@@ -1,0 +1,15 @@
+.containers/
+.vs/
+database-data
+Hls_video/
+obj/
+rtmp/obj/
+docker-compose.dcproj
+.env
+FrontAng/
+
+BackendNet/bin/
+BackendNet/obj/
+BackendNet/appsettings.Docker.json
+BackendNet/appsettings.json
+LiveStreamPlatform.sln

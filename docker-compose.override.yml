@@ -1,0 +1,32 @@
+version: '3.4'
+
+services:
+  api_netcore:
+    image: api_netcore
+    build: 
+      context: .
+      dockerfile: ./BackendNet/Dockerfile
+    ports:
+      - 80:80
+    depends_on:
+      - mongodb
+    
+
+  # nginx_rtmp_server:
+  #   image: nginx_rtmp_server
+  #   build: 
+  #     context: .
+  #     dockerfile: ./rtmp/Dockerfile
+  #   ports:
+  #     - 1935:1935
+  #   volumes:
+  #     - ./dataRec:/tmp/rec
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: unless-stopped
+    ports:
+      - 27017:27017
+    volumes:
+      - ./database-data:/data/db

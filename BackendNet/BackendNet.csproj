@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>337aeec4-7bd9-4dfc-a03c-7d87a004252b</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="wwwroot\HlsVideo - Copy\**" />
+    <Compile Remove="wwwroot\Images\**" />
+    <Compile Remove="wwwroot\Thumbnail\**" />
+    <Content Remove="wwwroot\HlsVideo - Copy\**" />
+    <Content Remove="wwwroot\Images\**" />
+    <Content Remove="wwwroot\Thumbnail\**" />
+    <EmbeddedResource Remove="wwwroot\HlsVideo - Copy\**" />
+    <EmbeddedResource Remove="wwwroot\Images\**" />
+    <EmbeddedResource Remove="wwwroot\Thumbnail\**" />
+    <None Remove="wwwroot\HlsVideo - Copy\**" />
+    <None Remove="wwwroot\Images\**" />
+    <None Remove="wwwroot\Thumbnail\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.Core" Version="3.7.303.25" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.307.26" />
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.13" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Common" Version="8.0.3" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
+    <PackageReference Include="MongoDB.Driver" Version="2.24.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  </ItemGroup>
+
+</Project>

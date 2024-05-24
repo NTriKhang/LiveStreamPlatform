@@ -1,0 +1,10 @@
+version: '3.4'
+
+services:
+  api_netcore:
+    image: api_netcore
+    build: 
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 8080:80
