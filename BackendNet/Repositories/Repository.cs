@@ -74,9 +74,9 @@ namespace BackendNet.Repository
         {
             GC.SuppressFinalize(this);
         }
-        private static FilterDefinition<TEntity> FilterId(string key, string value)
+        protected static FilterDefinition<TEntity> FilterId(string key, string keyValue)
         {
-            return Builders<TEntity>.Filter.Eq(key, value);
+            return Builders<TEntity>.Filter.Eq(key, keyValue);
         }
 
   

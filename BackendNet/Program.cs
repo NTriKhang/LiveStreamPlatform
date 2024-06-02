@@ -6,6 +6,7 @@ using BackendNet.Repository.IRepositories;
 using BackendNet.Services;
 using BackendNet.Services.IService;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 internal class Program
@@ -39,12 +40,14 @@ internal class Program
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddScoped<IVideoRepository, VideoRepository>();
         builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+        builder.Services.AddScoped<IChatliveRepository, ChatliveRepository>();
 
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IVideoService, VideoService>();
         builder.Services.AddScoped<IRoomService, RoomService>();
         builder.Services.AddScoped<IAwsService, AwsService>();
         builder.Services.AddScoped<IStreamService, StreamService>();
+        builder.Services.AddScoped<IChatliveService, ChatliveService>();
 
         builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
         .AddCookie(options =>
@@ -56,6 +59,26 @@ internal class Program
             };
         });
         builder.Services.AddSignalR();
+        //builder.Services.AddSignalR(e =>
+        //{
+        //    e.MaximumReceiveMessageSize = 102400000;
+        //    e.EnableDetailedErrors = true;
+        //    e.KeepAliveInterval = TimeSpan.FromMinutes(5);
+        //}).AddJsonProtocol(option =>
+        //{
+        //    option.PayloadSerializerOptions.PropertyNamingPolicy = null;
+        //});
+        //builder.WebHost.ConfigureKestrel(serverOption =>
+        //{
+        //    serverOption.ListenAnyIP(80);
+        //    serverOption.ListenAnyIP(443, option =>
+        //    {
+        //        string filePathConfig = "/app/wwwroot/https"!;
+        //        var filePaths = Directory.GetFiles(filePathConfig).ToList()[0];
+
+        //        option.UseHttps(filePaths, "password");
+        //    });
+        //});
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -63,7 +86,7 @@ internal class Program
         {
             app.UseSwagger();
             app.UseSwaggerUI();
-        }
+        }   
         app.UseCors("AllowFE");
         app.UseHttpsRedirection();
 
@@ -72,7 +95,7 @@ internal class Program
         app.UseStaticFiles();
         app.MapControllers();
         app.MapHub<StreamHub>("/hub");
-
+        app.MapHub<ChatLiveHub>("/chatHub");
         app.Run();
     }
 }

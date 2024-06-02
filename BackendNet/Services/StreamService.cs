@@ -12,10 +12,10 @@ namespace BackendNet.Services
     public class StreamService : IStreamService
     {
         private readonly IUserService _userService;
-        private readonly IHubContext<StreamHub, IStreamClient> _hubContext;
+        private readonly IHubContext<StreamHub, IStreamHub> _hubContext;
         private readonly string folderName;
 
-        public StreamService(IUserService userService,IHubContext<StreamHub,IStreamClient> hubContext,
+        public StreamService(IUserService userService,IHubContext<StreamHub,IStreamHub> hubContext,
                             IConfiguration configuration)
         {
             _userService = userService;

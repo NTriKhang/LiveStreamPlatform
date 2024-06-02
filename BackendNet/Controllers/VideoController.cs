@@ -1,11 +1,14 @@
 ﻿using BackendNet.Dtos;
+using BackendNet.Hubs;
 using BackendNet.Models;
 using BackendNet.Repositories.IRepositories;
+using BackendNet.Services;
 using BackendNet.Services.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using System.Net;
 using System.Net.Http.Headers;
@@ -24,14 +27,20 @@ namespace BackendNet.Controllers
         private readonly IConfiguration _configuration;
         private readonly IAwsService _awsService;
         private readonly IStreamService _streamService;
+        private readonly IHubContext<StreamHub, IStreamHub> _hubContext;
+        private readonly IChatliveService _chatliveService;
+
         public VideoController(IVideoService videoService, IRoomService roomService, 
-            IConfiguration configuration, IAwsService awsService, IStreamService streamService)
+            IConfiguration configuration, IAwsService awsService, IStreamService streamService,
+            IHubContext<StreamHub, IStreamHub> hubContext, IChatliveService chatliveService)
         {
             _videoService = videoService;
             _roomService = roomService;
             _configuration = configuration;
             _awsService = awsService;
             _streamService = streamService;
+            _hubContext = hubContext;
+            _chatliveService = chatliveService;
         }
         //[HttpGet("delete/{streamKey}")]
         //public void DeleteVideo(string streamKey)
@@ -124,9 +133,11 @@ namespace BackendNet.Controllers
                     return StatusCode(StatusCodes.Status400BadRequest, default(Videos));
 
                 var thumbnail = Request.Form.Files[0];
+
                 string? streamKey = User.FindFirstValue(ClaimTypes.UserData);
                 if (streamKey == null)
-                    return BadRequest();
+                    return StatusCode(StatusCodes.Status401Unauthorized);
+
                 var video = await _videoService.AddVideoAsync(new Videos
                 {
                     Title = streamInfoDto.title,
@@ -141,12 +152,9 @@ namespace BackendNet.Controllers
                 if (video == null)
                     return BadRequest("VIdeo is null");
 
-                if(streamKey == null)
-                    return StatusCode(StatusCodes.Status401Unauthorized);
-
                 var room = await _roomService.AddRoom(new Rooms { RoomKey = Guid.NewGuid().ToString().Substring(0,32), Status = RoomStatus.Opening.ToString(),
                                                 StreamKey = streamKey,Video = video  });
-                
+   
                 Response.Cookies.Append("VideoStreamingId", video.Id);
                 Response.Cookies.Append("RoomKey", room.RoomKey);
                 return Ok(room);

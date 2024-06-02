@@ -81,6 +81,7 @@ namespace BackendNet.Controllers
                 var claims = new List<Claim>
                 {
                     new Claim(type: ClaimTypes.NameIdentifier,value: userAuth.Id!),
+                    new Claim(type: ClaimTypes.Name, value: userAuth.UserName), 
                     new Claim(type: ClaimTypes.UserData, value: userAuth.StreamInfo.Stream_token!)
                 };
                 var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

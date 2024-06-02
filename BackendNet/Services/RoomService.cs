@@ -1,6 +1,8 @@
-﻿using BackendNet.Models;
+﻿using BackendNet.Hubs;
+using BackendNet.Models;
 using BackendNet.Repositories.IRepositories;
 using BackendNet.Services.IService;
+using Microsoft.AspNetCore.SignalR;
 using MongoDB.Driver;
 
 namespace BackendNet.Services
@@ -10,9 +12,7 @@ namespace BackendNet.Services
         private readonly IRoomRepository roomRepository;
         public RoomService(IRoomRepository roomRepository)
         {
-
             this.roomRepository = roomRepository;
-
         }
         public async Task<Rooms> AddRoom(Rooms room)
         {

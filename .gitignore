@@ -5,7 +5,7 @@ Hls_video/
 obj/
 rtmp/obj/
 docker-compose.dcproj
-.env
+key.env
 FrontAng/
 
 BackendNet/bin/

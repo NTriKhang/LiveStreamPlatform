@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace BackendNet.Hubs
 {
-    public class StreamHub : Hub<IStreamClient>
+    public class StreamHub : Hub<IStreamHub>
     {
         private readonly IUserService _userService;
         public StreamHub(IUserService userService)
@@ -33,7 +33,7 @@ namespace BackendNet.Hubs
             if (streamToken != null)
             {
                 Groups.AddToGroupAsync(Context.ConnectionId, streamToken);
-                Console.WriteLine("Streamkey: " + streamToken + " connectionId: " + Context.ConnectionId);
+                //Console.WriteLine("Streamkey: " + streamToken + " connectionId: " + Context.ConnectionId);
 
             }
             return Task.CompletedTask;
