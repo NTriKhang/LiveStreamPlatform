@@ -34,10 +34,10 @@ namespace BackendNet.Services
             return _videoRepository.GetByKey(nameof(Videos.Id), videoId);
         }
 
-        public async Task<List<Videos>> GetVideos(string userId, int page)
+        public async Task<IEnumerable<Videos>> GetVideos(string userId, int page)
         {
             var additionalFilter = Builders<Videos>.Filter.Ne(nameof(Videos.Status), VideoStatus.Keep.ToString());             
-            return await _videoRepository.GetManyByKey(nameof(Videos.User_id), userId, page, additionalFilter);
+            return await _videoRepository.GetManyByKey(nameof(Videos.User_id), userId, page,(int)PaginationCount.Video, additionalFilter);
         }
 
         public async Task UpdateVideoStatus(string status, string id)

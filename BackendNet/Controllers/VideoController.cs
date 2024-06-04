@@ -108,7 +108,7 @@ namespace BackendNet.Controllers
 
                 string imageApi = _configuration.GetValue<string>("ImageApiGateWay")!;
 
-                listVideo.ForEach(video => { video.Thumbnail = imageApi + video.Thumbnail; });
+                listVideo.ToList().ForEach(video => { video.Thumbnail = imageApi + video.Thumbnail; });
                 return StatusCode(StatusCodes.Status200OK, listVideo);
             }
             catch (Exception)

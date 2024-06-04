@@ -29,6 +29,11 @@ namespace BackendNet
             return stringBuilder.ToString();
         }
     }
+    public enum PaginationCount
+    {
+        Chat = 10,
+        Video = 6,
+    }
     public enum StreamStatus
     {
         Init,
