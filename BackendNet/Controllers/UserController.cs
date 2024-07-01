@@ -59,7 +59,16 @@ namespace BackendNet.Controllers
         {
             try
             {
-                var newUser = await userService.AddUserAsync(new Users { UserName = user.UserName, Password = user.Password});
+                var newUser = await userService.AddUserAsync(
+                    new Users 
+                    { 
+                        UserName = user.UserName, 
+                        Password = user.Password,
+                        Email = user.Email,
+                        DislayName= user.DislayName,
+                        Role = user.Role,
+                    }
+                );
                 return CreatedAtAction(nameof(signup), newUser);
             }
             catch (Exception)
