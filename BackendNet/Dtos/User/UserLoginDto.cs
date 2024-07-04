@@ -1,4 +1,4 @@
-﻿namespace BackendNet.Dtos
+﻿namespace BackendNet.Dtos.User
 {
     public class UserLoginDto
     {

@@ -1,4 +1,5 @@
 ﻿using BackendNet.Dtos;
+using BackendNet.Dtos.User;
 using BackendNet.Hubs;
 using BackendNet.Models;
 using BackendNet.Services.IService;
@@ -41,12 +42,13 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
-        [HttpGet("{token}")]
-        public async Task<Users> getUser(string token)
+        [HttpGet("{userId}")]
+        public async Task<ActionResult> getUser(string userId)
         {
             try
             {
-                return await userService.GetUserByStreamKey(token);
+                Users user = await userService.GetUserById(userId);
+                return Ok(new UserProfileDto(user.Id, user.UserName, user.Email, user.DislayName, user.Role, user.AvatarUrl));
             }
             catch (Exception)
             {
@@ -54,19 +56,33 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
+        //[HttpGet("{token}")]
+        //public async Task<Users> getUser(string token)
+        //{
+        //    try
+        //    {
+        //        return await userService.GetUserByStreamKey(token);
+        //    }
+        //    catch (Exception)
+        //    {
+
+        //        throw;
+        //    }
+        //}
         [HttpPost]
         public async Task<ActionResult<Users>> signup(UserSignupDto user)
         {
             try
             {
                 var newUser = await userService.AddUserAsync(
-                    new Users 
-                    { 
-                        UserName = user.UserName, 
+                    new Users
+                    {
+                        UserName = user.UserName,
                         Password = user.Password,
                         Email = user.Email,
-                        DislayName= user.DislayName,
+                        DislayName = user.DislayName,
                         Role = user.Role,
+                        AvatarUrl = "https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png"
                     }
                 );
                 return CreatedAtAction(nameof(signup), newUser);

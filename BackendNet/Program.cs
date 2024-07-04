@@ -41,6 +41,7 @@ internal class Program
         builder.Services.AddScoped<IVideoRepository, VideoRepository>();
         builder.Services.AddScoped<IRoomRepository, RoomRepository>();
         builder.Services.AddScoped<IChatliveRepository, ChatliveRepository>();
+        builder.Services.AddScoped<IFollowRepository, FollowRepository>();
 
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IVideoService, VideoService>();
@@ -48,6 +49,7 @@ internal class Program
         builder.Services.AddScoped<IAwsService, AwsService>();
         builder.Services.AddScoped<IStreamService, StreamService>();
         builder.Services.AddScoped<IChatliveService, ChatliveService>();
+        builder.Services.AddScoped<IFollowService, FollowService>();
 
         builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
         .AddCookie(options =>
