@@ -9,7 +9,10 @@ namespace BackendNet.Models.Submodel
         public DateTime? Last_stream { set; get; }
         public string? Stream_token { get; set; }
         public string? Status { get; set; }
-        public StreamInfo() { }
+        public StreamInfo() 
+        {
+            Stream_token = null;
+        }
         public StreamInfo(DateTime? last_stream, string stream_token, string status)
         {
             Last_stream = last_stream;

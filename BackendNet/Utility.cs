@@ -29,6 +29,11 @@ namespace BackendNet
             return stringBuilder.ToString();
         }
     }
+    public enum RoleKey
+    {
+        Teacher,
+        Student
+    }
     public enum PaginationCount
     {
         Chat = 10,

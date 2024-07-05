@@ -13,10 +13,26 @@ namespace BackendNet.Services
         {
             _userRepository = userRepository;
         }
-        public Task<Users> AddUserAsync(Users user)
+        public async Task<Users> AddUserAsync(Users user)
         {
-            user.StreamInfo = new Models.Submodel.StreamInfo(null, Utility.GenerateStreamKey(16), StreamStatus.Idle.ToString());
-            return _userRepository.Add(user);
+            var filterEmail = Builders<Users>.Filter.Eq(u => u.Email, user.Email);
+            var filterUserName = Builders<Users>.Filter.Eq(u => u.UserName, user.UserName);
+
+            var task1 = Task.Run(() => _userRepository.IsExist(filterEmail));
+            var task2 = Task.Run(() => _userRepository.IsExist(filterUserName));
+
+            await Task.WhenAll(task1, task2);
+
+            if (task1.Result)
+                return new Users() { Email = "409" };
+            else if (task2.Result)
+                return new Users() { UserName = "409" };
+
+            if (user.Role == RoleKey.Teacher.ToString())
+                user.StreamInfo = new Models.Submodel.StreamInfo();
+            
+            
+            return await _userRepository.Add(user);
         }
 
         public async Task<Users> AuthUser(string username, string password)

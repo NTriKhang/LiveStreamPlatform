@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Net.Http.Headers;
@@ -82,9 +83,14 @@ namespace BackendNet.Controllers
                         Email = user.Email,
                         DislayName = user.DislayName,
                         Role = user.Role,
-                        AvatarUrl = "https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png"
+                        AvatarUrl = "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-photo-183042379.jpg"
                     }
                 );
+                
+                if (newUser.UserName == "409")
+                    return Conflict("User name is already used");
+                else if (newUser.Email == "409")
+                    return Conflict("Email is already used");
                 return CreatedAtAction(nameof(signup), newUser);
             }
             catch (Exception)
@@ -93,6 +99,7 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
+        
         [HttpPost("auth")]
         public async Task<ActionResult<Users>> login(UserLoginDto user)
         {

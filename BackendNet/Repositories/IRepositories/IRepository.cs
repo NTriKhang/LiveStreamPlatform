@@ -13,5 +13,6 @@ namespace BackendNet.Repository.IRepositories
         Task<IEnumerable<TEntity>> GetAll();
         Task<UpdateResult> UpdateByKey(string key, string keyValue, UpdateDefinition<TEntity> updateDefinition);
         Task<bool> RemoveByKey(string key, string keyValue);
+        Task<bool> IsExist(FilterDefinition<TEntity> filter);
     }
 }

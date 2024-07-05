@@ -99,5 +99,10 @@ namespace BackendNet.Repository
 
             return data;
         }
+
+        public async Task<bool> IsExist(FilterDefinition<TEntity>? filter)
+        {
+            return await _collection.CountDocumentsAsync(filter) > 0;
+        }
     }
 }
