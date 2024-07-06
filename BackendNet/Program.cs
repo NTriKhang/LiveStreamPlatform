@@ -59,6 +59,9 @@ internal class Program
                 context.Response.StatusCode = 401;
                 return Task.CompletedTask;
             };
+            options.Cookie.SameSite = SameSiteMode.None;
+            options.Cookie.HttpOnly = true;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         });
         builder.Services.AddSignalR();
         //builder.Services.AddSignalR(e =>
