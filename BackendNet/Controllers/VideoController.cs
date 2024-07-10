@@ -27,20 +27,15 @@ namespace BackendNet.Controllers
         private readonly IConfiguration _configuration;
         private readonly IAwsService _awsService;
         private readonly IStreamService _streamService;
-        private readonly IHubContext<StreamHub, IStreamHub> _hubContext;
-        private readonly IChatliveService _chatliveService;
 
         public VideoController(IVideoService videoService, IRoomService roomService, 
-            IConfiguration configuration, IAwsService awsService, IStreamService streamService,
-            IHubContext<StreamHub, IStreamHub> hubContext, IChatliveService chatliveService)
+            IConfiguration configuration, IAwsService awsService, IStreamService streamService)
         {
             _videoService = videoService;
             _roomService = roomService;
             _configuration = configuration;
             _awsService = awsService;
             _streamService = streamService;
-            _hubContext = hubContext;
-            _chatliveService = chatliveService;
         }
         //[HttpGet("delete/{streamKey}")]
         //public void DeleteVideo(string streamKey)
@@ -60,9 +55,24 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
-        [HttpPost("upload_video")]
+        //[HttpPost("upload_video")]
+        //public async Task<HttpStatusCode> Upload_video([FromForm] string uploadVideoDto)
+        //{
+        //    try
+        //    {
+        //        string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+        //    }
+        //    catch (Exception)
+        //    {
+
+        //        throw;
+        //    }
+        //}
+
+        [HttpPost("stream_video")]
         [Authorize]
-        public async Task<HttpStatusCode> Upload_video([FromBody] UploadVideoDto uploadVideoDto)
+        public async Task<HttpStatusCode> Stream_video([FromBody] UploadVideoDto uploadVideoDto)
         {
             try
             {
@@ -106,9 +116,38 @@ namespace BackendNet.Controllers
                 if (listVideo == null)
                     return StatusCode(StatusCodes.Status204NoContent, listVideo);
 
-                string imageApi = _configuration.GetValue<string>("ImageApiGateWay")!;
+                //string imageApi = _configuration.GetValue<string>("ImageApiGateWay")!;
+                string videoThumbnail = "https://www.techsmith.com/blog/wp-content/uploads/2021/02/video-thumbnails-hero-1.png";
 
-                listVideo.ToList().ForEach(video => { video.Thumbnail = imageApi + video.Thumbnail; });
+                //listVideo.ToList().ForEach(video => { video.Thumbnail = imageApi + video.Thumbnail; });
+                listVideo.ToList().ForEach(video => { video.Thumbnail = videoThumbnail; });
+                return StatusCode(StatusCodes.Status200OK, listVideo);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        [HttpGet("following/{page}")]
+        [Authorize]
+        public async Task<ActionResult<List<Videos>>> GetFollowingVideos(int page)
+        {
+            try
+            {
+                string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+
+                var listVideo = await _videoService.GetVideos(user_id, page);
+
+                if (listVideo == null)
+                    return StatusCode(StatusCodes.Status204NoContent, listVideo);
+
+                //string imageApi = _configuration.GetValue<string>("ImageApiGateWay")!;
+                string videoThumbnail = "https://www.techsmith.com/blog/wp-content/uploads/2021/02/video-thumbnails-hero-1.png";
+
+                //listVideo.ToList().ForEach(video => { video.Thumbnail = imageApi + video.Thumbnail; });
+                listVideo.ToList().ForEach(video => { video.Thumbnail = videoThumbnail; });
+
                 return StatusCode(StatusCodes.Status200OK, listVideo);
             }
             catch (Exception)

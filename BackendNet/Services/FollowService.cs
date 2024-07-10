@@ -15,13 +15,12 @@ namespace BackendNet.Services
         }
         public async Task<IEnumerable<Follow>> GetFollower(string followed_id, int page)
         {
-            return await followRepository.GetManyByKey(nameof(Follow.Followed.user_id), followed_id, page, (int)PaginationCount.Follow, additionalFilter: null);
-
+            return await followRepository.GetManyByKey(nameof(Follow.Followed) + '.' + nameof(Follow.Followed.user_id), followed_id, page, (int)PaginationCount.Follow, additionalFilter: null);
         }
 
         public async Task<IEnumerable<Follow>> GetFollowing(string follower_id, int page)
         {
-            return await followRepository.GetManyByKey(nameof(Follow.Follower.user_id), follower_id, page, (int)PaginationCount.Follow, additionalFilter: null);
+            return await followRepository.GetManyByKey(nameof(Follow.Follower) + '.' + nameof(Follow.Follower.user_id), follower_id, page, (int)PaginationCount.Follow, additionalFilter: null);
         }
 
         public async Task<Follow> PostFollow(Follow follow)

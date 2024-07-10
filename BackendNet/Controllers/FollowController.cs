@@ -20,12 +20,12 @@ namespace BackendNet.Controllers
         public async Task<IEnumerable<Follow>> GetFollower(string followed_id, [FromQuery] int page = 1)
         {
             return await followService.GetFollower(followed_id, page);
-        }
+            }
         // GET: api/<FollowController>
         [HttpGet("GetFollowing/{follower_id}")]
         public async Task<IEnumerable<Follow>> GetFollowing(string follower_id, [FromQuery] int page = 1)
         {
-            return await followService.GetFollower(follower_id, page);
+            return await followService.GetFollowing(follower_id, page);
         }
 
         //// GET api/<FollowController>/5

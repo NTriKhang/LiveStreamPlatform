@@ -80,7 +80,8 @@ namespace BackendNet.Repository
                 filter &= additionalFilter;
 
 
-            data = await _collection.Find(filter).Skip(size * (page - 1)).Limit(size).ToListAsync();
+            //data = await _collection.Find(filter).Skip(size * (page - 1)).Limit(size).ToListAsync();
+            data = await _collection.Find(filter).ToListAsync();
 
             return data;
         }

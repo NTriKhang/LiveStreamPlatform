@@ -29,6 +29,12 @@ namespace BackendNet.Services
             return await _videoRepository.Add(video);
         }
 
+        public async Task<IEnumerable<Videos>> GetFollowingVideos(string userId, int page)
+        {
+            var additionalFilter = Builders<Videos>.Filter.Ne(nameof(Videos.Status), VideoStatus.Keep.ToString());             
+            return await _videoRepository.GetManyByKey(nameof(Videos.User_id), userId, page,(int)PaginationCount.Video, additionalFilter);throw new NotImplementedException();
+        }
+
         public Task<Videos> GetVideoAsync(string videoId)
         {
             return _videoRepository.GetByKey(nameof(Videos.Id), videoId);
