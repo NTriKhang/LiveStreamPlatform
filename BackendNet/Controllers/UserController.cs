@@ -136,5 +136,19 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
+        [HttpPost("logout")]
+        public async Task<ActionResult<Users>> logout()
+        {
+            try
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return NoContent();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }
