@@ -66,7 +66,7 @@ namespace BackendNet.Controllers
                 {
                     Title = uploadVideoDto.title,
                     User_id = user_id,
-                    StatusNum = uploadVideoDto.video_status,
+                    StatusNum = (int)VideoStatus.Upload,
                     Description = uploadVideoDto.description ?? "",
                     Like = 0,
                     Time = DateTime.Now,
