@@ -5,6 +5,7 @@ using BackendNet.Repositories.IRepositories;
 using BackendNet.Repository.IRepositories;
 using BackendNet.Services;
 using BackendNet.Services.IService;
+using BackendNet.Setting;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -33,8 +34,14 @@ internal class Program
         });
         builder.Services.Configure<LiveStreamDatabaseSetting>(
             builder.Configuration.GetSection("LiveStreamDatabase"));
+        builder.Services.Configure<EmailSetting>(
+            builder.Configuration.GetSection("EmailServerSetting"));
+
         builder.Services.AddSingleton<ILiveStreamDatabaseSetting>(sp =>
                         sp.GetRequiredService<IOptions<LiveStreamDatabaseSetting>>().Value);
+        builder.Services.AddSingleton(sp =>
+                        sp.GetRequiredService<IOptions<EmailSetting>>().Value);
+
         builder.Services.AddScoped<IMongoContext, MongoContext>();
 
         builder.Services.AddScoped<IUserRepository, UserRepository>();

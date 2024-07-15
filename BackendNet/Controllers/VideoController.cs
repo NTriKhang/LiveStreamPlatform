@@ -57,6 +57,7 @@ namespace BackendNet.Controllers
             }
         }
         [HttpPost("getPresignedUrl")]
+        [Authorize]
         public async Task<ActionResult> getPresignedUrl([FromBody] OnPublicDto uploadVideoDto)
         {
             try
@@ -86,6 +87,12 @@ namespace BackendNet.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError,ex.Message);
             }
         }
+        //[HttpPut("updateVideoStatus/{videoId}")]
+        //[Authorize]
+        //public Task<ActionResult> UpdateVideoStatus(string videoId)
+        //{
+
+        //}
         [HttpDelete("deleteVideo/{videoId}")]
         public async Task<ActionResult> Delete(string videoId, [FromQuery] bool uploaded = false)
         {
