@@ -20,21 +20,21 @@ services:
     #   - mongodb
     
 
-  nginx_rtmp_server:
-    image: nginx_rtmp_server
-    build: 
-      context: .
-      dockerfile: ./rtmp/Dockerfile
-    ports:
-      - 1935:1935
-      - 8888:8888
-    environment:
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-      - AWS_DEFAULT_REGION=ap-southeast-2
-      # - AWS_PROFILE=KhangUploadVideoToS3
-    volumes:
-      - ./Hls_video:/tmp/hls
+  # nginx_rtmp_server:
+  #   image: nginx_rtmp_server
+  #   build: 
+  #     context: .
+  #     dockerfile: ./rtmp/Dockerfile
+  #   ports:
+  #     - 1935:1935
+  #     - 8888:8888
+  #   environment:
+  #     - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+  #     - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+  #     - AWS_DEFAULT_REGION=ap-southeast-2
+  #     # - AWS_PROFILE=KhangUploadVideoToS3
+  #   volumes:
+  #     - ./Hls_video:/tmp/hls
 
   # mongodb:
   #   image: mongo:latest
