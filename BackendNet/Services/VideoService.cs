@@ -10,25 +10,39 @@ namespace BackendNet.Services
     {
         private readonly IVideoRepository _videoRepository;
         private readonly IUserService _userService;
-        private readonly IAwsService _imageService;
 
-        public VideoService(IVideoRepository video, IAwsService imageService, IUserService userService)
+        public VideoService(IVideoRepository video, IUserService userService)
         {
             _videoRepository = video;
-            _imageService = imageService;
             _userService = userService;
         }
 
         public async Task<Videos> AddVideoAsync(Videos video, IFormFile thumbnail)
         {
-            var thumbnailPath = await _imageService.UploadImage(thumbnail);
-            if (thumbnailPath == null)
-                return null;
-            video.Thumbnail = thumbnailPath;
-            await _userService.UpdateStreamStatusAsync(video.User_id, StreamStatus.Streaming.ToString());
+            //var thumbnailPath = await _awsService.UploadImage(thumbnail);
+            //if (thumbnailPath == null)
+                //return null;
+            //video.Thumbnail = thumbnailPath;
+            //await _userService.UpdateStreamStatusAsync(video.User_id, StreamStatus.Streaming.ToString());
             return await _videoRepository.Add(video);
         }
+        public async Task<Videos> AddVideoAsync(Videos video)
+        {
+            try
+            {
+                return await _videoRepository.Add(video);
+                
+            }
+            catch (Exception)
+            {
 
+                throw;
+            }
+        }
+        public async Task<bool> RemoveVideo(string Id)
+        {
+            return await _videoRepository.RemoveByKey(nameof(Follow.Id), Id);
+        }
         public async Task<IEnumerable<Videos>> GetFollowingVideos(string userId, int page)
         {
             var additionalFilter = Builders<Videos>.Filter.Ne(nameof(Videos.Status), VideoStatus.Keep.ToString());             

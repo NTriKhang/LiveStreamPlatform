@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System.Collections;
 
 namespace BackendNet.Models
 {
@@ -10,14 +11,19 @@ namespace BackendNet.Models
         public string? Id { get; set; }
         [BsonRepresentation(BsonType.ObjectId)]
         public string User_id { get; set; }
+
+        [BsonRepresentation(BsonType.DateTime)]
+        public DateTime? Time { set; get; }
         public string Title { set; get; }
         public string? Description { set; get; }
         public int? View { set; get; }
         public int? Like { set; get; }
         public string Thumbnail { set; get; }
         public string? Status { set; get; }
-        [BsonRepresentation(BsonType.DateTime)]
-        public DateTime? Time { set; get; }
-        public string Video_token { set; get; }
+        public int? StatusNum { set; get; }
+
+        public long VideoSize { set; get; }
+        public string FileType { set; get; }
+        public List<string> Tags { set; get; }
     }
 }

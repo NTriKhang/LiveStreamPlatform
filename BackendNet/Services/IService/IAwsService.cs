@@ -8,5 +8,8 @@ namespace BackendNet.Services.IService
     {
         Task<string> UploadImage(IFormFile formFiles);
         Task<HttpStatusCode> UploadStreamVideo(string streamkey, string folderContainName);
+        Task<HttpStatusCode> DeleteVideo(string videoId);
+        string GenerateVideoPostPresignedUrl(string videoId, long videoSize);
+
     }
 }

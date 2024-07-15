@@ -21,6 +21,49 @@ namespace BackendNet.Services
         {
             this.configuration = configuration;
         }
+        private AmazonS3Client getS3Client()
+        {
+            string? accesckey = configuration.GetSection("AwsCredentail").GetValue<string>("AccessKey");
+            if (accesckey == null)
+                return null;
+            BasicAWSCredentials basicAWSCredentials =
+                new BasicAWSCredentials(
+                    configuration.GetSection("AwsCredentail").GetValue<string>("AccessKey"),
+                    configuration.GetSection("AwsCredentail").GetValue<string>("SecretKey")
+                );
+            AmazonS3Client s3Client = new AmazonS3Client(basicAWSCredentials, Amazon.RegionEndpoint.APSoutheast2); string urlString = string.Empty;
+            return s3Client;
+        }
+        public string GenerateVideoPostPresignedUrl(string videoId, long videoSize)
+        {
+            try
+            {
+                var s3Client = getS3Client();
+                if (s3Client == null)
+                    return string.Empty;
+                string? bucketName = configuration.GetSection("BucketName").GetValue<string>("EduVideo");
+                double timeout = 2;
+
+                if (bucketName == null)
+                {
+                    return string.Empty;
+                }
+                var request = new GetPreSignedUrlRequest()
+                {
+                    BucketName = bucketName,
+                    Key = videoId,
+                    Expires = DateTime.UtcNow.AddMinutes(timeout),
+                    Verb = HttpVerb.PUT
+                };
+                var urlString = s3Client.GetPreSignedURL(request);
+                return urlString;
+            }
+            catch (AmazonS3Exception ex)
+            {
+                Console.WriteLine($"Error:'{ex.Message}'");
+                throw;
+            }
+        }
         public async Task<string> UploadImage(IFormFile formFiles)
         {
             try
@@ -69,7 +112,7 @@ namespace BackendNet.Services
                     configuration.GetSection("AwsCredentail").GetValue<string>("SecretKey")
                 );
 
-            string destinationFolderName = "D:\\Docker\\LiveStreamPlatform\\BackendNet\\wwwroot\\" + streamkey + "\\";
+            //string destinationFolderName = "D:\\Docker\\LiveStreamPlatform\\BackendNet\\wwwroot\\" + streamkey + "\\";
             //Directory.CreateDirectory(destinationFolderName);
             AmazonS3Client s3Client = new AmazonS3Client(basicAWSCredentials, Amazon.RegionEndpoint.APSoutheast2);
             try
@@ -117,6 +160,40 @@ namespace BackendNet.Services
             request.Key = folderName + "/";
             request.ContentBody = string.Empty;
             var res = await s3Client.PutObjectAsync(request);
+        }
+
+        public async Task<HttpStatusCode> DeleteVideo(string videoId)
+        {
+            try
+            {
+                var res = await DeleteObjectNonVersionedBucketAsync(getS3Client(), configuration.GetSection("BucketName").GetValue<string>("EduVideo"), videoId);
+                //if(res)
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public static async Task<HttpStatusCode> DeleteObjectNonVersionedBucketAsync(IAmazonS3 client, string bucketName, string keyName)
+        {
+            try
+            {
+                var deleteObjectRequest = new DeleteObjectRequest
+                {
+                    BucketName = bucketName,
+                    Key = keyName,
+                };
+
+                var res = await client.DeleteObjectAsync(deleteObjectRequest);
+                return res.HttpStatusCode;
+            }
+            catch (AmazonS3Exception ex)
+            {
+                Console.WriteLine($"Error encountered on server. Message:'{ex.Message}' when deleting an object.");
+                throw;
+            }
         }
     }
 }

@@ -48,12 +48,12 @@ namespace BackendNet
     }
     public enum VideoStatus
     {
-        Public,
-        Private,
-        Keep,
-        Member,
-        Remove,
-        Upload
+        Public, //0
+        Private,//1
+        Keep,//2
+        Member,//3
+        Remove,//4
+        Upload//5
     }
     public enum RoomStatus
     {
