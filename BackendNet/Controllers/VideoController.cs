@@ -91,7 +91,14 @@ namespace BackendNet.Controllers
         //[Authorize]
         //public Task<ActionResult> UpdateVideoStatus(string videoId)
         //{
-
+        //    try
+        //    {
+        //        _videoService.UpdateVideoStatus((int)VideoStatus.Public)
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+        //    }
         //}
         [HttpDelete("deleteVideo/{videoId}")]
         public async Task<ActionResult> Delete(string videoId, [FromQuery] bool uploaded = false)

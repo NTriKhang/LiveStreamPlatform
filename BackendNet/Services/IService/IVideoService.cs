@@ -9,7 +9,7 @@ namespace BackendNet.Services.IService
         Task<Videos> GetVideoAsync(string videoId);
         Task<IEnumerable<Videos>> GetVideos(string userId, int page);
         Task<IEnumerable<Videos>> GetFollowingVideos(string userId, int page);
-        Task UpdateVideoStatus(string status, string id);
+        Task UpdateVideoStatus(int status, string id);
         Task UpdateVideoView(string videoId);
         Task<bool> RemoveVideo(string Id);
 

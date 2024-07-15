@@ -21,9 +21,9 @@ namespace BackendNet.Repositories
             return id;
         }
 
-        public async Task UpdateVideoStatus(string status, string videoId)
+        public async Task UpdateVideoStatus(int status, string videoId)
         {
-            var update = Builders<Videos>.Update.Set(nameof(Videos.Status), status);
+            var update = Builders<Videos>.Update.Set(nameof(Videos.StatusNum), status);
             await _collection.UpdateOneAsync(x => x.Id == videoId, update);
         }
     }

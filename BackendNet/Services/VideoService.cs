@@ -60,10 +60,12 @@ namespace BackendNet.Services
             return await _videoRepository.GetManyByKey(nameof(Videos.User_id), userId, page,(int)PaginationCount.Video, additionalFilter);
         }
 
-        public async Task UpdateVideoStatus(string status, string id)
+        public async Task UpdateVideoStatus(int status, string id)
         {
-            await _videoRepository.UpdateVideoStatus(status, id);
+            var updateDefine = Builders<Videos>.Update.Set(x => x.StatusNum, status);
+            await _videoRepository.UpdateByKey(nameof(Videos.Id), id, updateDefine);
         }
+
         public Task UpdateVideoView(string videoId)
         {
             try
