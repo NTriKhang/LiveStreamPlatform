@@ -9,9 +9,9 @@ namespace BackendNet.Services
     public class EmailService : IEmailService
     {
         private EmailSetting emailSetting;
-        public EmailService()
+        public EmailService(EmailSetting emailSetting)
         {
-            emailSetting = new EmailSetting();
+            this.emailSetting = emailSetting;
         }
 
         public async Task SendEmail(SingleMailRequest mailRequest)

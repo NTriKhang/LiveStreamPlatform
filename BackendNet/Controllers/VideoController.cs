@@ -27,6 +27,7 @@ namespace BackendNet.Controllers
         private readonly IRoomService _roomService;
         private readonly IConfiguration _configuration;
         private readonly IAwsService _awsService;
+        private readonly IEmailService emailService;
         private readonly IStreamService _streamService;
 
         public VideoController(IVideoService videoService, IRoomService roomService, 
@@ -80,26 +81,31 @@ namespace BackendNet.Controllers
                 if (video == null)
                     return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi không thể lưu thông tin video");
                 string preSignedUrl = _awsService.GenerateVideoPostPresignedUrl(video.Id, uploadVideoDto.video_size);
-                return Ok(preSignedUrl);
+                return Ok(new { preSignedUrl, video});
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError,ex.Message);
             }
         }
-        //[HttpPut("updateVideoStatus/{videoId}")]
-        //[Authorize]
-        //public Task<ActionResult> UpdateVideoStatus(string videoId)
-        //{
-        //    try
-        //    {
-        //        _videoService.UpdateVideoStatus((int)VideoStatus.Public)
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-        //    }
-        //}
+        [HttpPut("updateVideoStatus/{videoId}")]
+        [Authorize]
+        public async Task<ActionResult> UpdateVideoStatus(string videoId, int status)
+        {
+            try
+            {
+                if(status == (int)VideoStatus.Upload)
+                {
+
+                }
+                await _videoService.UpdateVideoStatus(status, videoId);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
         [HttpDelete("deleteVideo/{videoId}")]
         public async Task<ActionResult> Delete(string videoId, [FromQuery] bool uploaded = false)
         {
