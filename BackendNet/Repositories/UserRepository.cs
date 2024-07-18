@@ -21,14 +21,14 @@ namespace BackendNet.Repositories
 
         public async Task<Users> AuthAsync(string username, string password)
         {
-            var user = await _collection.Find(user => user.UserName == username && user.Password == password).SingleOrDefaultAsync();
-            return user;
+            var user = await _collection.FindAsync(user => user.UserName == username && user.Password == password);
+            return user.Current?.SingleOrDefault();
         }
 
         public async Task<bool> CompareKey(string user_id, string key)
         {
-            var res = await _collection.Find(user => user.Id == user_id && user.StreamInfo.Stream_token == key).SingleOrDefaultAsync();
-            return res != null;
+            var res = await _collection.FindAsync(user => user.Id == user_id && user.StreamInfo.Stream_token == key);
+            return res.Current != null;
         }
 
         public async Task<bool> IsTokenExist(string token)

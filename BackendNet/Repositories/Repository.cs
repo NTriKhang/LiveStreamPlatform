@@ -29,13 +29,13 @@ namespace BackendNet.Repository
         public async Task<IEnumerable<TEntity>> GetAll()
         {
             var all = await _collection.FindAsync(Builders<TEntity>.Filter.Empty);
-            return all.ToList();
+            return all.Current?.ToList();
         }
 
         public virtual async Task<TEntity> GetByKey(string key, string id)
         {
-            var data = await _collection.Find(FilterId(key, id)).SingleOrDefaultAsync();
-            return data;
+            var data = await _collection.FindAsync(FilterId(key, id));
+            return data.Current?.SingleOrDefault();
         }
         public virtual async Task<bool> RemoveByKey(string key, string id)
         {
@@ -59,21 +59,19 @@ namespace BackendNet.Repository
 
         public async Task<IEnumerable<TEntity>> GetManyByKey(string key, string keyValue, FilterDefinition<TEntity>? additionalFilter = null)
         {
-            IEnumerable<TEntity> data;
             var filter = FilterId(key, keyValue);
 
             if (additionalFilter != null)
             {
                 filter &= additionalFilter;
             }
-            data = await _collection.Find(filter).ToListAsync();
+            var res = await _collection.FindAsync(filter);
 
-            return data;
+            return res.Current?.ToList();
         }
 
         public async Task<IEnumerable<TEntity>> GetManyByKey(string key, string keyValue, int page, int size, FilterDefinition<TEntity>? additionalFilter = null)
         {
-            IEnumerable<TEntity> data;
             var filter = FilterId(key, keyValue);
 
             if (additionalFilter != null)
@@ -81,9 +79,9 @@ namespace BackendNet.Repository
 
 
             //data = await _collection.Find(filter).Skip(size * (page - 1)).Limit(size).ToListAsync();
-            data = await _collection.Find(filter).ToListAsync();
+            var data = await _collection.FindAsync(filter);
 
-            return data;
+            return data.Current?.ToList();
         }
 
         public async Task<IEnumerable<TEntity>> GetManyByKey(string key, string keyValue, int page, int size, bool isSort = false, SortDefinition<TEntity>? sorDef = null, FilterDefinition<TEntity>? additionalFilter = null)
