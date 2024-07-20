@@ -9,6 +9,6 @@ namespace BackendNet.Services.IService
         Task<IEnumerable<Follow>> GetFollowing(string follower_id, int page);
         Task<Follow> PostFollow(Follow follow);
         Task<bool> RemoveFollow(string Id);
-        Task<IEnumerable<Follow>> GetFollowerEmail(string followedId);
+        Task<BsonArray> GetFollowerEmail(string followedId);
     }
 }

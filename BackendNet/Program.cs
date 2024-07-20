@@ -57,6 +57,7 @@ internal class Program
         builder.Services.AddScoped<IStreamService, StreamService>();
         builder.Services.AddScoped<IChatliveService, ChatliveService>();
         builder.Services.AddScoped<IFollowService, FollowService>();
+        builder.Services.AddScoped<IEmailService, EmailService>();
 
         builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
         .AddCookie(options =>

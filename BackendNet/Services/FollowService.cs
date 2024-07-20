@@ -4,6 +4,7 @@ using BackendNet.Repositories.IRepositories;
 using BackendNet.Services.IService;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Linq;
 
 namespace BackendNet.Services
 {
@@ -19,18 +20,13 @@ namespace BackendNet.Services
             return await followRepository.GetManyByKey(nameof(Follow.Followed) + '.' + nameof(Follow.Followed.user_id), followed_id, page, (int)PaginationCount.Follow, additionalFilter: null);
         }
 
-        public async Task<IEnumerable<Follow>> GetFollowerEmail(string followedId)
+        public async Task<BsonArray> GetFollowerEmail(string followedId)
         {
-            var matchStage = new BsonDocument
+            var matchStage = new BsonDocument("$match", new BsonDocument()
             {
-                {
-                    "$match",
-                    new BsonDocument
-                    {
-                        { "Followed.user_id", new ObjectId(followedId) }
-                    }
-                }
-            };
+                { "Followed.user_id", new ObjectId(followedId) }
+
+            });
             var lookupStage = new BsonDocument
             {
                 {
@@ -64,12 +60,15 @@ namespace BackendNet.Services
                     }
                 }
             };
-            //var matchFilter = Builders<Follow>.Filter.Eq(r => r.Followed.user_id, followedId);
-            //// Defines the aggregation pipeline with the $match and $group aggregation stages
-            //var pipeline = new EmptyPipelineDefinition<Follow>()
-            //    .Match(matchFilter);
-            return await followRepository.GetFollowerEmail(followedId);
-            //var res = await followRepository.ExecAggre(new[] { matchStage });
+
+            var res = await followRepository.ExecAggre(new[] { matchStage, lookupStage, unwindStage, groupStage });
+            if(res.Any())
+            {
+                var doc = res.First();
+                var emails = doc["emails"].AsBsonArray;
+                return emails;
+            }
+            return null;
         }
 
         public async Task<IEnumerable<Follow>> GetFollowing(string follower_id, int page)

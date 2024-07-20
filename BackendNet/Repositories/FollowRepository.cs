@@ -11,14 +11,7 @@ namespace BackendNet.Repositories
         public FollowRepository(IMongoContext context) : base(context)
         {
         }
-        public async Task<IEnumerable<Follow>> GetFollowerEmail(string followedId)
-        {
-            var queryableCollection = _collection.AsQueryable();
-            var query = queryableCollection
-                .Where(x => x.Followed.user_id == followedId)
-                .ToList();
-            return query;
-        }
+
 
     }
 }

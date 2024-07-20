@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq.Expressions;
@@ -107,8 +108,8 @@ namespace BackendNet.Repository
 
         public virtual async Task<IEnumerable<BsonDocument>> ExecAggre(BsonDocument[] pipeline)
         {
-            var results = await _collection.AggregateAsync<BsonDocument>(pipeline);
-            return results.Current;
+            var results = await _collection.Aggregate<BsonDocument>(pipeline).ToListAsync();
+            return results;
         }
 
         public virtual async Task<IEnumerable<TEntity>> ExecAggre(PipelineDefinition<TEntity, TEntity> pipeline)

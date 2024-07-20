@@ -27,17 +27,17 @@ namespace BackendNet.Controllers
         //private readonly IRoomService _roomService;
         //private readonly IConfiguration _configuration;
         private readonly IAwsService _awsService;
-        //private readonly IEmailService emailService;
+        private readonly IEmailService _emailService;
         //private readonly IStreamService _streamService;
         private readonly IFollowService _followService;
 
-        public VideoController(IVideoService videoService, IRoomService roomService, 
-            IConfiguration configuration, IAwsService awsService, IStreamService streamService
-            , IFollowService followService)
+        public VideoController(IVideoService videoService, IAwsService awsService
+            ,IFollowService followService, IEmailService emailService)
         {
             _videoService = videoService;
             //_roomService = roomService;
             //_configuration = configuration;
+            _emailService = emailService;
             _awsService = awsService;
             _followService = followService;
             //_streamService = streamService;
@@ -97,12 +97,20 @@ namespace BackendNet.Controllers
         {
             try
             {
-                if(status == (int)VideoStatus.Public)
+                //await _videoService.UpdateVideoStatus(status, videoId);
+
+                if (status == (int)VideoStatus.Public)
                 {
-                    var mail = await _followService.GetFollowerEmail("6682131597bd9b8b7a61ac8f");
-                    //emailService.SendMultiEmail()
+                    var emails = await _followService.GetFollowerEmail("6682131597bd9b8b7a61ac8f");
+                    if(emails != null)
+                    {
+                        _ = _emailService.SendMultiEmail(new Dtos.Mail.MultiMailRequest(
+                            $"Thông báo video mới",
+                            $"Khang vừa đăng tải video mới tại ...",
+                            emails.Select(x => x.AsString).ToList()
+                        ));
+                    }
                 }
-                await _videoService.UpdateVideoStatus(status, videoId);
                 return Ok();
             }
             catch (Exception ex)

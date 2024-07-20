@@ -52,7 +52,7 @@ namespace BackendNet.Services
             }
         }
 
-        public Task SendMultiEmail(MultiMailRequest mailRequests)
+        public async Task SendMultiEmail(MultiMailRequest mailRequests)
         {
             try
             {
@@ -68,21 +68,11 @@ namespace BackendNet.Services
                 email.To.Add(new GroupAddress("undisclosed-recipients"));
                 using (var smtp = new SmtpClient())
                 {
-                    _ = Task.Run(async () =>
-                    {
-                        try
-                        {
-                            await smtp.ConnectAsync(emailSetting.Host, emailSetting.Port, MailKit.Security.SecureSocketOptions.StartTls);
-                            await smtp.AuthenticateAsync(emailSetting.Email, emailSetting.Password);
-                            smtp.Send(message: email, sender: new MailboxAddress(emailSetting.DisplayName, emailSetting.Email), recipients: mailRequests.ToEmails);
-                        }
-                        finally
-                        {
-                            smtp.Disconnect(true);
-                        }
-                    });
+                    await smtp.ConnectAsync(emailSetting.Host, emailSetting.Port, MailKit.Security.SecureSocketOptions.StartTls);
+                    await smtp.AuthenticateAsync(emailSetting.Email, emailSetting.Password);
+                    smtp.Send(message: email, sender: new MailboxAddress(emailSetting.DisplayName, emailSetting.Email), recipients: mailRequests.ToEmails);
+                    smtp.Disconnect(true);
                 }
-                return Task.CompletedTask;
             }
             catch (Exception)
             {
