@@ -1,7 +1,11 @@
-﻿namespace BackendNet.Models.Submodel
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
+namespace BackendNet.Models.Submodel
 {
     public class FollowInfo
     {
+        [BsonRepresentation(BsonType.ObjectId)]
         public string user_id { set; get; } 
         public string user_display_name { set; get; }   
         public string user_avatar { set; get; }

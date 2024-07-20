@@ -24,20 +24,23 @@ namespace BackendNet.Controllers
     public class VideoController : ControllerBase
     {
         private readonly IVideoService _videoService;
-        private readonly IRoomService _roomService;
-        private readonly IConfiguration _configuration;
+        //private readonly IRoomService _roomService;
+        //private readonly IConfiguration _configuration;
         private readonly IAwsService _awsService;
-        private readonly IEmailService emailService;
-        private readonly IStreamService _streamService;
+        //private readonly IEmailService emailService;
+        //private readonly IStreamService _streamService;
+        private readonly IFollowService _followService;
 
         public VideoController(IVideoService videoService, IRoomService roomService, 
-            IConfiguration configuration, IAwsService awsService, IStreamService streamService)
+            IConfiguration configuration, IAwsService awsService, IStreamService streamService
+            , IFollowService followService)
         {
             _videoService = videoService;
-            _roomService = roomService;
-            _configuration = configuration;
+            //_roomService = roomService;
+            //_configuration = configuration;
             _awsService = awsService;
-            _streamService = streamService;
+            _followService = followService;
+            //_streamService = streamService;
         }
         //[HttpGet("delete/{streamKey}")]
         //public void DeleteVideo(string streamKey)
@@ -89,14 +92,15 @@ namespace BackendNet.Controllers
             }
         }
         [HttpPut("updateVideoStatus/{videoId}")]
-        [Authorize]
+       // [Authorize]
         public async Task<ActionResult> UpdateVideoStatus(string videoId, int status)
         {
             try
             {
-                if(status == (int)VideoStatus.Upload)
+                if(status == (int)VideoStatus.Public)
                 {
-
+                    var mail = await _followService.GetFollowerEmail("6682131597bd9b8b7a61ac8f");
+                    //emailService.SendMultiEmail()
                 }
                 await _videoService.UpdateVideoStatus(status, videoId);
                 return Ok();

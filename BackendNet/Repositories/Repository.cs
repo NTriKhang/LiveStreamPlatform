@@ -2,6 +2,7 @@
 using BackendNet.Repository.IRepositories;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Drawing;
@@ -102,6 +103,18 @@ namespace BackendNet.Repository
         public async Task<bool> IsExist(FilterDefinition<TEntity>? filter)
         {
             return await _collection.CountDocumentsAsync(filter) > 0;
+        }
+
+        public virtual async Task<IEnumerable<BsonDocument>> ExecAggre(BsonDocument[] pipeline)
+        {
+            var results = await _collection.AggregateAsync<BsonDocument>(pipeline);
+            return results.Current;
+        }
+
+        public virtual async Task<IEnumerable<TEntity>> ExecAggre(PipelineDefinition<TEntity, TEntity> pipeline)
+        {
+            var results = await _collection.AggregateAsync(pipeline);
+            return results.Current;
         }
     }
 }

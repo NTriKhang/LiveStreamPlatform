@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
 using System.Linq.Expressions;
 
 namespace BackendNet.Repository.IRepositories
@@ -14,5 +15,8 @@ namespace BackendNet.Repository.IRepositories
         Task<UpdateResult> UpdateByKey(string key, string keyValue, UpdateDefinition<TEntity> updateDefinition);
         Task<bool> RemoveByKey(string key, string keyValue);
         Task<bool> IsExist(FilterDefinition<TEntity> filter);
+        Task<IEnumerable<BsonDocument>> ExecAggre(BsonDocument[] pipeline);
+        Task<IEnumerable<TEntity>> ExecAggre(PipelineDefinition<TEntity,TEntity> pipeline);
+
     }
 }
