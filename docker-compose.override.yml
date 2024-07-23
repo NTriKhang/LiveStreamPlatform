@@ -8,8 +8,16 @@ services:
       dockerfile: ./BackendNet/Dockerfile
     ports:
       - 8000:80
-    depends_on:
-      - mongodb
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    volumes:
+      - ./Hls_video:/app/wwwroot
+    # develop:
+    #   watch:
+    #     - action: rebuild
+    #     - path: .
+    # depends_on:
+    #   - mongodb
     
 
   # nginx_rtmp_server:
@@ -19,14 +27,32 @@ services:
   #     dockerfile: ./rtmp/Dockerfile
   #   ports:
   #     - 1935:1935
+  #     - 8888:8888
+  #   environment:
+  #     - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+  #     - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+  #     - AWS_DEFAULT_REGION=ap-southeast-2
+  #     # - AWS_PROFILE=KhangUploadVideoToS3
   #   volumes:
-  #     - ./dataRec:/tmp/rec
+  #     - ./Hls_video:/tmp/hls
 
-  mongodb:
-    image: mongo:latest
-    container_name: mongodb
-    restart: unless-stopped
-    ports:
-      - 27017:27017
-    volumes:
-      - ./database-data:/data/db
+  # mongodb:
+  #   image: mongo:latest
+  #   container_name: mongodb
+  #   restart: unless-stopped
+  #   ports:
+  #     - 27017:27017
+  #   environment:
+  #     - MONGO_INITDB_ROOT_USERNAME=root
+  #     - MONGO_INITDB_ROOT_PASSWORD=password
+  #   volumes:
+  #     - ./database-data:/data/db
+  
+  # mongo-express:
+  #   image: mongo-express
+  #   ports:
+  #   - 8081:8081
+  #   environment:
+  #     - ME_CONFIG_MONGODB_URL=mongodb://root:password@mongodb:27017/
+  #     - ME_CONFIG_BASICAUTH_USERNAME=root
+  #     - ME_CONFIG_BASICAUTH_PASSWORD=password
