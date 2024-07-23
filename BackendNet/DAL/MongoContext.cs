@@ -12,13 +12,13 @@ namespace BackendNet.DAL
         {
 
             var settings = MongoClientSettings.FromConnectionString(setting.ConnectionString);
-            settings.ClusterConfigurator = cb =>
-            {
-                cb.Subscribe<CommandStartedEvent>(e =>
-                {
-                    Console.WriteLine($"{e.CommandName} - {e.Command.ToJson()}");
-                });
-            };
+            //settings.ClusterConfigurator = cb =>
+            //{
+            //    cb.Subscribe<CommandStartedEvent>(e =>
+            //    {
+            //        Console.WriteLine($"{e.CommandName} - {e.Command.ToJson()}");
+            //    });
+            //};
 
             var mongoClient = new MongoClient(settings);
 

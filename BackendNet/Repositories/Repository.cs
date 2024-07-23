@@ -31,13 +31,14 @@ namespace BackendNet.Repository
         public async Task<IEnumerable<TEntity>> GetAll()
         {
             var all = await _collection.FindAsync(Builders<TEntity>.Filter.Empty);
-            return all.Current?.ToList();
+            return all.ToList();
         }
 
         public virtual async Task<TEntity> GetByKey(string key, string id)
         {
             var data = await _collection.FindAsync(FilterId(key, id));
-            return data.Current?.SingleOrDefault();
+            var res = data.SingleOrDefault();
+            return res;
         }
         public virtual async Task<bool> RemoveByKey(string key, string id)
         {
@@ -69,7 +70,7 @@ namespace BackendNet.Repository
             }
             var res = await _collection.FindAsync(filter);
 
-            return res.Current?.ToList();
+            return res.ToList();
         }
 
         public async Task<IEnumerable<TEntity>> GetManyByKey(string key, string keyValue, int page, int size, FilterDefinition<TEntity>? additionalFilter = null)
@@ -83,7 +84,7 @@ namespace BackendNet.Repository
             //data = await _collection.Find(filter).Skip(size * (page - 1)).Limit(size).ToListAsync();
             var data = await _collection.FindAsync(filter);
 
-            return data.Current?.ToList();
+            return data.ToList();
         }
 
         public async Task<IEnumerable<TEntity>> GetManyByKey(string key, string keyValue, int page, int size, bool isSort = false, SortDefinition<TEntity>? sorDef = null, FilterDefinition<TEntity>? additionalFilter = null)
