@@ -29,6 +29,10 @@ namespace BackendNet
             return stringBuilder.ToString();
         }
     }
+    public enum ConfigKey
+    {
+        CloudFrontEduVideo
+    }
     public enum RoleKey
     {
         Teacher,

@@ -1,5 +1,6 @@
 ﻿using BackendNet.DAL;
 using BackendNet.Repository.IRepositories;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
@@ -59,7 +60,29 @@ namespace BackendNet.Repository
         {
             return Builders<TEntity>.Filter.Eq(key, keyValue);
         }
+        public async Task<IEnumerable<TEntity>> GetMany(int page, int size)
+        {
+            var all = _collection.Find(Builders<TEntity>.Filter.Empty).Skip(size * (page - 1)).Limit(size);
+            return await all.ToListAsync();
+        }
+        public Task<IEnumerable<TEntity>> GetMany(int page, int size, FilterDefinition<TEntity>? additionalFilter)
+        {
+            throw new NotImplementedException();
+        }
 
+        public async Task<IEnumerable<TEntity>> GetMany(int page, int size, FilterDefinition<TEntity>? additionalFilter, SortDefinition<TEntity>? sorDef)
+        {
+            IEnumerable<TEntity> data;
+            var filter = Builders<TEntity>.Filter.Empty;
+
+            if (additionalFilter != null)
+                filter &= additionalFilter;
+
+
+            data = await _collection.Find(filter).Sort(sorDef).Skip(size * (page - 1)).Limit(size).ToListAsync();
+
+            return data;
+        }
         public async Task<IEnumerable<TEntity>> GetManyByKey(string key, string keyValue, FilterDefinition<TEntity>? additionalFilter = null)
         {
             var filter = FilterId(key, keyValue);
@@ -118,5 +141,7 @@ namespace BackendNet.Repository
             var results = await _collection.AggregateAsync(pipeline);
             return results.Current;
         }
+
+
     }
 }

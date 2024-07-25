@@ -9,6 +9,7 @@ using BackendNet.Setting;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 
 internal class Program
 {
@@ -21,7 +22,33 @@ internal class Program
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerGen(c =>
+        {
+            c.AddSecurityDefinition("Authorization", new OpenApiSecurityScheme
+            {
+                Description = "Api key needed to access the endpoints. Authorization: Bearer xxxx",
+                In = ParameterLocation.Header,
+                Name = "Authorization",
+                Type = SecuritySchemeType.ApiKey
+            });
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Name = "Authorization",
+                            Type = SecuritySchemeType.ApiKey,
+                            In = ParameterLocation.Header,
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Authorization"
+                            },
+                        },
+                        new string[] {}
+                    }
+            });
+        });
         builder.Services.AddCors(option =>
         {
             option.AddPolicy("AllowFE", builder =>

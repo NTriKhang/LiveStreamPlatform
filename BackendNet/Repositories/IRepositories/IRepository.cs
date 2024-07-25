@@ -8,6 +8,9 @@ namespace BackendNet.Repository.IRepositories
     {
         Task<TEntity> Add(TEntity obj);
         Task<TEntity> GetByKey(string key, string keyValue);
+        Task<IEnumerable<TEntity>> GetMany(int page, int size);
+        Task<IEnumerable<TEntity>> GetMany(int page, int size, FilterDefinition<TEntity>? additionalFilter);
+        Task<IEnumerable<TEntity>> GetMany(int page, int size, FilterDefinition<TEntity>? additionalFilter, SortDefinition<TEntity>? sorDef);
         Task<IEnumerable<TEntity>> GetManyByKey(string key, string keyValue, FilterDefinition<TEntity>? additionalFilter = null);   
         Task<IEnumerable<TEntity>> GetManyByKey(string key, string keyValue, int page, int size , FilterDefinition<TEntity>? additionalFilter = null);
         Task<IEnumerable<TEntity>> GetManyByKey(string key, string keyValue, int page , int size, bool isSort = false, SortDefinition<TEntity>? sorDef = null, FilterDefinition<TEntity>? additionalFilter = null);

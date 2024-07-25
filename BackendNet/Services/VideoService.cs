@@ -43,18 +43,13 @@ namespace BackendNet.Services
         {
             return await _videoRepository.RemoveByKey(nameof(Follow.Id), Id);
         }
-        public async Task<IEnumerable<Videos>> GetFollowingVideos(string userId, int page)
-        {
-            var additionalFilter = Builders<Videos>.Filter.Ne(nameof(Videos.Status), VideoStatus.Keep.ToString());             
-            return await _videoRepository.GetManyByKey(nameof(Videos.User_id), userId, page,(int)PaginationCount.Video, additionalFilter);throw new NotImplementedException();
-        }
 
         public Task<Videos> GetVideoAsync(string videoId)
         {
             return _videoRepository.GetByKey(nameof(Videos.Id), videoId);
         }
 
-        public async Task<IEnumerable<Videos>> GetVideos(string userId, int page)
+        public async Task<IEnumerable<Videos>> GetUserVideos(string userId, int page)
         {
             var additionalFilter = Builders<Videos>.Filter.Ne(nameof(Videos.Status), VideoStatus.Keep.ToString());             
             return await _videoRepository.GetManyByKey(nameof(Videos.User_id), userId, page,(int)PaginationCount.Video, additionalFilter);
@@ -79,6 +74,12 @@ namespace BackendNet.Services
 
                 throw;
             }
+        }
+
+        public async Task<IEnumerable<Videos>> GetNewestVideo(int page)
+        {
+            SortDefinition<Videos> sort = Builders<Videos>.Sort.Descending(x => x.Time);
+            return await _videoRepository.GetMany(page, (int)PaginationCount.Video, null, sort);
         }
     }
 }

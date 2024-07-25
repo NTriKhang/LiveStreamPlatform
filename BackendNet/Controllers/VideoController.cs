@@ -25,18 +25,21 @@ namespace BackendNet.Controllers
     {
         private readonly IVideoService _videoService;
         //private readonly IRoomService _roomService;
-        //private readonly IConfiguration _configuration;
+        private readonly IConfiguration _configuration;
         private readonly IAwsService _awsService;
         private readonly IEmailService _emailService;
         //private readonly IStreamService _streamService;
         private readonly IFollowService _followService;
 
-        public VideoController(IVideoService videoService, IAwsService awsService
-            ,IFollowService followService, IEmailService emailService)
+        public VideoController(IVideoService videoService
+                                , IAwsService awsService
+                                , IFollowService followService
+                                , IEmailService emailService
+                                , IConfiguration configuration)
         {
             _videoService = videoService;
             //_roomService = roomService;
-            //_configuration = configuration;
+            _configuration = configuration;
             _emailService = emailService;
             _awsService = awsService;
             _followService = followService;
@@ -165,24 +168,24 @@ namespace BackendNet.Controllers
         //    }
         //}
         [HttpGet("{page}")]
-        [Authorize]
+        //[Authorize]
         public async Task<ActionResult<List<Videos>>> GetVideos(int page)
         {
             try
             {
-                string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-
-                var listVideo = await _videoService.GetVideos(user_id, page);
+                var listVideo = await _videoService.GetNewestVideo(page);
 
                 if (listVideo == null)
                     return StatusCode(StatusCodes.Status204NoContent, listVideo);
 
-                //string imageApi = _configuration.GetValue<string>("ImageApiGateWay")!;
-                //string videoThumbnail = "https://www.techsmith.com/blog/wp-content/uploads/2021/02/video-thumbnails-hero-1.png";
-
-                //listVideo.ToList().ForEach(video => { video.Thumbnail = imageApi + video.Thumbnail; });
-                //listVideo.ToList().ForEach(video => { video.Thumbnail = videoThumbnail; });
-                return StatusCode(StatusCodes.Status200OK, listVideo);
+                IList<VideoViewDto> videoView = new List<VideoViewDto>();
+                foreach (var video in listVideo)
+                {
+                    string videoUrl = _configuration.GetValue<string>("CloudFrontEduVideo") ?? "";
+                    videoUrl += "/" + video.Id;
+                    videoView.Add(new VideoViewDto(video, videoUrl));
+                }
+                return StatusCode(StatusCodes.Status200OK, videoView);
             }
             catch (Exception)
             {
@@ -198,7 +201,7 @@ namespace BackendNet.Controllers
             {
                 string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
-                var listVideo = await _videoService.GetVideos(user_id, page);
+                var listVideo = await _videoService.GetUserVideos(user_id, page);
 
                 if (listVideo == null)
                     return StatusCode(StatusCodes.Status204NoContent, listVideo);
