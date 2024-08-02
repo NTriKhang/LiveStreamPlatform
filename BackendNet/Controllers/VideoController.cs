@@ -30,13 +30,16 @@ namespace BackendNet.Controllers
         private readonly IEmailService _emailService;
         //private readonly IStreamService _streamService;
         private readonly IFollowService _followService;
+        private readonly IUserService _userService;
 
         public VideoController(IVideoService videoService
                                 , IAwsService awsService
                                 , IFollowService followService
                                 , IEmailService emailService
-                                , IConfiguration configuration)
+                                , IConfiguration configuration
+                                , IUserService userService)
         {
+            _userService = userService;
             _videoService = videoService;
             //_roomService = roomService;
             _configuration = configuration;
@@ -169,11 +172,11 @@ namespace BackendNet.Controllers
         //}
         [HttpGet("{page}")]
         //[Authorize]
-        public async Task<ActionResult<List<Videos>>> GetVideos(int page)
+        public async Task<ActionResult<List<Videos>>> GetVideos(int page, [FromQuery] int pageSize = (int)PaginationCount.Video)
         {
             try
             {
-                var listVideo = await _videoService.GetNewestVideo(page);
+                var listVideo = await _videoService.GetNewestVideo(page, pageSize);
 
                 if (listVideo == null)
                     return StatusCode(StatusCodes.Status204NoContent, listVideo);
@@ -183,7 +186,31 @@ namespace BackendNet.Controllers
                 {
                     string videoUrl = _configuration.GetValue<string>("CloudFrontEduVideo") ?? "";
                     videoUrl += "/" + video.Id;
-                    videoView.Add(new VideoViewDto(video, videoUrl));
+                    var subUser = await _userService.GetUserById(video.User_id);
+                    if(subUser != null)
+                        videoView.Add(new VideoViewDto
+                            (
+                                video, 
+                                new Models.Submodel.SubUser
+                                (
+                                    subUser.Id,
+                                    subUser.DislayName,
+                                    subUser.AvatarUrl
+                                ),
+                                videoUrl
+                            ));
+                    else
+                        videoView.Add(new VideoViewDto
+                            (
+                                video,
+                                new Models.Submodel.SubUser
+                                (
+                                    "No user",
+                                    "No user",
+                                    "https://i0.wp.com/digitalhealthskills.com/wp-content/uploads/2022/11/3da39-no-user-image-icon-27.png?fit=500%2C500&ssl=1"
+                                ),
+                                videoUrl
+                            ));
                 }
                 return StatusCode(StatusCodes.Status200OK, videoView);
             }

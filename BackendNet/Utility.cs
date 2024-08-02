@@ -43,6 +43,7 @@ namespace BackendNet
         Chat = 10,
         Video = 6,
         Follow = 25,
+        Course = 25,
     }
     public enum StreamStatus
     {

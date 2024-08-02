@@ -1,11 +1,12 @@
 ﻿using BackendNet.Models;
+using BackendNet.Models.Submodel;
 
 namespace BackendNet.Dtos.Video
 {
     public class VideoViewDto
     {
         public string? Id { get; set; }
-        public string User_id { get; set; }
+        public SubUser User { get; set; }
         public DateTime? Time { set; get; }
         public string Title { set; get; }
         public string? Description { set; get; }
@@ -17,10 +18,10 @@ namespace BackendNet.Dtos.Video
         public List<string> Tags { set; get; }
         public string FileType { set; get; }
         public string VideoUrl { set; get; }
-        public VideoViewDto(Videos video, string videoUrl)
+        public VideoViewDto(Videos video, SubUser videoOwner, string videoUrl)
         {
             Id = video.Id;
-            User_id = video.User_id;
+            User = videoOwner;
             Time = video.Time;
             Title = video.Title;
             Description = video.Description;

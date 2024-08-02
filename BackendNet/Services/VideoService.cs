@@ -9,12 +9,10 @@ namespace BackendNet.Services
     public class VideoService : IVideoService
     {
         private readonly IVideoRepository _videoRepository;
-        private readonly IUserService _userService;
 
-        public VideoService(IVideoRepository video, IUserService userService)
+        public VideoService(IVideoRepository video)
         {
             _videoRepository = video;
-            _userService = userService;
         }
 
         public async Task<Videos> AddVideoAsync(Videos video, IFormFile thumbnail)
@@ -76,10 +74,15 @@ namespace BackendNet.Services
             }
         }
 
-        public async Task<IEnumerable<Videos>> GetNewestVideo(int page)
+        public async Task<IEnumerable<Videos>> GetNewestVideo(int page, int pageSize)
         {
             SortDefinition<Videos> sort = Builders<Videos>.Sort.Descending(x => x.Time);
-            return await _videoRepository.GetMany(page, (int)PaginationCount.Video, null, sort);
+            return await _videoRepository.GetMany(page, pageSize , null, sort);
+        }
+
+        public string GetIdYet()
+        {
+            return _videoRepository.GenerateKey();
         }
     }
 }

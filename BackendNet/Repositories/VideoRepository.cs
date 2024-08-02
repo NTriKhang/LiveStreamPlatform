@@ -2,6 +2,7 @@
 using BackendNet.Models;
 using BackendNet.Repositories.IRepositories;
 using BackendNet.Repository;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Driver;
 
@@ -17,7 +18,7 @@ namespace BackendNet.Repositories
         public string GenerateKey()
         {
             ObjectIdGenerator objectIdGenerator = new ObjectIdGenerator();
-            var id = objectIdGenerator.GenerateId(_collection, typeof(Videos).Name).ToString();
+            var id = ObjectId.GenerateNewId().ToString();
             return id;
         }
 
