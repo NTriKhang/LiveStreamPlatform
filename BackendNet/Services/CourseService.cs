@@ -12,6 +12,12 @@ namespace BackendNet.Services
         {
             this.courseRepository = courseRepository;
         }
+
+        public async Task<Course> AddCourse(Course course)
+        {
+            return await courseRepository.Add(course);
+        }
+
         public Task<IEnumerable<Course>> GetAll()
         {
             throw new NotImplementedException();
@@ -27,5 +33,6 @@ namespace BackendNet.Services
             SortDefinition<Course> sort = Builders<Course>.Sort.Descending(x => x.Cdate);
             return await courseRepository.GetManyByKey("Created_user.user_id", userId, page, pageSize, true, sort);
         }
+
     }
 }

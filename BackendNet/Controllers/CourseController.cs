@@ -1,8 +1,13 @@
-﻿using BackendNet.Models;
+﻿using AutoMapper;
+using BackendNet.Dtos.Course;
+using BackendNet.Models;
+using BackendNet.Models.Submodel;
 using BackendNet.Services;
 using BackendNet.Services.IService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BackendNet.Controllers
 {
@@ -13,15 +18,18 @@ namespace BackendNet.Controllers
         private readonly ICourseService _courseService;
         private readonly IVideoService _videoService;
         private readonly IAwsService _awsService;
+        private readonly IMapper _mapper;
         public CourseController(
             ICourseService courseService
             , IVideoService videoService
             , IAwsService awsService
+            , IMapper mapper
         )
         {
             _courseService = courseService;
             _videoService = videoService;
             _awsService = awsService;
+            _mapper = mapper;
         }
         [HttpGet]
         public async Task<IEnumerable<Course>> getCourses(string userId, [FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Course)
@@ -35,7 +43,7 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
-        [HttpGet("{courseId}")]
+        [HttpGet("GetCourse/{courseId}")]
         public async Task<Course> getCourse(string courseId)
         {
             try
@@ -48,8 +56,8 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
-        [HttpGet("getPresignedUrl")]
-        public List<string> getPresignedUrl()
+        [HttpGet("GetCoursePresignedUrl")]
+        public List<string> getCoursePresignedUrl()
         {
             try
             {
@@ -60,25 +68,39 @@ namespace BackendNet.Controllers
                     n.Add(_awsService.GenerateVideoPostPresignedUrl(videoId,0));
                 }
                 return n;
-            }
+            }   
             catch (Exception)
             {
 
                 throw;
             }
         }
-        //[HttpPost]
-        //public async Task<ActionResult> postCourse([FromBody] Course course)
-        //{
-        //    try
-        //    {
-
-        //    }
-        //    catch (Exception)
-        //    {
-
-        //        throw;
-        //    }
-        //}
+        [HttpPost]
+        [Authorize]
+        public async Task<ActionResult> postCourse([FromBody] CourseCreateDto courseCreateDto)
+        {
+            try
+            {
+                Course crs = _mapper.Map<Course>(courseCreateDto);
+                var subUser = new SubUser(
+                        User?.FindFirstValue(ClaimTypes.NameIdentifier) ?? "",
+                        User?.FindFirstValue(ClaimTypes.Name) ?? "",
+                        User?.FindFirstValue(ClaimTypes.UserData) ?? ""
+                    );
+                if (subUser.user_id == "")
+                    return BadRequest("User is not valid");
+                crs.Cuser = subUser;
+                crs.Cdate = crs.Edate = DateTime.Now;
+                crs = await _courseService.AddCourse(crs);
+                return CreatedAtAction("GetCourse", new { courseId = crs._id }, crs);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.InnerException);
+                Console.WriteLine(ex.StackTrace);
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

@@ -9,6 +9,13 @@ namespace BackendNet.Models.Submodel
         public string user_id { set; get; }
         public string user_name { set; get; }
         public string user_avatar { set; get; }
+
+        public SubUser()
+        {
+            user_id = string.Empty;
+            user_name = string.Empty;
+            user_avatar = string.Empty;
+        }
         public SubUser(string user_id, string user_name, string user_avatar)
         {
             this.user_name = user_name;

@@ -8,10 +8,10 @@ namespace BackendNet.Models
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
-        public string _id { set; get; }
-        public string Title { set; get; }
-        public string Desc { set; get; }
-        public string CourseDetail { set; get; }
+        public string _id { set; get; } = string.Empty;
+        public string Title { set; get; } = string.Empty;
+        public string Desc { set; get; } = string.Empty;
+        public string CourseDetail { set; get; } = string.Empty;
         public decimal Price { set; get; }
         public List<string> Tags { set; get; }
         public decimal Discount { set; get; }
@@ -19,5 +19,11 @@ namespace BackendNet.Models
         public DateTime Cdate { set; get; }
         public DateTime Edate { set; get; }
         public List<CourseStudent> Students { set; get; }
+        public Course()
+        {
+            Students = new List<CourseStudent>();
+            Tags = new List<string>();
+            Cuser = new SubUser();
+        }
     }
 }

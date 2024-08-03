@@ -2,14 +2,13 @@ using BackendNet.DAL;
 using BackendNet.Hubs;
 using BackendNet.Repositories;
 using BackendNet.Repositories.IRepositories;
-using BackendNet.Repository.IRepositories;
 using BackendNet.Services;
 using BackendNet.Services.IService;
 using BackendNet.Setting;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 internal class Program
 {
@@ -101,6 +100,7 @@ internal class Program
             options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         });
         builder.Services.AddSignalR();
+        builder.Services.AddAutoMapper(typeof(Program));
         //builder.Services.AddSignalR(e =>
         //{
         //    e.MaximumReceiveMessageSize = 102400000;
