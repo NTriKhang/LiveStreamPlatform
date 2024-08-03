@@ -58,7 +58,8 @@ namespace BackendNet
         Keep,//2
         Member,//3
         Remove,//4
-        Upload//5
+        Upload,//5
+        TestData//6
     }
     public enum RoomStatus
     {

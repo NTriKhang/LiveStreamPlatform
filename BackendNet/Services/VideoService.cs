@@ -77,7 +77,9 @@ namespace BackendNet.Services
         public async Task<IEnumerable<Videos>> GetNewestVideo(int page, int pageSize)
         {
             SortDefinition<Videos> sort = Builders<Videos>.Sort.Descending(x => x.Time);
-            return await _videoRepository.GetMany(page, pageSize , null, sort);
+            var filter = Builders<Videos>.Filter.Ne(u => u.StatusNum, (int)VideoStatus.TestData);
+
+            return await _videoRepository.GetMany(page, pageSize , filter, sort);
         }
 
         public string GetIdYet()
