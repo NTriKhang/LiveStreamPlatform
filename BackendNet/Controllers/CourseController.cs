@@ -16,22 +16,37 @@ namespace BackendNet.Controllers
     public class CourseController : ControllerBase
     {
         private readonly ICourseService _courseService;
+        private readonly IUserService _userService;
         private readonly IVideoService _videoService;
         private readonly IAwsService _awsService;
         private readonly IMapper _mapper;
         public CourseController(
             ICourseService courseService
+            , IUserService userService
             , IVideoService videoService
             , IAwsService awsService
             , IMapper mapper
         )
         {
             _courseService = courseService;
+            _userService = userService;
             _videoService = videoService;
             _awsService = awsService;
             _mapper = mapper;
         }
-        [HttpGet]
+        //[HttpGet("GetUserCourse")]
+        //public async Task<IEnumerable<Course>> getCourse(string userId, [FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Course)
+        //{
+        //    try
+        //    {
+        //        return await _courseService.GetCourses(userId, page, pageSize);
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
+        [HttpGet("GetUserCourses/{userId}")]
         public async Task<IEnumerable<Course>> getCourses(string userId, [FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Course)
         {
             try
@@ -73,6 +88,36 @@ namespace BackendNet.Controllers
             {
 
                 throw;
+            }
+        }
+        [HttpPut]
+        [Authorize]
+        public async Task<ActionResult> putCourse([FromBody] CourseCreateDto courseCreateDto)
+        {
+            try
+            {
+                Course crs = _mapper.Map<Course>(courseCreateDto);
+                
+                var subUser = new SubUser(
+                        User?.FindFirstValue(ClaimTypes.NameIdentifier) ?? "",
+                        User?.FindFirstValue(ClaimTypes.Name) ?? "",
+                        User?.FindFirstValue(ClaimTypes.UserData) ?? ""
+                    );
+                if (subUser.user_id == "")
+                    return BadRequest("User is not valid");
+                crs.Cuser = subUser;
+                crs.Cdate = crs.Edate = DateTime.Now;
+                var res = await _courseService.UpdateCourse(crs);
+                if(res)
+                    return NoContent();
+                return BadRequest("Nothing is updated");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.InnerException);
+                Console.WriteLine(ex.StackTrace);
+                return BadRequest(ex.Message);
             }
         }
         [HttpPost]

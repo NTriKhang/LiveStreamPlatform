@@ -17,7 +17,14 @@ namespace BackendNet.Services
         {
             return await courseRepository.Add(course);
         }
-
+        public async Task<bool> UpdateCourse(Course course)
+        {
+            var filter = Builders<Course>.Filter.Eq(x => x._id, course._id);
+            var res = await courseRepository.ReplaceAsync(filter, course);
+            if (res.IsAcknowledged)
+                return true;
+            return false;
+        }
         public Task<IEnumerable<Course>> GetAll()
         {
             throw new NotImplementedException();
@@ -31,7 +38,7 @@ namespace BackendNet.Services
         public async Task<IEnumerable<Course>> GetCourses(string userId, int page, int pageSize)
         {
             SortDefinition<Course> sort = Builders<Course>.Sort.Descending(x => x.Cdate);
-            return await courseRepository.GetManyByKey("Created_user.user_id", userId, page, pageSize, true, sort);
+            return await courseRepository.GetManyByKey($"{nameof(Course.Cuser)}.{nameof(Course.Cuser.user_id)}", userId, page, pageSize, null, sort);
         }
 
     }
