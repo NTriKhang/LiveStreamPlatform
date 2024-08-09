@@ -22,7 +22,7 @@ namespace BackendNet.Repositories
         public async Task<Users> AuthAsync(string username, string password)
         {
             var user = await _collection.Find(user => user.UserName == username && user.Password == password).ToListAsync();
-            return user.FirstOrDefault();
+            return user.FirstOrDefault()!;
         }
 
         public async Task<bool> CompareKey(string user_id, string key)

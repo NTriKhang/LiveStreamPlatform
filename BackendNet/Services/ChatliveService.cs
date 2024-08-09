@@ -22,7 +22,7 @@ namespace BackendNet.Services
         public async Task<IEnumerable<ChatLive>> GetChatsPagination(string roomId,int page)
         {
             SortDefinition<ChatLive> sort = Builders<ChatLive>.Sort.Descending(x => x.createdAt);
-            return await _chatliveRepository.GetManyByKey(nameof(ChatLive.room_id), roomId, page, (int)PaginationCount.Chat, true, sort);
+            return await _chatliveRepository.GetManyByKey(nameof(ChatLive.room_id), roomId, page, (int)PaginationCount.Chat,null, sort);
         }
     }
 }

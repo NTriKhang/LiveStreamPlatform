@@ -8,7 +8,12 @@ using BackendNet.Setting;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+
 using System.Reflection;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 internal class Program
 {
@@ -58,17 +63,21 @@ internal class Program
                .AllowCredentials();
             });
         });
+
         builder.Services.Configure<LiveStreamDatabaseSetting>(
             builder.Configuration.GetSection("LiveStreamDatabase"));
         builder.Services.Configure<EmailSetting>(
             builder.Configuration.GetSection("EmailServerSetting"));
-
         builder.Services.AddSingleton<ILiveStreamDatabaseSetting>(sp =>
                         sp.GetRequiredService<IOptions<LiveStreamDatabaseSetting>>().Value);
         builder.Services.AddSingleton(sp =>
                         sp.GetRequiredService<IOptions<EmailSetting>>().Value);
 
         builder.Services.AddScoped<IMongoContext, MongoContext>();
+        builder.Services.AddSingleton<IConnectionMultiplexer>(cfg =>
+        {
+            return ConnectionMultiplexer.Connect(builder.Configuration.GetValue<string>("Redis")!);
+        });
 
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddScoped<IVideoRepository, VideoRepository>();
@@ -76,6 +85,7 @@ internal class Program
         builder.Services.AddScoped<IChatliveRepository, ChatliveRepository>();
         builder.Services.AddScoped<IFollowRepository, FollowRepository>();
         builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+        builder.Services.AddScoped<ICrsContentRepository, CrsContentRepository>();
 
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IVideoService, VideoService>();
@@ -86,21 +96,33 @@ internal class Program
         builder.Services.AddScoped<IFollowService, FollowService>();
         builder.Services.AddScoped<IEmailService, EmailService>();
         builder.Services.AddScoped<ICourseService, CourseService>();
+        builder.Services.AddScoped<ICrsContentService, CrsContentService>();
 
-        builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-        .AddCookie(options =>
-        {
-            options.Events.OnRedirectToLogin = (context) =>
+        builder.Services.AddAuthentication(cfg => {
+            cfg.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            cfg.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            cfg.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddJwtBearer(x => {
+            x.RequireHttpsMetadata = false;
+            x.SaveToken = false;
+            x.TokenValidationParameters = new TokenValidationParameters
             {
-                context.Response.StatusCode = 401;
-                return Task.CompletedTask;
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8
+                    .GetBytes("this is my top jwt secret key for authentication and i append it to have enough lenght")
+                ),
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ClockSkew = TimeSpan.Zero
             };
-            options.Cookie.SameSite = SameSiteMode.None;
-            options.Cookie.HttpOnly = true;
-            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         });
+
         builder.Services.AddSignalR();
         builder.Services.AddAutoMapper(typeof(Program));
+
+        builder.Services.AddHttpContextAccessor();
+        builder.Services.AddHttpClient();
         //builder.Services.AddSignalR(e =>
         //{
         //    e.MaximumReceiveMessageSize = 102400000;
@@ -130,6 +152,8 @@ internal class Program
 
         app.UseCors("AllowFE");
         app.UseHttpsRedirection();
+
+        app.UseMiddleware<JwtCookieMiddleware>();
 
         app.UseAuthentication();
         app.UseAuthorization();

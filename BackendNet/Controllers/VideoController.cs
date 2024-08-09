@@ -170,9 +170,9 @@ namespace BackendNet.Controllers
         //        throw;
         //    }
         //}
-        [HttpGet("{page}")]
+        [HttpGet]
         //[Authorize]
-        public async Task<ActionResult<List<Videos>>> GetVideos(int page, [FromQuery] int pageSize = (int)PaginationCount.Video)
+        public async Task<ActionResult<List<Videos>>> GetVideos([FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Video)
         {
             try
             {
@@ -220,33 +220,33 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
-        [HttpGet("following/{page}")]
-        [Authorize]
-        public async Task<ActionResult<List<Videos>>> GetFollowingVideos(int page)
-        {
-            try
-            {
-                string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        //[HttpGet("following/{page}")]
+        //[Authorize]
+        //public async Task<ActionResult<List<Videos>>> GetFollowingVideos(int page)
+        //{
+        //    try
+        //    {
+        //        string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
-                var listVideo = await _videoService.GetUserVideos(user_id, page);
+        //        var listVideo = await _videoService.GetUserVideos(user_id, page);
 
-                if (listVideo == null)
-                    return StatusCode(StatusCodes.Status204NoContent, listVideo);
+        //        if (listVideo == null)
+        //            return StatusCode(StatusCodes.Status204NoContent, listVideo);
 
-                //string imageApi = _configuration.GetValue<string>("ImageApiGateWay")!;
-                string videoThumbnail = "https://www.techsmith.com/blog/wp-content/uploads/2021/02/video-thumbnails-hero-1.png";
+        //        //string imageApi = _configuration.GetValue<string>("ImageApiGateWay")!;
+        //        string videoThumbnail = "https://www.techsmith.com/blog/wp-content/uploads/2021/02/video-thumbnails-hero-1.png";
 
-                //listVideo.ToList().ForEach(video => { video.Thumbnail = imageApi + video.Thumbnail; });
-                listVideo.ToList().ForEach(video => { video.Thumbnail = videoThumbnail; });
+        //        //listVideo.ToList().ForEach(video => { video.Thumbnail = imageApi + video.Thumbnail; });
+        //        listVideo.ToList().ForEach(video => { video.Thumbnail = videoThumbnail; });
 
-                return StatusCode(StatusCodes.Status200OK, listVideo);
-            }
-            catch (Exception)
-            {
+        //        return StatusCode(StatusCodes.Status200OK, listVideo);
+        //    }
+        //    catch (Exception)
+        //    {
 
-                throw;
-            }
-        }
+        //        throw;
+        //    }
+        //}
         //[Authorize]
         //[HttpPost("on_stream")]
         //public async Task<ActionResult<Rooms>> PublicVideoStream([FromForm] string streamInfo)

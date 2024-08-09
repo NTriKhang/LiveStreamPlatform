@@ -11,9 +11,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
+using Newtonsoft.Json.Linq;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
+using System.Text;
 
 namespace BackendNet.Controllers
 {
@@ -101,7 +105,7 @@ namespace BackendNet.Controllers
         }
         
         [HttpPost("auth")]
-        public async Task<ActionResult<Users>> login(UserLoginDto user)
+        public async Task<ActionResult> login(UserLoginDto user)
         {
             try
             {
@@ -110,32 +114,46 @@ namespace BackendNet.Controllers
                 {
                     return NotFound(user);
                 }
-                var claims = new List<Claim>
+                if(userAuth.code == 300)
                 {
-                    new Claim(type: ClaimTypes.NameIdentifier,value: userAuth.Id!),
-                    new Claim(type: ClaimTypes.Name, value: userAuth.UserName), 
-                    new Claim(type: ClaimTypes.UserData, value: userAuth.AvatarUrl), 
-                   // new Claim(type: ClaimTypes.UserData, value: userAuth.StreamInfo?.Stream_token ?? "")
-                };
-                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(identity),
-                    new AuthenticationProperties
-                    {
-                        IsPersistent = true,
-                        AllowRefresh = true,
-                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1),
-                    }
-                );
+                    return StatusCode(StatusCodes.Status303SeeOther, user);
+                }
+                var expired_time = DateTime.Now.AddDays(1); 
 
-                return Ok(userAuth);
+                CookieOptions cookieOptions = new CookieOptions();
+                cookieOptions.HttpOnly = true;
+                cookieOptions.Expires = expired_time;
+                var token = GenerateJWTToken((userAuth.entity as Users)!);
+                Response.Cookies.Append("AuthToken", token, cookieOptions);
+                    
+                return Ok(userAuth.entity);
             }
             catch (Exception)
             {
 
                 throw;
             }
+        }
+        [NonAction]
+        public string GenerateJWTToken(Users user)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Role, user.Role),
+            };
+            var jwtToken = new JwtSecurityToken(
+                claims: claims,
+                notBefore: DateTime.UtcNow,
+                expires: DateTime.UtcNow.AddDays(7),
+                signingCredentials: new SigningCredentials(
+                    new SymmetricSecurityKey(
+                       Encoding.UTF8.
+                            GetBytes("this is my top jwt secret key for authentication and i append it to have enough lenght")
+                        ),
+                    SecurityAlgorithms.HmacSha256Signature)
+                );
+            return new JwtSecurityTokenHandler().WriteToken(jwtToken);
         }
         [HttpPost("logout")]
         public async Task<ActionResult<Users>> logout()
