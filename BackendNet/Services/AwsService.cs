@@ -23,15 +23,12 @@ namespace BackendNet.Services
         }
         private AmazonS3Client getS3Client()
         {
-            string? accesckey = configuration.GetSection("AwsCredentail").GetValue<string>("AccessKey");
-            if (accesckey == null)
-                return null;
             BasicAWSCredentials basicAWSCredentials =
                 new BasicAWSCredentials(
-                    configuration.GetSection("AwsCredentail").GetValue<string>("AccessKey"),
-                    configuration.GetSection("AwsCredentail").GetValue<string>("SecretKey")
+                    configuration.GetSection("AwsCredentail").GetValue<string>("AccessKey") ?? "",
+                    configuration.GetSection("AwsCredentail").GetValue<string>("SecretKey") ?? ""
                 );
-            AmazonS3Client s3Client = new AmazonS3Client(basicAWSCredentials, Amazon.RegionEndpoint.APSoutheast2); string urlString = string.Empty;
+            AmazonS3Client s3Client = new AmazonS3Client(basicAWSCredentials, Amazon.RegionEndpoint.APSoutheast2);
             return s3Client;
         }
         public string GenerateVideoPostPresignedUrl(string videoId, long videoSize)
@@ -54,6 +51,36 @@ namespace BackendNet.Services
                     Key = videoId,
                     Expires = DateTime.UtcNow.AddMinutes(timeout),
                     Verb = HttpVerb.PUT
+                };
+                var urlString = s3Client.GetPreSignedURL(request);
+                return urlString;
+            }
+            catch (AmazonS3Exception ex)
+            {
+                Console.WriteLine($"Error:'{ex.Message}'");
+                throw;
+            }
+        }
+        public string GenerateVideoDeletePresignedUrl(string videoId)
+        {
+            try
+            {
+                var s3Client = getS3Client();
+                if (s3Client == null)
+                    return string.Empty;
+                string? bucketName = configuration.GetSection("BucketName").GetValue<string>("EduVideo");
+                double timeout = 2;
+
+                if (bucketName == null)
+                {
+                    return string.Empty;
+                }
+                var request = new GetPreSignedUrlRequest()
+                {
+                    BucketName = bucketName,
+                    Key = videoId,
+                    Expires = DateTime.UtcNow.AddMinutes(timeout),
+                    Verb = HttpVerb.DELETE
                 };
                 var urlString = s3Client.GetPreSignedURL(request);
                 return urlString;
@@ -166,7 +193,8 @@ namespace BackendNet.Services
         {
             try
             {
-                var res = await DeleteObjectNonVersionedBucketAsync(getS3Client(), configuration.GetSection("BucketName").GetValue<string>("EduVideo"), videoId);
+                string bucketName = configuration.GetSection("BucketName").GetValue<string>("EduVideo") ?? "";
+                var res = await DeleteObjectAsync(getS3Client(), bucketName , videoId);
                 //if(res)
                 return res;
             }
@@ -176,7 +204,7 @@ namespace BackendNet.Services
                 throw;
             }
         }
-        public static async Task<HttpStatusCode> DeleteObjectNonVersionedBucketAsync(IAmazonS3 client, string bucketName, string keyName)
+        private async Task<HttpStatusCode> DeleteObjectAsync(IAmazonS3 client, string bucketName, string keyName)
         {
             try
             {

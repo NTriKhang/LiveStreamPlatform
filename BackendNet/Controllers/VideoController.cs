@@ -171,7 +171,6 @@ namespace BackendNet.Controllers
         //    }
         //}
         [HttpGet]
-        //[Authorize]
         public async Task<ActionResult<List<Videos>>> GetVideos([FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Video)
         {
             try
@@ -217,6 +216,19 @@ namespace BackendNet.Controllers
             catch (Exception)
             {
 
+                throw;
+            }
+        }
+        [HttpDelete("DeleteS3Video/{videoId}")]
+        public async Task<ActionResult> DeleteS3Video(string videoId)
+        {
+            try
+            {
+                await _awsService.DeleteVideo(videoId);
+                return NoContent();
+            }
+            catch (Exception)
+            {
                 throw;
             }
         }

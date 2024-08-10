@@ -18,6 +18,7 @@ namespace BackendNet.Hubs
         public override Task OnConnectedAsync()
         {
             string? userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            var context = Context.GetHttpContext();
             if(userId != null)
             {
                 Groups.AddToGroupAsync(Context.ConnectionId, userId);

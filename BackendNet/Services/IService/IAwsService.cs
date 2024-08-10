@@ -10,6 +10,7 @@ namespace BackendNet.Services.IService
         Task<HttpStatusCode> UploadStreamVideo(string streamkey, string folderContainName);
         Task<HttpStatusCode> DeleteVideo(string videoId);
         string GenerateVideoPostPresignedUrl(string videoId, long videoSize);
+        string GenerateVideoDeletePresignedUrl(string videoId);
 
     }
 }

@@ -17,6 +17,7 @@ namespace BackendNet.Hubs
             this.chatLiveService = chatLiveService;
 
         }
+        [Authorize]
         public override async Task OnConnectedAsync()
         {
             try
