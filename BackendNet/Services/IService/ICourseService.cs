@@ -9,6 +9,6 @@ namespace BackendNet.Services.IService
         Task<Course> GetCourse(string courseId);
         Task<Course> AddCourse(Course course);
         Task<bool> UpdateCourse(Course course);
-
+        Task<bool> DeleteCourse(string courseId);
     }
 }

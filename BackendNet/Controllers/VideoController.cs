@@ -104,10 +104,10 @@ namespace BackendNet.Controllers
             try
             {
                 //await _videoService.UpdateVideoStatus(status, videoId);
-
+                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
                 if (status == (int)VideoStatus.Public)
                 {
-                    var emails = await _followService.GetFollowerEmail("6682131597bd9b8b7a61ac8f");
+                    var emails = await _followService.GetFollowerEmail(userId);
                     if(emails != null)
                     {
                         _ = _emailService.SendMultiEmail(new Dtos.Mail.MultiMailRequest(

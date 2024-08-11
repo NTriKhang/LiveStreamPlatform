@@ -18,20 +18,17 @@ namespace BackendNet.Controllers
         private readonly ICourseService _courseService;
         private readonly IUserService _userService;
         private readonly IVideoService _videoService;
-        private readonly IAwsService _awsService;
         private readonly IMapper _mapper;
         public CourseController(
             ICourseService courseService
             , IUserService userService
             , IVideoService videoService
-            , IAwsService awsService
             , IMapper mapper
         )
         {
             _courseService = courseService;
             _userService = userService;
             _videoService = videoService;
-            _awsService = awsService;
             _mapper = mapper;
         }
         //[HttpGet("GetUserCourse")]
@@ -71,19 +68,48 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
-        [HttpGet("GetCoursePresignedUrl")]
-        public List<string> getCoursePresignedUrl()
+        /// <summary>
+        /// only use for test
+        /// </summary>
+        /// <param name="courseId"></param>
+        /// <returns></returns>
+        [HttpDelete("{courseId}")]
+        public async Task<ActionResult> deleteCourse(string courseId)
         {
             try
             {
-                List<string> n = new List<string>();
-                for(int i =0; i< 5; i++)
+                var res = await _courseService.DeleteCourse(courseId);
+                if(res == false)
+                    return BadRequest(res);
+                return NoContent();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        /// <summary>
+        /// use in application
+        /// </summary>
+        /// <param name="courseCreateDto"></param>
+        /// <returns></returns>
+        [HttpDelete("CourseDelete/{courseId}")]
+        [Authorize]
+        public async Task<ActionResult> deleteCourseInUse(string courseId)
+        {
+            try
+            {
+                var course = await _courseService.GetCourse(courseId);
+                if(course != null && course.Cuser.user_id == (User.FindFirstValue(ClaimTypes.NameIdentifier) ?? ""))
                 {
-                    string videoId = _videoService.GetIdYet();
-                    n.Add(_awsService.GenerateVideoPostPresignedUrl(videoId,0));
+                    var res = await _courseService.DeleteCourse(courseId);
+                    if (res == false)
+                        return BadRequest(res);
+                    return NoContent();
                 }
-                return n;
-            }   
+                return Unauthorized();
+            }
             catch (Exception)
             {
 
@@ -97,12 +123,9 @@ namespace BackendNet.Controllers
             try
             {
                 Course crs = _mapper.Map<Course>(courseCreateDto);
-                
-                var subUser = new SubUser(
-                        User?.FindFirstValue(ClaimTypes.NameIdentifier) ?? "",
-                        User?.FindFirstValue(ClaimTypes.Name) ?? "",
-                        User?.FindFirstValue(ClaimTypes.UserData) ?? ""
-                    );
+                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+                var subUser = await _userService.GetSubUser(userId);
+
                 if (subUser.user_id == "")
                     return BadRequest("User is not valid");
                 crs.Cuser = subUser;
@@ -127,13 +150,12 @@ namespace BackendNet.Controllers
             try
             {
                 Course crs = _mapper.Map<Course>(courseCreateDto);
-                var subUser = new SubUser(
-                        User?.FindFirstValue(ClaimTypes.NameIdentifier) ?? "",
-                        User?.FindFirstValue(ClaimTypes.Name) ?? "",
-                        User?.FindFirstValue(ClaimTypes.UserData) ?? ""
-                    );
+                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+                var subUser = await _userService.GetSubUser(userId);
+
                 if (subUser.user_id == "")
                     return BadRequest("User is not valid");
+
                 crs.Cuser = subUser;
                 crs.Cdate = crs.Edate = DateTime.Now;
                 crs = await _courseService.AddCourse(crs);

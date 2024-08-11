@@ -41,5 +41,9 @@ namespace BackendNet.Services
             return await courseRepository.GetManyByKey($"{nameof(Course.Cuser)}.{nameof(Course.Cuser.user_id)}", userId, page, pageSize, null, sort);
         }
 
+        public async Task<bool> DeleteCourse(string courseId)
+        {
+            return await courseRepository.RemoveByKey(nameof(Course._id), courseId);
+        }
     }
 }
