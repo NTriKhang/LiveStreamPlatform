@@ -57,7 +57,7 @@ internal class Program
         {
             option.AddPolicy("AllowFE", builder =>
             {
-                builder.WithOrigins("http://localhost:4200", "https://localhost:7104/")
+                builder.WithOrigins("http://localhost:4200", "https://localhost:7104/", "https://stream.hightfive.click")
                .AllowAnyHeader()
                .AllowAnyMethod()
                .AllowCredentials();
