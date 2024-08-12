@@ -1,4 +1,7 @@
 ﻿using BackendNet.Models;
+using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
+using MongoDB.Driver.Core.Operations;
 
 namespace BackendNet.Services.IService
 {
@@ -10,5 +13,7 @@ namespace BackendNet.Services.IService
         Task<Course> AddCourse(Course course);
         Task<bool> UpdateCourse(Course course);
         Task<bool> DeleteCourse(string courseId);
+        Task<UpdateResult> AddVideoToCrs(string courseId, Videos videos);
+        Task<UpdateResult> DeleteVideoFromCrs(string videoId);
     }
 }

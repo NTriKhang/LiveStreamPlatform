@@ -1,6 +1,8 @@
 ﻿using BackendNet.Models;
 using BackendNet.Repositories.IRepositories;
 using BackendNet.Services.IService;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 
 namespace BackendNet.Services
@@ -44,6 +46,17 @@ namespace BackendNet.Services
         public async Task<bool> DeleteCourse(string courseId)
         {
             return await courseRepository.RemoveByKey(nameof(Course._id), courseId);
+        }
+
+        public async Task<UpdateResult> AddVideoToCrs(string courseId, Videos videos)
+        {
+            var updateDef = Builders<Course>.Update.Push(x => x.Videos, videos);
+            return await courseRepository.UpdateByKey(nameof(Course._id), courseId, updateDef);
+        }
+
+        public Task<UpdateResult> DeleteVideoFromCrs(string videoId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

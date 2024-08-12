@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BackendNet.Dtos.Course;
+using BackendNet.Dtos.Video;
 using BackendNet.Models;
 using BackendNet.Models.Submodel;
 using BackendNet.Services;
@@ -18,17 +19,20 @@ namespace BackendNet.Controllers
         private readonly ICourseService _courseService;
         private readonly IUserService _userService;
         private readonly IVideoService _videoService;
+        private readonly IAwsService _awsService;
         private readonly IMapper _mapper;
         public CourseController(
             ICourseService courseService
             , IUserService userService
             , IVideoService videoService
+            , IAwsService awsService
             , IMapper mapper
         )
         {
             _courseService = courseService;
             _userService = userService;
             _videoService = videoService;
+            _awsService = awsService;
             _mapper = mapper;
         }
         //[HttpGet("GetUserCourse")]
@@ -169,5 +173,65 @@ namespace BackendNet.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpGet("GetCoursePresignedUrl")]
+        [Authorize]
+        public List<string> getCoursePresignedUrl([FromQuery] int n = 5)
+        {
+            try
+            {
+                List<string> res = new List<string>();
+                for (int i = 0; i < (n > 5 ? 5 : n); i++)
+                {
+                    string videoId = _videoService.GetIdYet();
+                    res.Add(_awsService.GenerateVideoPostPresignedUrl(videoId, 0));
+                }
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        [HttpPut("PutCourseVideo/{courseId}")]
+        [Authorize]
+        public async Task<ActionResult> PutCourseVideo(string courseId, [FromBody] VideoCreateDto videoCreate)
+        {
+            try
+            {
+                Videos video = _mapper.Map<VideoCreateDto, Videos>(videoCreate);
+                video.User_id = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+                var res = await _courseService.AddVideoToCrs(courseId, video);
+                if(res.IsAcknowledged)
+                    return NoContent();
+
+                return BadRequest();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        //[HttpDelete("DeleteCourseVideo")]
+        //[Authorize]
+        //public async Task<ActionResult> PutCourseVideo([FromQuery] string courseId, [FromQuery] string videoId)
+        //{
+        //    try
+        //    {
+        //        Videos video = _mapper.Map<VideoCreateDto, Videos>(videoCreate);
+        //        video.User_id = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        //        var res = await _courseService.AddVideoToCrs(courseId, video);
+        //        if (res.IsAcknowledged)
+        //            return NoContent();
+
+        //        return BadRequest();
+        //    }
+        //    catch (Exception)
+        //    {
+
+        //        throw;
+        //    }
+        //}
     }
 }

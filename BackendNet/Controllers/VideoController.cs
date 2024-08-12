@@ -68,7 +68,7 @@ namespace BackendNet.Controllers
         }
         [HttpPost("getPresignedUrl")]
         [Authorize]
-        public async Task<ActionResult> getPresignedUrl([FromBody] OnPublicDto uploadVideoDto)
+        public async Task<ActionResult> getPresignedUrl([FromBody] VideoCreateDto uploadVideoDto)
         {
             try
             {

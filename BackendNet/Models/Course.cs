@@ -19,8 +19,10 @@ namespace BackendNet.Models
         public DateTime Cdate { set; get; }
         public DateTime Edate { set; get; }
         public List<CourseStudent> Students { set; get; }
+        public List<Videos> Videos { set; get; }
         public Course()
         {
+            Videos = new List<Videos>();
             Students = new List<CourseStudent>();
             Tags = new List<string>();
             Cuser = new SubUser();
