@@ -1,5 +1,6 @@
 ﻿using BackendNet.Models;
 using BackendNet.Services.IService;
+using BackendNet.Setting;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -17,13 +18,13 @@ namespace BackendNet.Controllers
         }
         // GET: api/<FollowController>
         [HttpGet("GetFollower/{followed_id}")]
-        public async Task<IEnumerable<Follow>> GetFollower(string followed_id, [FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Follow)
+        public async Task<PaginationModel<Follow>> GetFollower(string followed_id, [FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Follow)
         {
             return await followService.GetFollower(followed_id, page);
             }
         // GET: api/<FollowController>
         [HttpGet("GetFollowing/{follower_id}")]
-        public async Task<IEnumerable<Follow>> GetFollowing(string follower_id, [FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Follow)
+        public async Task<PaginationModel<Follow>> GetFollowing(string follower_id, [FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Follow)
         {
             return await followService.GetFollowing(follower_id, page);
         }

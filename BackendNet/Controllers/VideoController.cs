@@ -5,6 +5,7 @@ using BackendNet.Models;
 using BackendNet.Repositories.IRepositories;
 using BackendNet.Services;
 using BackendNet.Services.IService;
+using BackendNet.Setting;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -180,8 +181,8 @@ namespace BackendNet.Controllers
                 if (listVideo == null)
                     return StatusCode(StatusCodes.Status204NoContent, listVideo);
 
-                IList<VideoViewDto> videoView = new List<VideoViewDto>();
-                foreach (var video in listVideo)
+                List<VideoViewDto> videoView = new List<VideoViewDto>();
+                foreach (var video in listVideo.data)
                 {
                     string videoUrl = _configuration.GetValue<string>("CloudFrontEduVideo") ?? "";
                     videoUrl += "/" + video.Id;
@@ -211,7 +212,16 @@ namespace BackendNet.Controllers
                                 videoUrl
                             ));
                 }
-                return StatusCode(StatusCodes.Status200OK, videoView);
+                var paginationModel = new PaginationModel<VideoViewDto>()
+                {
+                    total_pages = listVideo.total_pages,
+                    total_rows = listVideo.total_rows,
+                    page = listVideo.page,
+                    pageSize = listVideo.pageSize,
+                    data = videoView
+                };
+
+                return StatusCode(StatusCodes.Status200OK, paginationModel);
             }
             catch (Exception)
             {

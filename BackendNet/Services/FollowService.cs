@@ -2,6 +2,7 @@
 using BackendNet.Repositories;
 using BackendNet.Repositories.IRepositories;
 using BackendNet.Services.IService;
+using BackendNet.Setting;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace BackendNet.Services
         {
             this.followRepository = followRepository;
         }
-        public async Task<IEnumerable<Follow>> GetFollower(string followed_id, int page)
+        public async Task<PaginationModel<Follow>> GetFollower(string followed_id, int page)
         {
             return await followRepository.GetManyByKey(nameof(Follow.Followed) + '.' + nameof(Follow.Followed.user_id), followed_id, page, (int)PaginationCount.Follow, additionalFilter: null);
         }
@@ -71,7 +72,7 @@ namespace BackendNet.Services
             return null;
         }
 
-        public async Task<IEnumerable<Follow>> GetFollowing(string follower_id, int page)
+        public async Task<PaginationModel<Follow>> GetFollowing(string follower_id, int page)
         {
             return await followRepository.GetManyByKey(nameof(Follow.Follower) + '.' + nameof(Follow.Follower.user_id), follower_id, page, (int)PaginationCount.Follow, additionalFilter: null);
         }

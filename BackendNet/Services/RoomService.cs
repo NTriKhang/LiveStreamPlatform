@@ -45,7 +45,7 @@ namespace BackendNet.Services
             try
             {
                 var updateDefine = Builders<Rooms>.Update.Set(x => x.Status, status);
-                return await roomRepository.UpdateByKey("RoomKey", roomKey, updateDefine);
+                return await roomRepository.UpdateByKey("RoomKey", roomKey, null, updateDefine);
             }
             catch (Exception)
             {

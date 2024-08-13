@@ -1,5 +1,6 @@
 ﻿using BackendNet.DAL;
 using BackendNet.Repository.IRepositories;
+using BackendNet.Setting;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
@@ -47,7 +48,7 @@ namespace BackendNet.Repository
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<TEntity>> GetMany(int page, int size, FilterDefinition<TEntity>? additionalFilter, SortDefinition<TEntity>? sorDef)
+        public async Task<PaginationModel<TEntity>> GetMany(int page, int size, FilterDefinition<TEntity>? additionalFilter, SortDefinition<TEntity>? sorDef)
         {
             IEnumerable<TEntity> data;
             var filter = Builders<TEntity>.Filter.Empty;
@@ -57,8 +58,14 @@ namespace BackendNet.Repository
 
 
             data = await _collection.Find(filter).Sort(sorDef).Skip(size * (page - 1)).Limit(size).ToListAsync();
+            var model = new PaginationModel<TEntity>();
+            model.data = data.ToList();
+            model.page = page;
+            model.pageSize = size;
+            model.total_rows = (int)(await _collection.Find(filter).CountDocumentsAsync());
+            model.total_pages = (int)Math.Ceiling(model.total_rows / (double)size);
 
-            return data;
+            return model;
         }
         public async Task<IEnumerable<TEntity>> GetManyByKey(string key, string keyValue, FilterDefinition<TEntity>? additionalFilter = null)
         {
@@ -73,21 +80,26 @@ namespace BackendNet.Repository
             return res.ToList();
         }
 
-        public async Task<IEnumerable<TEntity>> GetManyByKey(string key, string keyValue, int page, int size, FilterDefinition<TEntity>? additionalFilter = null)
+        public async Task<PaginationModel<TEntity>> GetManyByKey(string key, string keyValue, int page, int size, FilterDefinition<TEntity>? additionalFilter = null)
         {
             var filter = FilterId(key, keyValue);
 
             if (additionalFilter != null)
                 filter &= additionalFilter;
 
-
-            //data = await _collection.Find(filter).Skip(size * (page - 1)).Limit(size).ToListAsync();
             var data = await _collection.FindAsync(filter);
 
-            return data.ToList();
+            var model = new PaginationModel<TEntity>();
+            model.data = data.ToList();
+            model.page = page;
+            model.pageSize = size;
+            model.total_rows = (int)(await _collection.Find(filter).CountDocumentsAsync());
+            model.total_pages = (int)Math.Ceiling(model.total_rows / (double)size);
+
+            return model;
         }
 
-        public async Task<IEnumerable<TEntity>> GetManyByKey(string key, string keyValue, int page, int size, FilterDefinition<TEntity>? additionalFilter = null, SortDefinition<TEntity>? sorDef = null)
+        public async Task<PaginationModel<TEntity>> GetManyByKey(string key, string keyValue, int page, int size, FilterDefinition<TEntity>? additionalFilter = null, SortDefinition<TEntity>? sorDef = null)
         {
 
             IEnumerable<TEntity> data;
@@ -98,8 +110,14 @@ namespace BackendNet.Repository
 
 
             data = await _collection.Find(filter).Sort(sorDef).Skip(size * (page - 1)).Limit(size).ToListAsync();
+            var model = new PaginationModel<TEntity>();
+            model.data = data.ToList();
+            model.page = page;
+            model.pageSize = size;
+            model.total_rows = (int)(await _collection.Find(filter).CountDocumentsAsync());
+            model.total_pages = (int)Math.Ceiling(model.total_rows / (double)size);
 
-            return data;
+            return model;
         }
         #endregion
 
@@ -137,9 +155,12 @@ namespace BackendNet.Repository
         #endregion
 
         #region Update method
-        public async Task<UpdateResult> UpdateByKey(string key, string id, UpdateDefinition<TEntity> updateDefinition)
+        public async Task<UpdateResult> UpdateByKey(string key, string keyValue, FilterDefinition<TEntity> addFilter, UpdateDefinition<TEntity> updateDefinition)
         {
-            return await _collection.UpdateOneAsync(FilterId(key, id), updateDefinition);
+            var filter = FilterId(key, keyValue);
+            if (addFilter != null)
+                filter &= addFilter;
+            return await _collection.UpdateOneAsync(filter, updateDefinition);
 
         }
         public async Task<ReplaceOneResult> ReplaceAsync(FilterDefinition<TEntity> filter, TEntity entity)
@@ -149,15 +170,19 @@ namespace BackendNet.Repository
         }
         #endregion
 
-
-
+        #region delete method
         public virtual async Task<bool> RemoveByKey(string key, string id)
         {
             var result = await _collection.DeleteOneAsync(FilterId(key, id));
             return result.IsAcknowledged;
         }
+        public virtual async Task<bool> RemoveByKey(string key, string id, DeleteOptions deleteOptions)
+        {
+            var res = await _collection.DeleteOneAsync(FilterId(key, id), deleteOptions);
+            return res.IsAcknowledged;
+        }
+        #endregion
 
-     
         public void Dispose()
         {
             GC.SuppressFinalize(this);
@@ -166,14 +191,9 @@ namespace BackendNet.Repository
         {
             return Builders<TEntity>.Filter.Eq(key, keyValue);
         }
-        
-
         public async Task<bool> IsExist(FilterDefinition<TEntity>? filter)
         {
             return await _collection.CountDocumentsAsync(filter) > 0;
         }
-
-      
-
     }
 }

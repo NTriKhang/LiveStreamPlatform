@@ -1,5 +1,6 @@
 ﻿using BackendNet.Models;
 using BackendNet.Services.IService;
+using BackendNet.Setting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,7 +17,7 @@ namespace BackendNet.Controllers
         }
 
         [HttpGet("{roomId}")]
-        public async Task<IEnumerable<ChatLive>> getChatLives(string roomId,[FromQuery] int page = 1)
+        public async Task<PaginationModel<ChatLive>> getChatLives(string roomId,[FromQuery] int page = 1)
         {
             try
             {

@@ -1,18 +1,25 @@
 ﻿using BackendNet.Models;
 using BackendNet.Repositories.IRepositories;
 using BackendNet.Services.IService;
+using BackendNet.Setting;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
+using System.Security.Claims;
 
 namespace BackendNet.Services
 {
     public class CourseService : ICourseService
     {
         private readonly ICourseRepository courseRepository;
-        public CourseService(ICourseRepository courseRepository)
+        private readonly IHttpContextAccessor httpContextAccessor;
+        public CourseService(
+            ICourseRepository courseRepository
+            , IHttpContextAccessor httpContextAccessor
+        )
         {
             this.courseRepository = courseRepository;
+            this.httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<Course> AddCourse(Course course)
@@ -37,7 +44,7 @@ namespace BackendNet.Services
             return await courseRepository.GetByKey(nameof(Course._id), courseId);
         }
 
-        public async Task<IEnumerable<Course>> GetCourses(string userId, int page, int pageSize)
+        public async Task<PaginationModel<Course>> GetCourses(string userId, int page, int pageSize)
         {
             SortDefinition<Course> sort = Builders<Course>.Sort.Descending(x => x.Cdate);
             return await courseRepository.GetManyByKey($"{nameof(Course.Cuser)}.{nameof(Course.Cuser.user_id)}", userId, page, pageSize, null, sort);
@@ -51,12 +58,15 @@ namespace BackendNet.Services
         public async Task<UpdateResult> AddVideoToCrs(string courseId, Videos videos)
         {
             var updateDef = Builders<Course>.Update.Push(x => x.Videos, videos);
-            return await courseRepository.UpdateByKey(nameof(Course._id), courseId, updateDef);
+            return await courseRepository.UpdateByKey(nameof(Course._id), courseId, null, updateDef);
         }
 
-        public Task<UpdateResult> DeleteVideoFromCrs(string videoId)
+        public async Task<UpdateResult> DeleteVideoFromCrs(string courseId, string videoId)
         {
-            throw new NotImplementedException();
+            var updateDef = Builders<Course>.Update.PullFilter(s => s.Videos, f => f.Id == videoId);
+            var userId = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+            var addFilter = Builders<Course>.Filter.Eq(x => x.Cuser.user_id, userId);
+            return await courseRepository.UpdateByKey(nameof(Course._id), courseId, addFilter, updateDef);
         }
     }
 }

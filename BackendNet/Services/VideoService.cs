@@ -2,6 +2,7 @@
 using BackendNet.Repositories;
 using BackendNet.Repositories.IRepositories;
 using BackendNet.Services.IService;
+using BackendNet.Setting;
 using MongoDB.Driver;
 
 namespace BackendNet.Services
@@ -47,7 +48,7 @@ namespace BackendNet.Services
             return _videoRepository.GetByKey(nameof(Videos.Id), videoId);
         }
 
-        public async Task<IEnumerable<Videos>> GetUserVideos(string userId, int page)
+        public async Task<PaginationModel<Videos>> GetUserVideos(string userId, int page)
         {
             var additionalFilter = Builders<Videos>.Filter.Ne(nameof(Videos.Status), VideoStatus.Keep.ToString());             
             return await _videoRepository.GetManyByKey(nameof(Videos.User_id), userId, page,(int)PaginationCount.Video, additionalFilter);
@@ -56,7 +57,7 @@ namespace BackendNet.Services
         public async Task UpdateVideoStatus(int status, string id)
         {
             var updateDefine = Builders<Videos>.Update.Set(x => x.StatusNum, status);
-            await _videoRepository.UpdateByKey(nameof(Videos.Id), id, updateDefine);
+            await _videoRepository.UpdateByKey(nameof(Videos.Id), id, null, updateDefine);
         }
 
         public Task UpdateVideoView(string videoId)
@@ -64,7 +65,7 @@ namespace BackendNet.Services
             try
             {
                 var updateDefine = Builders<Videos>.Update.Inc(x => x.View, 1);
-                _ = _videoRepository.UpdateByKey(nameof(Videos.Id), videoId, updateDefine);
+                _ = _videoRepository.UpdateByKey(nameof(Videos.Id), videoId, null, updateDefine);
                 return Task.CompletedTask;
             }
             catch (Exception)
@@ -74,7 +75,7 @@ namespace BackendNet.Services
             }
         }
 
-        public async Task<IEnumerable<Videos>> GetNewestVideo(int page, int pageSize)
+        public async Task<PaginationModel<Videos>> GetNewestVideo(int page, int pageSize)
         {
             SortDefinition<Videos> sort = Builders<Videos>.Sort.Descending(x => x.Time);
             var filter = Builders<Videos>.Filter.Ne(u => u.StatusNum, (int)VideoStatus.TestData);

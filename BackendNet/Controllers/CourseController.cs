@@ -5,6 +5,7 @@ using BackendNet.Models;
 using BackendNet.Models.Submodel;
 using BackendNet.Services;
 using BackendNet.Services.IService;
+using BackendNet.Setting;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -48,7 +49,7 @@ namespace BackendNet.Controllers
         //    }
         //}
         [HttpGet("GetUserCourses/{userId}")]
-        public async Task<IEnumerable<Course>> getCourses(string userId, [FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Course)
+        public async Task<PaginationModel<Course>> getCourses(string userId, [FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Course)
         {
             try
             {
@@ -213,25 +214,23 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
-        //[HttpDelete("DeleteCourseVideo")]
-        //[Authorize]
-        //public async Task<ActionResult> PutCourseVideo([FromQuery] string courseId, [FromQuery] string videoId)
-        //{
-        //    try
-        //    {
-        //        Videos video = _mapper.Map<VideoCreateDto, Videos>(videoCreate);
-        //        video.User_id = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-        //        var res = await _courseService.AddVideoToCrs(courseId, video);
-        //        if (res.IsAcknowledged)
-        //            return NoContent();
+        [HttpDelete("DeleteCourseVideo")]
+        [Authorize]
+        public async Task<ActionResult> DeleteCourseVideo([FromQuery] string courseId, [FromQuery] string videoId)
+        {
+            try
+            {
+                var res = await _courseService.DeleteVideoFromCrs(courseId, videoId);
+                if (res.IsAcknowledged)
+                    return NoContent();
 
-        //        return BadRequest();
-        //    }
-        //    catch (Exception)
-        //    {
+                return BadRequest();
+            }
+            catch (Exception)
+            {
 
-        //        throw;
-        //    }
-        //}
+                throw;
+            }
+        }
     }
 }

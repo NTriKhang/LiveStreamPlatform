@@ -1,10 +1,11 @@
 ﻿using BackendNet.Models;
+using BackendNet.Setting;
 
 namespace BackendNet.Services.IService
 {
     public interface IChatliveService
     {
         Task<ChatLive> AddChat(ChatLive chat);
-        Task<IEnumerable<ChatLive>> GetChatsPagination(string roomId, int page);
+        Task<PaginationModel<ChatLive>> GetChatsPagination(string roomId, int page);
     }
 }
