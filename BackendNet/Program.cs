@@ -5,13 +5,10 @@ using BackendNet.Repositories.IRepositories;
 using BackendNet.Services;
 using BackendNet.Services.IService;
 using BackendNet.Setting;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using StackExchange.Redis;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-
-using System.Reflection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -22,7 +19,7 @@ internal class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
-
+        
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
@@ -37,30 +34,32 @@ internal class Program
             });
             c.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
+                {
+                    new OpenApiSecurityScheme
                     {
-                        new OpenApiSecurityScheme
+                        Name = "Authorization",
+                        Type = SecuritySchemeType.ApiKey,
+                        In = ParameterLocation.Header,
+                        Reference = new OpenApiReference
                         {
-                            Name = "Authorization",
-                            Type = SecuritySchemeType.ApiKey,
-                            In = ParameterLocation.Header,
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Authorization"
-                            },
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Authorization"
                         },
-                        new string[] {}
-                    }
+                    },
+                    new string[] {}
+                }
             });
         });
         builder.Services.AddCors(option =>
         {
             option.AddPolicy("AllowFE", builder =>
             {
-                builder.WithOrigins("http://localhost:4200", "https://localhost:7104/", "https://stream.hightfive.click")
-               .AllowAnyHeader()
-               .AllowAnyMethod()
-               .AllowCredentials();
+                builder
+                    .WithOrigins("http://localhost:4200", "https://localhost:7104", "https://stream.hightfive.click")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials()
+                    .SetIsOriginAllowed(origin => true); // Be cautious with this in production
             });
         });
 
@@ -102,17 +101,24 @@ internal class Program
             cfg.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
         }).AddJwtBearer(x => {
             x.RequireHttpsMetadata = false;
-            x.SaveToken = false;
+            x.SaveToken = true;
             x.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8
-                    .GetBytes("this is my top jwt secret key for authentication and i append it to have enough lenght")
+                    Encoding.UTF8.GetBytes("this is my top jwt secret key for authentication and i append it to have enough lenght")
                 ),
                 ValidateIssuer = false,
                 ValidateAudience = false,
                 ClockSkew = TimeSpan.Zero
+            };
+            x.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    context.Token = context.Request.Cookies["jwt_token"];
+                    return Task.CompletedTask;
+                }
             };
         });
 
@@ -160,5 +166,26 @@ internal class Program
         app.MapHub<StreamHub>("/hub");
         app.MapHub<ChatLiveHub>("/chatHub");
         app.Run();
+    }
+}
+
+public class JwtCookieMiddleware
+{
+    private readonly RequestDelegate _next;
+
+    public JwtCookieMiddleware(RequestDelegate next)
+    {
+        _next = next;
+    }
+
+    public async Task Invoke(HttpContext context)
+    {
+        var token = context.Request.Cookies["jwt_token"];
+        if (!string.IsNullOrEmpty(token))
+        {
+            context.Request.Headers.Add("Authorization", "Bearer " + token);
+        }
+
+        await _next(context);
     }
 }
