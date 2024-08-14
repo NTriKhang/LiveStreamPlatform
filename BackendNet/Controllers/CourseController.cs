@@ -176,15 +176,16 @@ namespace BackendNet.Controllers
         }
         [HttpGet("GetCoursePresignedUrl")]
         [Authorize]
-        public List<string> getCoursePresignedUrl([FromQuery] int n = 5)
+        public List<CoursePresignedUrl> getCoursePresignedUrl([FromQuery] int n = 5)
         {
             try
             {
-                List<string> res = new List<string>();
+                List<CoursePresignedUrl> res = new List<CoursePresignedUrl>();
                 for (int i = 0; i < (n > 5 ? 5 : n); i++)
                 {
                     string videoId = _videoService.GetIdYet();
-                    res.Add(_awsService.GenerateVideoPostPresignedUrl(videoId, 0));
+                    string url = _awsService.GenerateVideoPostPresignedUrl(videoId, 0);
+                    res.Add(new CoursePresignedUrl(url,videoId));
                 }
                 return res;
             }
@@ -202,6 +203,7 @@ namespace BackendNet.Controllers
             {
                 Videos video = _mapper.Map<VideoCreateDto, Videos>(videoCreate);
                 video.User_id = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+                video.Id = videoCreate._id;
                 var res = await _courseService.AddVideoToCrs(courseId, video);
                 if(res.IsAcknowledged)
                     return NoContent();
@@ -214,9 +216,9 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
-        [HttpDelete("DeleteCourseVideo")]
+        [HttpDelete("RemoveVideoFromCourse")]
         [Authorize]
-        public async Task<ActionResult> DeleteCourseVideo([FromQuery] string courseId, [FromQuery] string videoId)
+        public async Task<ActionResult> RemoveVideoFromCourse([FromQuery] string courseId, [FromQuery] string videoId)
         {
             try
             {

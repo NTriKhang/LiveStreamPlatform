@@ -2,6 +2,7 @@
 {
     public class VideoCreateDto
     {
+        public string _id {  get; set; }
         public string title { set; get; }
         public string description { set; get; }
         public string image_url { set; get; } = string.Empty;

@@ -11,5 +11,6 @@ FrontAng/
 BackendNet/bin/
 BackendNet/obj/
 BackendNet/appsettings.Docker.json
+BackendNet/appsettings.Development.json
 BackendNet/appsettings.json
 LiveStreamPlatform.sln
