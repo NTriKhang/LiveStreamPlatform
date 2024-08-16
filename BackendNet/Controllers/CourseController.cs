@@ -121,21 +121,26 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
-        [HttpPut]
+        [HttpPut("{courseId}")]
         [Authorize]
-        public async Task<ActionResult> putCourse([FromBody] CourseCreateDto courseCreateDto)
+        public async Task<ActionResult> putCourse(string courseId, [FromBody] CourseCreateDto courseCreateDto)
         {
             try
             {
                 Course crs = _mapper.Map<Course>(courseCreateDto);
+
                 string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
                 var subUser = await _userService.GetSubUser(userId);
 
                 if (subUser.user_id == "")
                     return BadRequest("User is not valid");
+
+                crs._id = courseId;
                 crs.Cuser = subUser;
                 crs.Cdate = crs.Edate = DateTime.Now;
+
                 var res = await _courseService.UpdateCourse(crs);
+
                 if(res)
                     return NoContent();
                 return BadRequest("Nothing is updated");
