@@ -223,10 +223,18 @@ namespace BackendNet.Controllers
         }
         [HttpDelete("RemoveVideoFromCourse")]
         [Authorize]
-        public async Task<ActionResult> RemoveVideoFromCourse([FromQuery] string courseId, [FromQuery] string videoId)
+        public async Task<ActionResult> RemoveVideoFromCourse([FromQuery] string courseId, [FromQuery] string videoId, [FromQuery] bool isUploaded = false)
         {
             try
             {
+                if (courseId == null || videoId == null) 
+                    return BadRequest();
+
+                if (isUploaded)
+                {
+                    await _awsService.DeleteVideo(videoId);
+                }
+
                 var res = await _courseService.DeleteVideoFromCrs(courseId, videoId);
                 if (res.IsAcknowledged)
                     return NoContent();
