@@ -9,6 +9,7 @@ using BackendNet.Setting;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using System.Security.Claims;
 
 namespace BackendNet.Controllers
@@ -179,6 +180,11 @@ namespace BackendNet.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        /// <summary>
+        /// get url và videoId để đăng video vào course
+        /// </summary>
+        /// <param name="n"></param>
+        /// <returns></returns>
         [HttpGet("GetCoursePresignedUrl")]
         [Authorize]
         public List<CoursePresignedUrl> getCoursePresignedUrl([FromQuery] int n = 5)
@@ -200,6 +206,12 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
+        /// <summary>
+        /// Api để đăng video trong course
+        /// </summary>
+        /// <param name="courseId"></param>
+        /// <param name="videoCreate"></param>
+        /// <returns>Api để lưu thông video trong course vào database</returns>
         [HttpPut("PutCourseVideo/{courseId}")]
         [Authorize]
         public async Task<ActionResult> PutCourseVideo(string courseId, [FromBody] VideoCreateDto videoCreate)

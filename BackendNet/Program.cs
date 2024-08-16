@@ -28,6 +28,15 @@ internal class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>
         {
+            c.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = "BackendNet",
+                Version = "v1",
+                Description = "This is a sample API for demonstration purposes."
+            });
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            c.IncludeXmlComments(xmlPath);
             c.AddSecurityDefinition("Authorization", new OpenApiSecurityScheme
             {
                 Description = "Api key needed to access the endpoints. Authorization: Bearer xxxx",
@@ -146,7 +155,10 @@ internal class Program
         // Configure the HTTP request pipeline.
 
         app.UseSwagger();
-        app.UseSwaggerUI();
+        app.UseSwaggerUI(c =>
+        {
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "BackendNet");
+        });
 
         app.UseCors("AllowFE");
         app.UseHttpsRedirection();
