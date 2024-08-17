@@ -122,7 +122,10 @@ namespace BackendNet.Controllers
 
                 CookieOptions cookieOptions = new CookieOptions();
                 cookieOptions.HttpOnly = true;
+                cookieOptions.Secure = true;
                 cookieOptions.Expires = expired_time;
+                cookieOptions.Path = "/";
+                cookieOptions.Domain  = "https://cms.hightfive.click";
                 var token = GenerateJWTToken((userAuth.entity as Users)!);
                 Response.Cookies.Append("AuthToken", token, cookieOptions);
                     
