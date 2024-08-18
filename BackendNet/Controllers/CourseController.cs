@@ -74,6 +74,19 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
+        [HttpGet("GetCourse")]
+        public async Task<PaginationModel<Course>> getCourse([FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Course)
+        {
+            try
+            {
+                return await _courseService.GetCourses(page,pageSize);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         /// <summary>
         /// only use for test
         /// </summary>

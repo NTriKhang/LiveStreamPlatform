@@ -68,5 +68,11 @@ namespace BackendNet.Services
             var addFilter = Builders<Course>.Filter.Eq(x => x.Cuser.user_id, userId);
             return await courseRepository.UpdateByKey(nameof(Course._id), courseId, addFilter, updateDef);
         }
+
+        public async Task<PaginationModel<Course>> GetCourses(int page, int pageSize)
+        {
+            SortDefinition<Course> sort = Builders<Course>.Sort.Descending(x => x.Cdate);
+            return await courseRepository.GetMany(page, pageSize, null, sort);
+        }
     }
 }

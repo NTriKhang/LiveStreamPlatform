@@ -10,6 +10,7 @@ namespace BackendNet.Services.IService
     {
         Task<IEnumerable<Course>> GetAll();
         Task<PaginationModel<Course>> GetCourses(string userId, int page, int pageSize);
+        Task<PaginationModel<Course>> GetCourses(int page, int pageSize);
         Task<Course> GetCourse(string courseId);
         Task<Course> AddCourse(Course course);
         Task<bool> UpdateCourse(Course course);

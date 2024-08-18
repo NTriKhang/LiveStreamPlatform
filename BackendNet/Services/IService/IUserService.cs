@@ -16,5 +16,7 @@ namespace BackendNet.Services.IService
         Task<Users> GetUserByStreamKey(string streamKey);
 
         Task<SubUser> GetSubUser(string id);
+        Task<bool> UpdateUser(Users user);
+
     }
 }

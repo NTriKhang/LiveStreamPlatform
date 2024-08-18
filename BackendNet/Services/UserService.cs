@@ -1,6 +1,7 @@
 ﻿using BackendNet.Dtos;
 using BackendNet.Models;
 using BackendNet.Models.Submodel;
+using BackendNet.Repositories;
 using BackendNet.Repositories.IRepositories;
 using BackendNet.Services.IService;
 using BackendNet.Setting;
@@ -100,6 +101,22 @@ namespace BackendNet.Services
         public async Task<UpdateResult> UpdateStreamStatusAsync(string user_id, string status)
         {
             return await _userRepository.UpdateStreamTokenAsync(user_id, status);
+        }
+        public async Task<bool> UpdateUser(Users user)
+        {
+            try
+            {
+                var filter = Builders<Users>.Filter.Eq(x => x.Id, user.Id);
+                var res = await _userRepository.ReplaceAsync(filter, user);
+                if (res.ModifiedCount > 0)
+                    return true;
+                return false;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
         public async Task<IEnumerable<Users>> GetUsersAsync()
         {

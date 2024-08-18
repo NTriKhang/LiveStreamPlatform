@@ -1,4 +1,5 @@
-﻿using BackendNet.Dtos;
+﻿using AutoMapper;
+using BackendNet.Dtos;
 using BackendNet.Dtos.User;
 using BackendNet.Hubs;
 using BackendNet.Models;
@@ -26,11 +27,15 @@ namespace BackendNet.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService userService;
+        private readonly IMapper mapper;
         private readonly IHubContext<StreamHub> hubContext;
-        public UserController(IUserService userService, IHubContext<StreamHub> hubContext)
+        public UserController(IUserService userService
+            , IMapper mapper
+            , IHubContext<StreamHub> hubContext)
         {
             this.userService = userService;
             this.hubContext = hubContext;
+            this.mapper = mapper;
         }
         [Authorize]
         [HttpGet]
@@ -156,12 +161,33 @@ namespace BackendNet.Controllers
             return new JwtSecurityTokenHandler().WriteToken(jwtToken);
         }
         [HttpPost("logout")]
-        public async Task<ActionResult<Users>> logout()
+        public async Task<ActionResult<Users>> Logout()
         {
             try
             {
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 return NoContent();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        [HttpPut("updateProfile")]
+        public async Task<ActionResult> UpdateProfile(UserProfileDto userProfileDto)
+        {
+            try
+            {
+                var user = await userService.GetUserById(userProfileDto.Id);
+                if (user == null)
+                    return BadRequest();
+                
+                user = mapper.Map<UserProfileDto,Users>(userProfileDto);
+                var res = await userService.UpdateUser(user);
+                if (res)
+                    return NoContent();
+                return BadRequest(userProfileDto);
             }
             catch (Exception)
             {
