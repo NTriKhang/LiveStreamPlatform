@@ -183,7 +183,7 @@ namespace BackendNet.Controllers
                 if (user == null)
                     return BadRequest();
                 
-                user = mapper.Map<UserProfileDto,Users>(userProfileDto);
+                mapper.Map<UserProfileDto,Users>(userProfileDto, user);
                 var res = await userService.UpdateUser(user);
                 if (res)
                     return NoContent();

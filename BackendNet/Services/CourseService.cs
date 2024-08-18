@@ -44,7 +44,7 @@ namespace BackendNet.Services
             return await courseRepository.GetByKey(nameof(Course._id), courseId);
         }
 
-        public async Task<PaginationModel<Course>> GetCourses(string userId, int page, int pageSize)
+        public async Task<PaginationModel<Course>> GetUserCourses(string userId, int page, int pageSize)
         {
             SortDefinition<Course> sort = Builders<Course>.Sort.Descending(x => x.Cdate);
             return await courseRepository.GetManyByKey($"{nameof(Course.Cuser)}.{nameof(Course.Cuser.user_id)}", userId, page, pageSize, null, sort);
@@ -69,10 +69,11 @@ namespace BackendNet.Services
             return await courseRepository.UpdateByKey(nameof(Course._id), courseId, addFilter, updateDef);
         }
 
-        public async Task<PaginationModel<Course>> GetCourses(int page, int pageSize)
+        public async Task<PaginationModel<Course>> GetCourses(string userId, int page, int pageSize)
         {
             SortDefinition<Course> sort = Builders<Course>.Sort.Descending(x => x.Cdate);
-            return await courseRepository.GetMany(page, pageSize, null, sort);
+            var filter = Builders<Course>.Filter.ElemMatch(x => x.Students, o => o.user_id == userId);
+            return await courseRepository.GetMany(page, pageSize, filter, sort);
         }
     }
 }

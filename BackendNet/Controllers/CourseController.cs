@@ -54,7 +54,7 @@ namespace BackendNet.Controllers
         {
             try
             {
-                return await _courseService.GetCourses(userId,page,pageSize);
+                return await _courseService.GetUserCourses(userId,page,pageSize);
             }
             catch (Exception)
             {
@@ -79,7 +79,8 @@ namespace BackendNet.Controllers
         {
             try
             {
-                return await _courseService.GetCourses(page,pageSize);
+                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "" ;
+                return await _courseService.GetCourses(userId, page,pageSize);
             }
             catch (Exception)
             {
