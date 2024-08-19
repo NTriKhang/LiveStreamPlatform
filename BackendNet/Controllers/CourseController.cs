@@ -227,11 +227,11 @@ namespace BackendNet.Controllers
         /// <returns>Api để lưu thông video trong course vào database</returns>
         [HttpPut("PutCourseVideo/{courseId}")]
         [Authorize]
-        public async Task<ActionResult> PutCourseVideo(string courseId, [FromBody] VideoCreateDto videoCreate)
+        public async Task<ActionResult> PutCourseVideo(string courseId, [FromBody] CourseVideoCreateDto videoCreate)
         {
             try
             {
-                Videos video = _mapper.Map<VideoCreateDto, Videos>(videoCreate);
+                Videos video = _mapper.Map<CourseVideoCreateDto, Videos>(videoCreate);
                 video.User_id = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
                 video.Id = videoCreate._id;
                 var res = await _courseService.AddVideoToCrs(courseId, video);

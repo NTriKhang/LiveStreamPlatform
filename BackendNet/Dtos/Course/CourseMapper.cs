@@ -9,6 +9,9 @@ namespace BackendNet.Dtos.Course
         {
             CreateMap<Models.Course, CourseCreateDto>();
             CreateMap<CourseCreateDto, Models.Course>();
+
+            CreateMap<Models.Videos, CourseVideoCreateDto>();
+            CreateMap<CourseVideoCreateDto, Models.Videos>();
         }
     }
 }

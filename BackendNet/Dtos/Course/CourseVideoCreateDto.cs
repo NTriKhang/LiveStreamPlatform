@@ -1,7 +1,8 @@
-﻿namespace BackendNet.Dtos.Video
+﻿namespace BackendNet.Dtos.Course
 {
-    public class VideoCreateDto
+    public class CourseVideoCreateDto
     {
+        public string? _id { get; set; } = string.Empty;
         public string title { set; get; }
         public string description { set; get; }
         public string image_url { set; get; } = string.Empty;
