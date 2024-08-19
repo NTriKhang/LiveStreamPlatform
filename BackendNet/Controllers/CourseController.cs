@@ -151,8 +151,7 @@ namespace BackendNet.Controllers
                     return BadRequest("User is not valid");
 
                 crs._id = courseId;
-                crs.Cuser = subUser;
-                crs.Cdate = crs.Edate = DateTime.Now;
+                crs.Edate = DateTime.Now;
 
                 var res = await _courseService.UpdateCourse(crs);
 
