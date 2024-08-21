@@ -9,6 +9,7 @@ namespace BackendNet.Services.IService
     public interface ICourseService
     {
         Task<IEnumerable<Course>> GetAll();
+        Task<PaginationModel<Course>> GetNewestCourses(int page, int pageSize);
         Task<PaginationModel<Course>> GetUserCourses(string userId, int page, int pageSize);
         Task<PaginationModel<Course>> GetCourses(string userId, int page, int pageSize);
         Task<Course> GetCourse(string courseId);

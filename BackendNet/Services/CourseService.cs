@@ -1,4 +1,5 @@
 ﻿using BackendNet.Models;
+using BackendNet.Repositories;
 using BackendNet.Repositories.IRepositories;
 using BackendNet.Services.IService;
 using BackendNet.Setting;
@@ -74,6 +75,14 @@ namespace BackendNet.Services
             SortDefinition<Course> sort = Builders<Course>.Sort.Descending(x => x.Cdate);
             var filter = Builders<Course>.Filter.ElemMatch(x => x.Students, o => o.user_id == userId);
             return await courseRepository.GetMany(page, pageSize, filter, sort);
+        }
+
+        public async Task<PaginationModel<Course>> GetNewestCourses(int page, int pageSize)
+        {
+            SortDefinition<Course> sort = Builders<Course>.Sort.Descending(x => x.Cdate);
+            //var filter = Builders<Videos>.Filter.Ne(u => u.StatusNum, (int)VideoStatus.TestData);
+
+            return await courseRepository.GetMany(page, pageSize, null, sort);
         }
     }
 }

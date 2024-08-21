@@ -22,12 +22,14 @@ namespace BackendNet.Controllers
         private readonly IUserService _userService;
         private readonly IVideoService _videoService;
         private readonly IAwsService _awsService;
+        private readonly IPaymenService _paymentService;
         private readonly IMapper _mapper;
         public CourseController(
             ICourseService courseService
             , IUserService userService
             , IVideoService videoService
             , IAwsService awsService
+            , IPaymenService paymentService
             , IMapper mapper
         )
         {
@@ -35,6 +37,7 @@ namespace BackendNet.Controllers
             _userService = userService;
             _videoService = videoService;
             _awsService = awsService;
+            _paymentService = paymentService;
             _mapper = mapper;
         }
         //[HttpGet("GetUserCourse")]
@@ -49,6 +52,42 @@ namespace BackendNet.Controllers
         //        throw;
         //    }
         //}
+        /// <summary>
+        /// Chưa xài
+        /// </summary>
+        /// <param name="course"></param>
+        /// <returns></returns>
+        [HttpPost("BuyCourse")]
+        [Authorize]
+        public async Task<ActionResult> BuyCourse(Course course)
+        {
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+            var user = await _userService.GetUserById(userId);
+
+            string sessionUrl = await _paymentService.CreatePaymentInfo(course, userId);
+            Response.Headers["Location"] = sessionUrl;
+
+            return StatusCode(StatusCodes.Status307TemporaryRedirect);
+        }
+        /// <summary>
+        /// Get course mới nhất
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        [HttpGet("GetNewestCourses")]
+        public async Task<PaginationModel<Course>> getNewestCourse([FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Course)
+        {
+            try
+            {
+                return await _courseService.GetNewestCourses(page, pageSize);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         [HttpGet("GetUserCourses/{userId}")]
         public async Task<PaginationModel<Course>> getCourses(string userId, [FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Course)
         {

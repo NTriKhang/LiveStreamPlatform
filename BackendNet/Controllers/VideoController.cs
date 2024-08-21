@@ -104,20 +104,20 @@ namespace BackendNet.Controllers
         {
             try
             {
-                //await _videoService.UpdateVideoStatus(status, videoId);
-                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
-                if (status == (int)VideoStatus.Public)
-                {
-                    var emails = await _followService.GetFollowerEmail(userId);
-                    if(emails != null)
-                    {
-                        _ = _emailService.SendMultiEmail(new Dtos.Mail.MultiMailRequest(
-                            $"Thông báo video mới",
-                            $"Khang vừa đăng tải video mới tại ...",
-                            emails.Select(x => x.AsString).ToList()
-                        ));
-                    }
-                }
+                await _videoService.UpdateVideoStatus(status, videoId);
+                //string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+                //if (status == (int)VideoStatus.Public)
+                //{
+                //    var emails = await _followService.GetFollowerEmail(userId);
+                //    if(emails != null)
+                //    {
+                //        _ = _emailService.SendMultiEmail(new Dtos.Mail.MultiMailRequest(
+                //            $"Thông báo video mới",
+                //            $"Khang vừa đăng tải video mới tại ...",
+                //            emails.Select(x => x.AsString).ToList()
+                //        ));
+                //    }
+                //}
                 return Ok();
             }
             catch (Exception ex)
