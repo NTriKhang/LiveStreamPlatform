@@ -125,12 +125,10 @@ namespace BackendNet.Controllers
                 }
                 var expired_time = DateTime.Now.AddDays(1);
 
-                CookieOptions cookieOptions = new CookieOptions
-                {
-                    HttpOnly = true,
-                    Expires = expired_time,
-                    Domain = "localhost:8000"
-                };
+                CookieOptions cookieOptions = new CookieOptions();
+                cookieOptions.HttpOnly = true;
+                cookieOptions.Expires = expired_time;
+                cookieOptions.Path = "/";
                 var token = GenerateJWTToken((userAuth.entity as Users)!);
                 Response.Cookies.Append("AuthToken", token, cookieOptions);
 
