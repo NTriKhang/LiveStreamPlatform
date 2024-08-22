@@ -5,8 +5,8 @@
         public CourseStudent(string user_id, string user_name, string user_avatar) 
             : base(user_id, user_name, user_avatar) 
         {
-            
+            rate = 0;
         }
-        public int rate { get; set; }
+        public float rate { get; set; }
     }
 }

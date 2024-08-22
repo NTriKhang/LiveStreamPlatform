@@ -5,20 +5,40 @@ using Stripe;
 
 namespace BackendNet.Services
 {
-    public interface IPaymenService
+    public interface IStripeService
     {
         Task<string> CreatePaymentInfo(Course course, string buyerId);
+        string CreateStripeAccount();
     }
-    public class PaymentService : IPaymenService
+    public class StripeService : IStripeService
     {
         private IConfiguration configuration;
         private IHttpContextAccessor httpContextAccessor;
-        public PaymentService(IConfiguration configuration
+        public StripeService(IConfiguration configuration
             ,IHttpContextAccessor httpContextAccessor)
         {
             this.configuration = configuration;
         }
+        public string CreateStripeAccount()
+        {
+            StripeConfiguration.ApiKey = configuration.GetSection("Stripe").GetValue<string>("Secretkey");
 
+            var options = new AccountCreateOptions
+            {
+                Controller = new AccountControllerOptions
+                {
+                    Losses = new AccountControllerLossesOptions { Payments = "application" },
+                    Fees = new AccountControllerFeesOptions { Payer = "application" },
+                    StripeDashboard = new AccountControllerStripeDashboardOptions
+                    {
+                        Type = "express",
+                    },
+                },
+            };
+            var service = new AccountService();
+            service.Create(options);
+            return service.BaseUrl;
+        }
         public async Task<string> CreatePaymentInfo(Course course, string buyerId)
         {
 

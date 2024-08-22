@@ -1,4 +1,5 @@
 ﻿using BackendNet.Models;
+using BackendNet.Models.Submodel;
 using BackendNet.Setting;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
@@ -18,5 +19,7 @@ namespace BackendNet.Services.IService
         Task<bool> DeleteCourse(string courseId);
         Task<UpdateResult> AddVideoToCrs(string courseId, Videos videos);
         Task<UpdateResult> DeleteVideoFromCrs(string courseId, string videoId);
+        Task<UpdateResult> BuyCourse(string courseId, CourseStudent courseStudent);
+
     }
 }

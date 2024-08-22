@@ -3,6 +3,7 @@ using BackendNet.Dtos;
 using BackendNet.Dtos.User;
 using BackendNet.Hubs;
 using BackendNet.Models;
+using BackendNet.Services;
 using BackendNet.Services.IService;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -28,15 +29,32 @@ namespace BackendNet.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService userService;
+        private readonly IStripeService stripeService;
         private readonly IMapper mapper;
         private readonly IHubContext<StreamHub> hubContext;
         public UserController(IUserService userService
+            , IStripeService stripeService
             , IMapper mapper
             , IHubContext<StreamHub> hubContext)
         {
+            this.stripeService = stripeService;
             this.userService = userService;
             this.hubContext = hubContext;
             this.mapper = mapper;
+        }
+        [HttpGet("GetStripeAccount")]
+        public ActionResult GetStripeAccount()
+        {
+            try
+            {
+                var url = stripeService.CreateStripeAccount();
+                return Ok(url);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
         [Authorize]
         [HttpGet]

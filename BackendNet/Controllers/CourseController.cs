@@ -22,14 +22,14 @@ namespace BackendNet.Controllers
         private readonly IUserService _userService;
         private readonly IVideoService _videoService;
         private readonly IAwsService _awsService;
-        private readonly IPaymenService _paymentService;
+        private readonly IStripeService _paymentService;
         private readonly IMapper _mapper;
         public CourseController(
             ICourseService courseService
             , IUserService userService
             , IVideoService videoService
             , IAwsService awsService
-            , IPaymenService paymentService
+            , IStripeService paymentService
             , IMapper mapper
         )
         {
@@ -53,21 +53,26 @@ namespace BackendNet.Controllers
         //    }
         //}
         /// <summary>
-        /// Chưa xài
+        /// thông tin người dùng mua course là thông tin người đăng nhập
         /// </summary>
         /// <param name="course"></param>
         /// <returns></returns>
         [HttpPost("BuyCourse")]
         [Authorize]
-        public async Task<ActionResult> BuyCourse(Course course)
+        public async Task<ActionResult> BuyCourse(string courseId)
         {
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
-            var user = await _userService.GetUserById(userId);
+            var user = await _userService.GetSubUser(userId);
+            if (user == null)
+                return BadRequest();
+            //string sessionUrl = await _paymentService.CreatePaymentInfo(course, userId);
+            //Response.Headers["Location"] = sessionUrl;
 
-            string sessionUrl = await _paymentService.CreatePaymentInfo(course, userId);
-            Response.Headers["Location"] = sessionUrl;
-
-            return StatusCode(StatusCodes.Status307TemporaryRedirect);
+            //return StatusCode(StatusCodes.Status307TemporaryRedirect);
+            var res = await _courseService.BuyCourse(courseId, new CourseStudent(userId, user.user_name, user.user_avatar));
+            if (res.ModifiedCount > 0)
+                return NoContent();
+            return StatusCode(StatusCodes.Status500InternalServerError);
         }
         /// <summary>
         /// Get course mới nhất
@@ -88,6 +93,13 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
+        /// <summary>
+        /// Get các course của 1 tài khoản teacher
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
         [HttpGet("GetUserCourses/{userId}")]
         public async Task<PaginationModel<Course>> getCourses(string userId, [FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Course)
         {
@@ -100,6 +112,11 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
+        /// <summary>
+        /// Get chi tiết 1 course
+        /// </summary>
+        /// <param name="courseId"></param>
+        /// <returns></returns>
         [HttpGet("GetCourse/{courseId}")]
         public async Task<Course> getCourse(string courseId)
         {
@@ -113,6 +130,12 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
+        /// <summary>
+        /// Get các course mà user đó đã mua
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
         [HttpGet("GetCourse")]
         public async Task<PaginationModel<Course>> getCourse([FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Course)
         {

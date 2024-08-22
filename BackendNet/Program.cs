@@ -104,7 +104,7 @@ internal class Program
         builder.Services.AddScoped<IFollowService, FollowService>();
         builder.Services.AddScoped<IEmailService, EmailService>();
         builder.Services.AddScoped<ICourseService, CourseService>();
-        builder.Services.AddScoped<IPaymenService, PaymentService>();
+        builder.Services.AddScoped<IStripeService, StripeService>();
 
         builder.Services.AddAuthentication(cfg => {
             cfg.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

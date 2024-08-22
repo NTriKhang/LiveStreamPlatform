@@ -1,4 +1,5 @@
 ﻿using BackendNet.Models;
+using BackendNet.Models.Submodel;
 using BackendNet.Repositories;
 using BackendNet.Repositories.IRepositories;
 using BackendNet.Services.IService;
@@ -22,7 +23,11 @@ namespace BackendNet.Services
             this.courseRepository = courseRepository;
             this.httpContextAccessor = httpContextAccessor;
         }
-
+        public async Task<UpdateResult> BuyCourse(string courseId, CourseStudent courseStudent)
+        {
+            var updateDef = Builders<Course>.Update.Push(x => x.Students, courseStudent);
+            return await courseRepository.UpdateByKey(nameof(Course._id), courseId, null, updateDef);
+        }
         public async Task<Course> AddCourse(Course course)
         {
             return await courseRepository.Add(course);
