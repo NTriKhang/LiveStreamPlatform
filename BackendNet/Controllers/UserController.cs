@@ -10,10 +10,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Net.Http.Headers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
@@ -129,10 +129,9 @@ namespace BackendNet.Controllers
                 {
                     HttpOnly = true,
                     Expires = expired_time,
-                    SameSite = SameSiteMode.Lax, 
-                    Secure = Request.IsHttps
+                    SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Lax,
+                    Secure = true
                 };
-
                 var token = GenerateJWTToken((userAuth.entity as Users)!);
                 Response.Cookies.Append("AuthToken", token, cookieOptions);
 
