@@ -1,5 +1,4 @@
 ﻿using Amazon.Runtime.Internal.Util;
-using BackendNet.Dtos.Payment;
 using BackendNet.Models;
 using Stripe.Checkout;
 using Stripe;
@@ -22,9 +21,20 @@ namespace BackendNet.Services
 
         public async Task<string> CreatePaymentInfo(Course course, string buyerId)
         {
-            StripeConfiguration.ApiKey = configuration.GetSection("Stripe").GetValue<string>("Secretkey");
 
-            var url = "https://localhost:44363/RoleManage";
+            var userAgent = httpContextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString() ?? string.Empty;
+            string returnUrl = string.Empty;
+            if (userAgent != string.Empty)
+            {
+                if (userAgent.Contains("Windows NT") || userAgent.Contains("Macintosh") || userAgent.Contains("Mac OS X"))
+                    returnUrl = "http://localhost:8000/";
+                else if (userAgent.Contains("Mobi") || userAgent.Contains("Android") || userAgent.Contains("iPhone") || userAgent.Contains("iPad"))
+                    returnUrl = "http://10.0.2.2/";
+            }
+
+            
+
+            StripeConfiguration.ApiKey = configuration.GetSection("Stripe").GetValue<string>("Secretkey");
             decimal price = course.Price;
             if(course.Discount > 0)
             {
@@ -42,15 +52,18 @@ namespace BackendNet.Services
                             Currency = "usd",
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
-                                Name = $"Buy course {course.Title}"
+                                Name = $"Buy course {course.Title}",
+                                Description = $"Desc: {course.Desc}",
+                                Images = new List<string>{ course.CourseImage }
                             },
                         },
                         Quantity = 1,
                     },
                 },
+                
                 Mode = "payment",
-                SuccessUrl = url + "/ConfirmCheckout/?userId=" + buyerId,
-                CancelUrl = url + "/Index"
+                SuccessUrl = returnUrl + "/ConfirmCheckout/?userId=" + buyerId,
+                CancelUrl = returnUrl + "/Index"
             };
             var service = new SessionService();
             Session session = await service.CreateAsync(options);
