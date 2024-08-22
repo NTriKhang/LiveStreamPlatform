@@ -1,4 +1,5 @@
-﻿using BackendNet.Dtos;
+﻿using AutoMapper;
+using BackendNet.Dtos;
 using BackendNet.Dtos.Video;
 using BackendNet.Hubs;
 using BackendNet.Models;
@@ -25,6 +26,7 @@ namespace BackendNet.Controllers
     public class VideoController : ControllerBase
     {
         private readonly IVideoService _videoService;
+        private readonly IMapper _mapper;
         //private readonly IRoomService _roomService;
         private readonly IConfiguration _configuration;
         private readonly IAwsService _awsService;
@@ -34,12 +36,14 @@ namespace BackendNet.Controllers
         private readonly IUserService _userService;
 
         public VideoController(IVideoService videoService
+            , IMapper mapper
                                 , IAwsService awsService
                                 , IFollowService followService
                                 , IEmailService emailService
                                 , IConfiguration configuration
                                 , IUserService userService)
         {
+            _mapper  = mapper;
             _userService = userService;
             _videoService = videoService;
             //_roomService = roomService;
@@ -55,11 +59,17 @@ namespace BackendNet.Controllers
         //    _videoService.removeStreamVideo(streamKey);
         //}
         [HttpGet("getVideo/{videoId}")]
-        public async Task<ActionResult<Videos>> GetVideo(string videoId)
+        public async Task<ActionResult<VideoViewDto>> GetVideo(string videoId)
         {
             try
             {
-                return StatusCode(StatusCodes.Status200OK, await _videoService.GetVideoAsync(videoId));
+                var video = await _videoService.GetVideoAsync(videoId);
+                var subuser = await _userService.GetSubUser(video.User_id);
+                string videoUrl = _configuration.GetValue<string>("CloudFrontEduVideo") ?? "";
+                videoUrl += "/" + video.Id;
+                VideoViewDto videoViewDto = new VideoViewDto(video, subuser, videoUrl);
+
+                return StatusCode(StatusCodes.Status200OK, videoViewDto);
             }
             catch (Exception)
             {
@@ -91,15 +101,15 @@ namespace BackendNet.Controllers
                 if (video == null)
                     return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi không thể lưu thông tin video");
                 string preSignedUrl = _awsService.GenerateVideoPostPresignedUrl(video.Id, uploadVideoDto.video_size);
-                return Ok(new { preSignedUrl, video});
+                return Ok(new { preSignedUrl, video });
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError,ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
         [HttpPut("updateVideoStatus/{videoId}")]
-       // [Authorize]
+        // [Authorize]
         public async Task<ActionResult> UpdateVideoStatus(string videoId, int status)
         {
             try
@@ -187,10 +197,10 @@ namespace BackendNet.Controllers
                     string videoUrl = _configuration.GetValue<string>("CloudFrontEduVideo") ?? "";
                     videoUrl += "/" + video.Id;
                     var subUser = await _userService.GetUserById(video.User_id);
-                    if(subUser != null)
+                    if (subUser != null)
                         videoView.Add(new VideoViewDto
                             (
-                                video, 
+                                video,
                                 new Models.Submodel.SubUser
                                 (
                                     subUser.Id,
@@ -306,7 +316,7 @@ namespace BackendNet.Controllers
 
         //        var room = await _roomService.AddRoom(new Rooms { RoomKey = Guid.NewGuid().ToString().Substring(0,32), Status = RoomStatus.Opening.ToString(),
         //                                        StreamKey = streamKey,Video = video  });
-   
+
         //        Response.Cookies.Append("VideoStreamingId", video.Id);
         //        Response.Cookies.Append("RoomKey", room.RoomKey);
         //        return Ok(room);

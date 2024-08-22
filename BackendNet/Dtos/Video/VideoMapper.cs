@@ -18,6 +18,8 @@ namespace BackendNet.Dtos.Video
                 .ForMember(dest => dest.View, opt => opt.MapFrom(src => 0))
                 .ForMember(dest => dest.StatusNum, opt => opt.MapFrom(src => src.status))
                 .ForMember(dest => dest.Time, opt => opt.MapFrom(src => DateTime.Now));
+
+            CreateMap<Videos, VideoViewDto>();
         }
     }
 }
