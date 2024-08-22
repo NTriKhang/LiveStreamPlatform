@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -124,17 +123,11 @@ namespace BackendNet.Controllers
                 {
                     return StatusCode(StatusCodes.Status303SeeOther, user);
                 }
-                var expired_time = DateTime.Now.AddDays(6); 
+                var expired_time = DateTime.Now.AddDays(1); 
 
                 CookieOptions cookieOptions = new CookieOptions();
                 cookieOptions.HttpOnly = true;
                 cookieOptions.Expires = expired_time;
-                // string url = Request.GetDisplayUrl();
-                // if (url.Contains(".hightfive.click"))
-                // {
-                //     cookieOptions.Domain = ".hightfive.click";
-                //     cookieOptions.Secure = true;
-                // }
                 var token = GenerateJWTToken((userAuth.entity as Users)!);
                 Response.Cookies.Append("AuthToken", token, cookieOptions);
                     
@@ -172,10 +165,7 @@ namespace BackendNet.Controllers
         {
             try
             {
-                Response.Cookies.Append("AuthToken", "", new CookieOptions
-                {
-                    Expires = DateTime.Now.AddDays(-1)
-                });
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 return NoContent();
             }
             catch (Exception)
