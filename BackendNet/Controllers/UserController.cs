@@ -95,7 +95,7 @@ namespace BackendNet.Controllers
                         AvatarUrl = "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-photo-183042379.jpg"
                     }
                 );
-                
+
                 if (newUser.UserName == "409")
                     return Conflict("User name is already used");
                 else if (newUser.Email == "409")
@@ -108,7 +108,7 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
-        
+
         [HttpPost("auth")]
         public async Task<ActionResult> login(UserLoginDto user)
         {
@@ -119,18 +119,23 @@ namespace BackendNet.Controllers
                 {
                     return NotFound(user);
                 }
-                if(userAuth.code == 300)
+                if (userAuth.code == 300)
                 {
                     return StatusCode(StatusCodes.Status303SeeOther, user);
                 }
-                var expired_time = DateTime.Now.AddDays(1); 
+                var expired_time = DateTime.Now.AddDays(1);
 
-                CookieOptions cookieOptions = new CookieOptions();
-                cookieOptions.HttpOnly = true;
-                cookieOptions.Expires = expired_time;
+                CookieOptions cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Expires = expired_time,
+                    SameSite = SameSiteMode.Lax, 
+                    Secure = Request.IsHttps
+                };
+
                 var token = GenerateJWTToken((userAuth.entity as Users)!);
                 Response.Cookies.Append("AuthToken", token, cookieOptions);
-                    
+
                 return Ok(userAuth.entity);
             }
             catch (Exception)
@@ -182,8 +187,8 @@ namespace BackendNet.Controllers
                 var user = await userService.GetUserById(userProfileDto.Id);
                 if (user == null)
                     return BadRequest();
-                
-                mapper.Map<UserProfileDto,Users>(userProfileDto, user);
+
+                mapper.Map<UserProfileDto, Users>(userProfileDto, user);
                 var res = await userService.UpdateUser(user);
                 if (res)
                     return NoContent();
