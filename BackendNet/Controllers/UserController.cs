@@ -129,12 +129,12 @@ namespace BackendNet.Controllers
                 CookieOptions cookieOptions = new CookieOptions();
                 cookieOptions.HttpOnly = true;
                 cookieOptions.Expires = expired_time;
-                string url = Request.GetDisplayUrl();
-                if (url.Contains(".hightfive.click"))
-                {
-                    cookieOptions.Domain = ".hightfive.click";
-                    cookieOptions.Secure = true;
-                }
+                // string url = Request.GetDisplayUrl();
+                // if (url.Contains(".hightfive.click"))
+                // {
+                //     cookieOptions.Domain = ".hightfive.click";
+                //     cookieOptions.Secure = true;
+                // }
                 var token = GenerateJWTToken((userAuth.entity as Users)!);
                 Response.Cookies.Append("AuthToken", token, cookieOptions);
                     
