@@ -27,6 +27,33 @@ namespace BackendNet.Services
             }
         }
 
+        public async Task<bool> DeleteRoom(string roomId)
+        {
+            try
+            {
+                var res = await roomRepository.RemoveByKey(nameof(Rooms._id), roomId);
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<Rooms> GetRoomById(string roomId)
+        {
+            try
+            {
+                return await roomRepository.GetByKey(nameof(Rooms._id), roomId);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
         public async Task<Rooms> GetRoomByRoomKey(string roomKey)
         {
             try

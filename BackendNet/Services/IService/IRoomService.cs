@@ -6,7 +6,9 @@ namespace BackendNet.Services.IService
     public interface IRoomService
     {
         Task<Rooms> GetRoomByRoomKey(string roomKey);
+        Task<Rooms> GetRoomById(string roomId);
         Task<Rooms> AddRoom(Rooms room);
-        Task<UpdateResult> UpdateRoomStatus(string status, string roomKey);
+        Task<UpdateResult> UpdateRoomStatus(string status, string roomId);
+        Task<bool> DeleteRoom(string roomId);
     }
 }

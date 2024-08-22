@@ -174,12 +174,12 @@ namespace BackendNet.Repository
         public virtual async Task<bool> RemoveByKey(string key, string id)
         {
             var result = await _collection.DeleteOneAsync(FilterId(key, id));
-            return result.IsAcknowledged;
+            return result.DeletedCount > 0;
         }
         public virtual async Task<bool> RemoveByKey(string key, string id, DeleteOptions deleteOptions)
         {
             var res = await _collection.DeleteOneAsync(FilterId(key, id), deleteOptions);
-            return res.IsAcknowledged;
+            return res.DeletedCount > 0;
         }
         #endregion
 
