@@ -17,6 +17,7 @@ namespace BackendNet.Services.IService
 
         Task<SubUser> GetSubUser(string id);
         Task<bool> UpdateUser(Users user);
+        Task<UpdateResult> UpdateStreamKey(string userId, Models.Submodel.StreamInfo streamInfo);
 
     }
 }

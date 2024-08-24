@@ -147,7 +147,7 @@ namespace BackendNet.Controllers
                 CookieOptions cookieOptions = new CookieOptions();
                 cookieOptions.HttpOnly = true;
                 cookieOptions.Expires = expired_time;
-                string url = Request.GetDisplayUrl();
+                string url = Request.Host.ToString();
                 if (url.Contains(".hightfive.click"))
                 {
                     cookieOptions.Domain = ".hightfive.click";
@@ -216,6 +216,35 @@ namespace BackendNet.Controllers
                 if (res)
                     return NoContent();
                 return BadRequest(userProfileDto);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        /// <summary>
+        /// Cấp lại stream key cho user
+        /// </summary>
+        /// <returns></returns>
+        [HttpPut("UpdateStreamKey")]
+        [Authorize]
+        public async Task<ActionResult> UpdateStreamKey()
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var user = await userService.GetUserById(userId);
+                if (user == null)
+                    return NotFound("can't find user");
+
+                if(user.Role != "Teacher" && user.StreamInfo != null && user.StreamInfo.Status == StreamStatus.Streaming.ToString())
+                    return StatusCode(StatusCodes.Status405MethodNotAllowed);
+
+                var res = await userService.UpdateStreamKey(userId, user.StreamInfo);
+                if (res.ModifiedCount > 0)
+                    return NoContent();
+                return StatusCode(StatusCodes.Status304NotModified);
             }
             catch (Exception)
             {

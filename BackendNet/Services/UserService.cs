@@ -19,14 +19,13 @@ namespace BackendNet.Services
         private readonly IHttpContextAccessor _contextAccessor;
         public UserService(
             IUserRepository userRepository
-            //, IConnectionMultiplexer redisConnect
             , IHttpContextAccessor contextAccessor
-
+        //, IConnectionMultiplexer redisConnect
         )
         {
             _userRepository = userRepository;
-            //_redisConnect = redisConnect;
             _contextAccessor = contextAccessor;
+            //_redisConnect = redisConnect;
 
         }
         public async Task<Users> AddUserAsync(Users user)
@@ -50,7 +49,6 @@ namespace BackendNet.Services
             
             return await _userRepository.Add(user);
         }
-
         public async Task<ReturnModel> AuthUser(string username, string password)
         {
             var user = await _userRepository.AuthAsync(username, password);
@@ -111,6 +109,26 @@ namespace BackendNet.Services
                 if (res.ModifiedCount > 0)
                     return true;
                 return false;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public async Task<UpdateResult> UpdateStreamKey(string userId, Models.Submodel.StreamInfo streamInfo)
+        {
+            try
+            {
+                if(streamInfo == null)
+                    streamInfo = new Models.Submodel.StreamInfo();
+
+                streamInfo.Status = StreamStatus.Idle.ToString();
+                streamInfo.Stream_token = Utility.GenerateStreamKey(10);
+                streamInfo.Last_stream = null;
+
+                var updateDef = Builders<Users>.Update.Set(x => x.StreamInfo, streamInfo);
+                return await _userRepository.UpdateByKey(nameof(Users.Id), userId, null, updateDef);
             }
             catch (Exception)
             {

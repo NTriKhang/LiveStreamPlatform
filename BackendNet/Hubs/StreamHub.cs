@@ -22,8 +22,8 @@ namespace BackendNet.Hubs
             if(userId != null)
             {
                 Groups.AddToGroupAsync(Context.ConnectionId, userId);
-                Console.WriteLine("userId: " + userId + " connectionId: " + Context.ConnectionId);
-                AddTokenToGroupsAsync(userId);
+                //Console.WriteLine("userId: " + userId + " connectionId: " + Context.ConnectionId);
+                //AddTokenToGroupsAsync(userId);
             }
             return base.OnConnectedAsync();
         }
@@ -46,7 +46,7 @@ namespace BackendNet.Hubs
             if(userId != null)
             {
                 Groups.RemoveFromGroupAsync(Context.ConnectionId, userId);
-                _ = RemoveTokenFromGroupsAsync(userId);
+                //_ = RemoveTokenFromGroupsAsync(userId);
             }
             return base.OnDisconnectedAsync(exception);
         }
