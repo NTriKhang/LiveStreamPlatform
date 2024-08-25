@@ -3,7 +3,6 @@
     public class RoomCreateDto
     {
         public string RoomKey { get; set; }
-        public string StreamKey { get; set; }
-        public string Status { get; set; }
+        public int Status { get; set; }
     }
 }

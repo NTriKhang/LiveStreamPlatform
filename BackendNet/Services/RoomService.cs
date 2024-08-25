@@ -67,7 +67,7 @@ namespace BackendNet.Services
             }
         }
 
-        public async Task<UpdateResult> UpdateRoomStatus(string status, string roomKey)
+        public async Task<UpdateResult> UpdateRoomStatus(int status, string roomKey)
         {
             try
             {
