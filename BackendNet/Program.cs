@@ -94,6 +94,7 @@ internal class Program
         builder.Services.AddScoped<IChatliveRepository, ChatliveRepository>();
         builder.Services.AddScoped<IFollowRepository, FollowRepository>();
         builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+        builder.Services.AddScoped<IStatusRepository, StatusRepository>();
 
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IVideoService, VideoService>();
@@ -105,6 +106,7 @@ internal class Program
         builder.Services.AddScoped<IEmailService, EmailService>();
         builder.Services.AddScoped<ICourseService, CourseService>();
         builder.Services.AddScoped<IStripeService, StripeService>();
+        builder.Services.AddScoped<IStatusService, StatusService>();
 
         builder.Services.AddAuthentication(cfg => {
             cfg.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

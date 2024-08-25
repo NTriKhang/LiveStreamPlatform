@@ -8,7 +8,7 @@ namespace BackendNet.Services.IService
         Task<Rooms> GetRoomByRoomKey(string roomKey);
         Task<Rooms> GetRoomById(string roomId);
         Task<Rooms> AddRoom(Rooms room);
-        Task<UpdateResult> UpdateRoomStatus(string status, string roomId);
+        Task<UpdateResult> UpdateRoomStatus(int status, string roomId);
         Task<bool> DeleteRoom(string roomId);
     }
 }
