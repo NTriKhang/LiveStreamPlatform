@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BackendNet.Models;
+using BackendNet.Models.Submodel;
 
 namespace BackendNet.Dtos.Video
 {
@@ -20,6 +21,21 @@ namespace BackendNet.Dtos.Video
                 .ForMember(dest => dest.Time, opt => opt.MapFrom(src => DateTime.Now));
 
             CreateMap<Videos, VideoViewDto>();
+        }
+    }
+
+    public class VideoViewDtoMapper
+    {
+        public static VideoViewDto Map(Videos video, SubUser subUser, string videoUrl)
+        {
+            VideoViewDto videoViewDto;
+            videoViewDto = new VideoViewDto
+                (
+                    video,
+                    subUser,
+                    videoUrl
+                );
+            return videoViewDto;
         }
     }
 }

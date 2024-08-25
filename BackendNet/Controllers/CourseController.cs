@@ -23,6 +23,7 @@ namespace BackendNet.Controllers
         private readonly IVideoService _videoService;
         private readonly IAwsService _awsService;
         private readonly IStripeService _paymentService;
+        private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
         public CourseController(
             ICourseService courseService
@@ -30,6 +31,7 @@ namespace BackendNet.Controllers
             , IVideoService videoService
             , IAwsService awsService
             , IStripeService paymentService
+            , IConfiguration configuration
             , IMapper mapper
         )
         {
@@ -38,6 +40,7 @@ namespace BackendNet.Controllers
             _videoService = videoService;
             _awsService = awsService;
             _paymentService = paymentService;
+            _configuration = configuration;
             _mapper = mapper;
         }
         //[HttpGet("GetUserCourse")]
@@ -118,11 +121,25 @@ namespace BackendNet.Controllers
         /// <param name="courseId"></param>
         /// <returns></returns>
         [HttpGet("GetCourse/{courseId}")]
-        public async Task<Course> getCourse(string courseId)
+        public async Task<ActionResult<CourseViewDto>> getCourse(string courseId)
         {
             try
             {
-                return await _courseService.GetCourse(courseId);
+                var course = await _courseService.GetCourse(courseId);
+                if (course == null)
+                    return NoContent();
+
+                var courseView = new CourseViewDto();
+                _mapper.Map(course, courseView);
+                courseView.Videos = new List<VideoViewDto>();
+                foreach(var video in course.Videos)
+                {
+                    string videoUrl = _configuration.GetValue<string>("CloudFrontEduVideo") ?? "";
+                    videoUrl += "/" + video.Id;
+                    courseView.Videos.Add(new VideoViewDto(video, course.Cuser, videoUrl));
+                }
+
+                return Ok(courseView);
             }
             catch (Exception)
             {

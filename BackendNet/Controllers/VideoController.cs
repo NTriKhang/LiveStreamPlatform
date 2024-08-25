@@ -26,31 +26,22 @@ namespace BackendNet.Controllers
     public class VideoController : ControllerBase
     {
         private readonly IVideoService _videoService;
-        private readonly IMapper _mapper;
         //private readonly IRoomService _roomService;
         private readonly IConfiguration _configuration;
         private readonly IAwsService _awsService;
-        private readonly IEmailService _emailService;
         //private readonly IStreamService _streamService;
-        private readonly IFollowService _followService;
         private readonly IUserService _userService;
 
         public VideoController(IVideoService videoService
-            , IMapper mapper
                                 , IAwsService awsService
-                                , IFollowService followService
-                                , IEmailService emailService
                                 , IConfiguration configuration
                                 , IUserService userService)
         {
-            _mapper  = mapper;
             _userService = userService;
             _videoService = videoService;
             //_roomService = roomService;
             _configuration = configuration;
-            _emailService = emailService;
             _awsService = awsService;
-            _followService = followService;
             //_streamService = streamService;
         }
         //[HttpGet("delete/{streamKey}")]
@@ -196,31 +187,10 @@ namespace BackendNet.Controllers
                 {
                     string videoUrl = _configuration.GetValue<string>("CloudFrontEduVideo") ?? "";
                     videoUrl += "/" + video.Id;
-                    var subUser = await _userService.GetUserById(video.User_id);
-                    if (subUser != null)
-                        videoView.Add(new VideoViewDto
-                            (
-                                video,
-                                new Models.Submodel.SubUser
-                                (
-                                    subUser.Id,
-                                    subUser.DislayName,
-                                    subUser.AvatarUrl
-                                ),
-                                videoUrl
-                            ));
-                    else
-                        videoView.Add(new VideoViewDto
-                            (
-                                video,
-                                new Models.Submodel.SubUser
-                                (
-                                    "No user",
-                                    "No user",
-                                    "https://i0.wp.com/digitalhealthskills.com/wp-content/uploads/2022/11/3da39-no-user-image-icon-27.png?fit=500%2C500&ssl=1"
-                                ),
-                                videoUrl
-                            ));
+                    var subUser = await _userService.GetSubUser(video.User_id);
+
+                    VideoViewDto videoViewDto = new VideoViewDto(video, subUser, videoUrl);
+                    videoView.Add(videoViewDto);    
                 }
                 var paginationModel = new PaginationModel<VideoViewDto>()
                 {
