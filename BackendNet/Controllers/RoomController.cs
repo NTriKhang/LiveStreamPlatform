@@ -3,6 +3,7 @@ using BackendNet.Dtos;
 using BackendNet.Dtos.Room;
 using BackendNet.Hubs;
 using BackendNet.Models;
+using BackendNet.Models.Submodel;
 using BackendNet.Repositories;
 using BackendNet.Repositories.IRepositories;
 using BackendNet.Services.IService;
@@ -148,6 +149,31 @@ namespace BackendNet.Controllers
             }
             catch (Exception)
             {
+                throw;
+            }
+        }
+        /// <summary>
+        /// Dùng khi accept yêu cầu tham gia phòng từ người dùng
+        /// </summary>
+        /// <param name="roomId"></param>
+        /// <param name="student"></param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpPut("AddStudentToRoom")]
+        public async Task<ReturnModel> AddStudentToRoom(string roomId, SubUser student)
+        {
+            try
+            {
+                var res = await roomService.AddStudentToRoom(roomId, student);
+                if (res.ModifiedCount > 0)
+                {
+                    return new ReturnModel(200, string.Empty, new {roomId, student});
+                }
+                return new ReturnModel(505, $"Có lỗi khi thêm {student.user_name} vào phòng", new {roomId, student});   
+            }
+            catch (Exception)
+            {
+
                 throw;
             }
         }

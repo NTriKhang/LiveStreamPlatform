@@ -1,5 +1,7 @@
 ﻿using BackendNet.Hubs;
 using BackendNet.Models;
+using BackendNet.Models.Submodel;
+using BackendNet.Repositories;
 using BackendNet.Repositories.IRepositories;
 using BackendNet.Services.IService;
 using BackendNet.Setting;
@@ -127,6 +129,12 @@ namespace BackendNet.Services
 
                 throw;
             }
+        }
+
+        public async Task<UpdateResult> AddStudentToRoom(string roomId, SubUser student)
+        {
+            var updateDef = Builders<Rooms>.Update.Push(x => x.Attendees, student);
+            return await roomRepository.UpdateByKey(nameof(Rooms._id), roomId, null, updateDef);
         }
     }
 }
