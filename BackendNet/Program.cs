@@ -174,9 +174,10 @@ internal class Program
         app.MapControllers();
 
         app.MapHub<EduNimoHub>("/edunimoHub");
+        app.MapHub<RoomHub>("/roomHub");
 
-        app.MapHub<StreamHub>("/hub");
-        app.MapHub<ChatLiveHub>("/chatHub");
+        //app.MapHub<StreamHub>("/hub");
+        //app.MapHub<ChatLiveHub>("/chatHub");
         app.Run();
     }
 }
