@@ -14,10 +14,10 @@ namespace BackendNet.Hubs
     {
         const string ErrorReturn = "ReceiveError";
 
-        [Authorize]
         public override Task OnConnectedAsync()
         {
-            string userId = Context.GetHttpContext().User?.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+            string userId = Context.GetHttpContext().Request.Query["userId"].ToString() ?? "";
+            Console.WriteLine("userId : " + userId);
             if(userId != "")
                 Groups.AddToGroupAsync(Context.ConnectionId, userId);
             return base.OnConnectedAsync();

@@ -22,13 +22,7 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Add services to the container.
 
-        //Log.Logger = new LoggerConfiguration()
-        //    .WriteTo.MongoDB("mongodb+srv://caohieeu2003:5qqJ1I5aVbOVfd0X@educationlivesream.gbct01s.mongodb.net/?retryWrites=true&w=majority&appName=EducationLivesream/logs", collectionName: "logcollection")
-        //    .CreateLogger();
-
-        //builder.Host.UseSerilog();
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
@@ -179,7 +173,7 @@ internal class Program
         app.UseStaticFiles();
         app.MapControllers();
 
-        app.MapHub<StreamHub>("/edunimoHub");
+        app.MapHub<EduNimoHub>("/edunimoHub");
 
         app.MapHub<StreamHub>("/hub");
         app.MapHub<ChatLiveHub>("/chatHub");

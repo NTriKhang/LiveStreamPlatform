@@ -148,9 +148,9 @@ namespace BackendNet.Controllers
                 cookieOptions.HttpOnly = true;
                 cookieOptions.Expires = expired_time;
                 string url = Request.Host.ToString();
-                if (url.Contains("cms.hightfive.click"))
+                if (url.Contains(".hightfive.click"))
                 {
-                    cookieOptions.Domain = "cms.hightfive.click";
+                    cookieOptions.Domain = ".hightfive.click";
                     cookieOptions.Secure = true;
                 }
                 var token = GenerateJWTToken((userAuth.entity as Users)!);
