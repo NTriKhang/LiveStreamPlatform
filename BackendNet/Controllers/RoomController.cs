@@ -92,7 +92,8 @@ namespace BackendNet.Controllers
                     room.Attendees = new List<Models.Submodel.SubUser>();
                     room.RoomTitle = roomCreate.RoomTitle;
                     room.RoomThumbnail = roomCreate.RoomThumbnail;
-                    room.Status = roomCreate.Status;
+                    room.Status = (int)RoomStatus.Opening;
+                    room.Mode = (int)Mode.Public;
                     room.Owner = new Models.Submodel.SubUser(user.Id, user.DislayName, user.AvatarUrl);
                     var res = await roomService.AddRoom(room);
                     return res;
@@ -131,7 +132,7 @@ namespace BackendNet.Controllers
             }
         }
         [HttpPut]
-        public async Task<ReturnModel> UpdateRoom([FromHeader] string roomId, RoomCreateDto roomCreateDto)
+        public async Task<ReturnModel> UpdateRoom([FromHeader] string roomId, RoomUpdateDto roomCreateDto)
         {
             try
             {

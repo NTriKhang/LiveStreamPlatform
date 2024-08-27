@@ -13,6 +13,7 @@ namespace BackendNet.Models
         public string RoomTitle { get; set; }
         public string RoomThumbnail { set; get; }
         public int Status { get; set; }
+        public int Mode { get; set; }
         public DateTime CDate { set; get; }
         public SubUser Owner { set; get; }
         public List<SubUser> Attendees { set; get; }

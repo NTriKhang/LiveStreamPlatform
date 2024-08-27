@@ -66,4 +66,9 @@ namespace BackendNet
         Closed,
         Expired,
     }
+    public enum Mode
+    {
+        Public,
+        Private
+    }
 }
