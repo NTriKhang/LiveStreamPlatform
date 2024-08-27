@@ -8,6 +8,12 @@
         public int code { set; get; }
         public string message { set; get; }
         public object entity { set; get; }
+        public ReturnModel()
+        {
+            code = 0;
+            message = string.Empty;
+            entity = null;
+        }
         public ReturnModel(int code, string message, object entity)
         {
             this.code = code;

@@ -67,7 +67,7 @@ namespace BackendNet.Services
         {
             string streamKey = getStreamKey(requestBody);
             Console.WriteLine("On publish" + streamKey);
-            if ((await _userService.IsTokenExist(streamKey)) == false)
+            if ((await _userService.IsStreamKeyExist(streamKey)) == false)
                 return false;
             Console.WriteLine("On publish" + streamKey);
             string message = StreamStatus.Streaming.ToString();

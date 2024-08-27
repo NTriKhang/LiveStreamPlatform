@@ -146,7 +146,7 @@ namespace BackendNet.Services
             return await _userRepository.GetByKey(nameof(Users.Id) ,id);
         }
 
-        public async Task<bool> IsTokenExist(string streamKey)
+        public async Task<bool> IsStreamKeyExist(string streamKey)
         {
             if ((await _userRepository.GetByKey("StreamInfo.Stream_token", streamKey)) != null)
             {
@@ -168,6 +168,15 @@ namespace BackendNet.Services
                                         .Include(x => x.AvatarUrl);
             var user = await _userRepository.GetByKey(nameof(Users.Id), id, projection);
             return new SubUser(user.Id, user.DislayName, user.AvatarUrl);
+        }
+
+        public async Task<bool> IsStreamKeyInUse(string userId)
+        {
+            var filter = Builders<Users>.Filter.And(
+                Builders<Users>.Filter.Eq(x => x.Id, userId),
+                Builders<Users>.Filter.Eq(x => x.StreamInfo.Status, StreamStatus.Streaming.ToString())
+            );
+            return await _userRepository.IsExist(filter);
         }
     }
 }

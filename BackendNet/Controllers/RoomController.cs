@@ -6,6 +6,7 @@ using BackendNet.Models;
 using BackendNet.Repositories;
 using BackendNet.Repositories.IRepositories;
 using BackendNet.Services.IService;
+using BackendNet.Setting;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -38,26 +39,26 @@ namespace BackendNet.Controllers
             this.userService = userService; 
         }
         /// <summary>
-        /// chưa xài
+        /// 
         /// </summary>
         /// <param name="roomId"></param>
         /// <returns></returns>
         [HttpGet("{roomId}")]
-        public async Task<ActionResult<Rooms>> GetRoom(string roomId)
+        public async Task<ReturnModel> GetRoom(string roomId)
         {
             try
             {
                 var rooms = await roomService.GetRoomById(roomId);
 
                 if (rooms == null)
-                    return NoContent();
+                    return new ReturnModel(400, "Không tìm thấy phòng này", roomId);
 
                 //_ = videoService.UpdateVideoView(rooms.Video.Id!);
                 if (rooms.Status == (int)RoomStatus.Closed)
-                    return StatusCode(StatusCodes.Status406NotAcceptable);
+                    return new ReturnModel(400, "Phòng này hiện đang đóng", roomId);
                 else if (rooms.Status == (int)RoomStatus.Expired)
-                    return StatusCode(StatusCodes.Status404NotFound);
-                return Ok(rooms);
+                    return new ReturnModel(400, "Phòng này đã hết hạn", roomId);
+                return new ReturnModel(200, string.Empty, rooms);
             }
             catch (Exception)
             {
@@ -66,13 +67,13 @@ namespace BackendNet.Controllers
             }
         }
         /// <summary>
-        /// Chưa xài
+        /// Để ý giá trị status khi tạo, người dùng phải kết thúc phòng cũ ( status = expired ) mới được tạo phòng mới
         /// </summary>
         /// <param name="roomCreate"></param>
         /// <returns></returns>
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<Rooms>> AddRoom(RoomCreateDto roomCreate)
+        public async Task<ActionResult<ReturnModel>> AddRoom(RoomCreateDto roomCreate)
         {
             try
             {
@@ -81,23 +82,24 @@ namespace BackendNet.Controllers
 
                 string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
                 if (userId == string.Empty)
-                    return StatusCode(StatusCodes.Status404NotFound, "Không tìm thấy user");
+                    return new ReturnModel(400, "Thông tin người dùng có thể bị lỗi", null);
 
                 var user = await userService.GetUserById(userId);
 
                 if (user.StreamInfo != null && user.StreamInfo.Stream_token != null)
                 {
-                    room.StreamKey = user.StreamInfo.Stream_token;
                     room.CDate = DateTime.Now;
                     room.Attendees = new List<Models.Submodel.SubUser>();
+                    room.RoomTitle = roomCreate.RoomTitle;
+                    room.RoomThumbnail = roomCreate.RoomThumbnail;
                     room.Status = roomCreate.Status;
                     room.Owner = new Models.Submodel.SubUser(user.Id, user.DislayName, user.AvatarUrl);
                     var res = await roomService.AddRoom(room);
-                    return Ok(res);
+                    return res;
                 }
                 else
                 {
-                    return StatusCode(StatusCodes.Status307TemporaryRedirect, "Cần cập nhật lại stream key");
+                    return new ReturnModel((int)HttpStatusCode.TemporaryRedirect, "Cần cập nhật lại stream key của người dùng", roomCreate);
                 }
             }
             catch (Exception e)
@@ -107,7 +109,7 @@ namespace BackendNet.Controllers
             }
         }
         /// <summary>
-        /// Chưa xài
+        ///
         /// </summary>
         /// <param name="roomId"></param>
         /// <returns></returns>
@@ -128,20 +130,26 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
-        //[HttpPut]
-        //public async Task<ActionResult<UpdateResult>> UpdateRoom(UpdateRoomStatusDto updateRoomStatusDto)
-        //{
-        //    try
-        //    {
-        //        var res = await roomService.UpdateRoomStatus(updateRoomStatusDto.status, updateRoomStatusDto.roomKey);
-        //        return Ok(res.IsAcknowledged);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Console.WriteLine(e.Message);
-        //        return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
-        //    }            
-        //}
+        [HttpPut]
+        public async Task<ReturnModel> UpdateRoom([FromHeader] string roomId, RoomCreateDto roomCreateDto)
+        {
+            try
+            {
+                var room = await roomService.GetRoomById(roomId);
+                if (room == null)
+                    return new ReturnModel(404, "Không tìm thấy phòng này", roomId);
+
+                mapper.Map(roomCreateDto, room);
+                var res = await roomService.UpdateRoom(room);
+                if (res.ModifiedCount > 0)
+                    return new ReturnModel(200, string.Empty, room);
+                return new ReturnModel((int)HttpStatusCode.BadRequest, string.Empty, room);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 
 }

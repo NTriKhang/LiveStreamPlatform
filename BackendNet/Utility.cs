@@ -47,7 +47,6 @@ namespace BackendNet
     }
     public enum StreamStatus
     {
-        Init,
         Idle,
         Streaming
     }

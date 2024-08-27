@@ -2,23 +2,52 @@
 using BackendNet.Models;
 using BackendNet.Repositories.IRepositories;
 using BackendNet.Services.IService;
+using BackendNet.Setting;
 using Microsoft.AspNetCore.SignalR;
 using MongoDB.Driver;
+using System.Net;
 
 namespace BackendNet.Services
 {
     public class RoomService : IRoomService
     {
         private readonly IRoomRepository roomRepository;
-        public RoomService(IRoomRepository roomRepository)
+        private readonly IUserService userService;
+        public RoomService(
+            IRoomRepository roomRepository
+            , IUserService userService
+        )
         {
             this.roomRepository = roomRepository;
+            this.userService = userService;
+
         }
-        public async Task<Rooms> AddRoom(Rooms room)
+        public async Task<ReturnModel> AddRoom(Rooms room)
         {
             try
             {
-                return await roomRepository.Add(room);
+                var returmModel = new ReturnModel();
+                var isRemain = await IsUserRemainRoom(room.Owner.user_id);
+                if(isRemain)
+                {
+                    returmModel.code = (int)HttpStatusCode.MethodNotAllowed;
+                    returmModel.message = "Tồn tại phòng ở trạng thái chưa kết thúc";
+                    returmModel.entity = room;
+                    return returmModel;
+                }
+                var isStreamKeyInUse = await userService.IsStreamKeyInUse(room.Owner.user_id);
+                if(isStreamKeyInUse)
+                {
+                    returmModel.code = (int)HttpStatusCode.MethodNotAllowed;
+                    returmModel.message = "Stream key của người dùng đang được sử dụng";
+                    returmModel.entity = room;
+                    return returmModel;
+                }
+
+                var res = await roomRepository.Add(room);
+                returmModel.entity = res;
+                returmModel.code = 200;
+                return returmModel;
             }
             catch (Exception)
             {
@@ -26,7 +55,26 @@ namespace BackendNet.Services
                 throw;
             }
         }
+        private async Task<bool> IsUserRemainRoom(string userId)
+        {
+            try
+            {
+                var filterUserId = Builders<Rooms>.Filter.Eq(x => x.Owner.user_id, userId);
 
+
+                var filterStatus = Builders<Rooms>.Filter.Or(
+                    Builders<Rooms>.Filter.Eq(x => x.Status, (int)RoomStatus.Opening),
+                    Builders<Rooms>.Filter.Eq(x => x.Status, (int)RoomStatus.Closed)
+                );
+                var filter = Builders<Rooms>.Filter.And(filterUserId, filterStatus);
+                return await roomRepository.IsExist(filter);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         public async Task<bool> DeleteRoom(string roomId)
         {
             try
@@ -67,12 +115,12 @@ namespace BackendNet.Services
             }
         }
 
-        public async Task<UpdateResult> UpdateRoomStatus(int status, string roomKey)
+        public async Task<ReplaceOneResult> UpdateRoom(Rooms room)
         {
             try
             {
-                var updateDefine = Builders<Rooms>.Update.Set(x => x.Status, status);
-                return await roomRepository.UpdateByKey("RoomKey", roomKey, null, updateDefine);
+                var filter = Builders<Rooms>.Filter.Eq(x => x._id, room._id);
+                return await roomRepository.ReplaceAsync(filter, room);
             }
             catch (Exception)
             {

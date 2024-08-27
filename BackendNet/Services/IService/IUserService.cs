@@ -12,12 +12,13 @@ namespace BackendNet.Services.IService
         Task<ReturnModel> AuthUser(string username, string password);
         Task<IEnumerable<Users>> GetUsersAsync();
         Task<UpdateResult> UpdateStreamStatusAsync(string user_id, string status);
-        Task<bool> IsTokenExist(string streamKey);
+        Task<bool> IsStreamKeyExist(string streamKey);
         Task<Users> GetUserByStreamKey(string streamKey);
 
         Task<SubUser> GetSubUser(string id);
         Task<bool> UpdateUser(Users user);
         Task<UpdateResult> UpdateStreamKey(string userId, Models.Submodel.StreamInfo streamInfo);
+        Task<bool> IsStreamKeyInUse(string userId);
 
     }
 }
