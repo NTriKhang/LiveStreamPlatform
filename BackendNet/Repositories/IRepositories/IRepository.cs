@@ -9,6 +9,7 @@ namespace BackendNet.Repository.IRepositories
     {
         Task<TEntity> Add(TEntity obj);
         Task<TEntity> GetByKey(string key, string keyValue);
+        Task<TEntity> GetByFilter(FilterDefinition<TEntity> filter);
         Task<TEntity> GetByKey(string key, string keyValue, ProjectionDefinition<TEntity> projectionDefinition);
         Task<IEnumerable<TEntity>> GetMany(int page, int size);
         Task<IEnumerable<TEntity>> GetMany(int page, int size, FilterDefinition<TEntity>? additionalFilter);

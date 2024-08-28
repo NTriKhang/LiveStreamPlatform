@@ -10,6 +10,7 @@ using MongoDB.Driver.Linq;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq.Expressions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BackendNet.Repository
 {
@@ -194,6 +195,13 @@ namespace BackendNet.Repository
         public async Task<bool> IsExist(FilterDefinition<TEntity>? filter)
         {
             return await _collection.CountDocumentsAsync(filter) > 0;
+        }
+
+        public async Task<TEntity> GetByFilter( FilterDefinition<TEntity> Filter)
+        {
+            var data = await _collection.FindAsync(Filter);
+            var res = data.SingleOrDefault();
+            return res;
         }
     }
 }

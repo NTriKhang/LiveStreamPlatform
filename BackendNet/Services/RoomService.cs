@@ -105,7 +105,18 @@ namespace BackendNet.Services
                 throw;
             }
         }
+        public async Task<IEnumerable<Rooms>> GetRoomByUserId(string userId)
+        {
+            try
+            {
+                return await roomRepository.GetManyByKey(nameof(Rooms.Owner) + "." + nameof(Rooms.Owner.user_id), userId);
+            }
+            catch (Exception)
+            {
 
+                throw;
+            }
+        }
         public async Task<Rooms> GetRoomByRoomKey(string roomKey)
         {
             try

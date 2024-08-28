@@ -12,6 +12,9 @@ namespace BackendNet.Dtos.Room
 
             CreateMap<RoomUpdateDto, Rooms>();
             CreateMap<Rooms,RoomUpdateDto>();
+
+            CreateMap<Rooms, RoomViewDto>();
+            CreateMap<RoomViewDto, Rooms>();
         }
     }
 }

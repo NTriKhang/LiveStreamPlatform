@@ -27,6 +27,15 @@ namespace BackendNet.Services
             return await statusRepository.GetManyByKey(nameof(Status.ControllerCode), ControllerCode);
         }
 
+        public async Task<Status> GetStatus(string code, int value)
+        {
+            var filter = Builders<Status>.Filter.And(
+                Builders<Status>.Filter.Eq(x => x.ControllerCode, code),
+                Builders<Status>.Filter.Eq(x => x.Value, value)
+            );
+            return await statusRepository.GetByFilter(filter);
+        }
+
         public async Task<ReplaceOneResult> ReplaceStatus(Status status)
         {
             var filter = Builders<Status>.Filter.Eq(x => x.Id, status.Id);

@@ -10,6 +10,7 @@ namespace BackendNet.Services.IService
     {
         Task<Rooms> GetRoomByRoomKey(string roomKey);
         Task<Rooms> GetRoomById(string roomId);
+        Task<IEnumerable<Rooms>> GetRoomByUserId(string userId);
         Task<ReturnModel> AddRoom(Rooms room);
         Task<ReplaceOneResult> UpdateRoom(Rooms room);
         Task<bool> DeleteRoom(string roomId);

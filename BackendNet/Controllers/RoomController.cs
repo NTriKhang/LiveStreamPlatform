@@ -29,16 +29,19 @@ namespace BackendNet.Controllers
         private readonly IRoomService roomService;
         private readonly IVideoService videoService;
         private readonly IUserService userService;
+        private readonly IStatusService statusService;
         public RoomController(IRoomService roomService
             , IMapper mapper
             , IVideoService videoService
             , IUserService userService
+            , IStatusService statusService
             )
         {
             this.mapper = mapper;
             this.roomService = roomService;
             this.videoService = videoService;
             this.userService = userService; 
+            this.statusService = statusService;
         }
         /// <summary>
         /// 
@@ -61,6 +64,35 @@ namespace BackendNet.Controllers
                 else if (rooms.Status == (int)RoomStatus.Expired)
                     return new ReturnModel(400, "Phòng này đã hết hạn", roomId);
                 return new ReturnModel(200, string.Empty, rooms);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="roomId"></param>
+        /// <returns></returns>
+        [HttpGet("GetUserRoom")]
+        public async Task<ReturnModel> GetRoom()
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+                var res = await roomService.GetRoomByUserId(userId);
+                IEnumerable<RoomViewDto> roomViewDtos = new List<RoomViewDto>();
+                mapper.Map(res, roomViewDtos);
+
+                foreach(var roomViewDto in roomViewDtos)
+                {
+                    var status = await statusService.GetStatus("Room", roomViewDto.Status);
+                    roomViewDto.StatusName = status.Name;
+                }
+
+                return new ReturnModel(200, string.Empty, roomViewDtos);
             }
             catch (Exception)
             {
