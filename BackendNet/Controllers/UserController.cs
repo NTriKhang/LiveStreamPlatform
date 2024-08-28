@@ -151,7 +151,7 @@ namespace BackendNet.Controllers
 
                 var url = HttpContext.Request.Headers["Origin"].ToString();
                 cookieOptions.Domain = "localhost";
-                cookieOptions.Secure = true;
+                //cookieOptions.Secure = true;
                 //if (url.Contains(".hightfive.click"))
                 //{
                 //    cookieOptions.Domain = ".hightfive.click";
