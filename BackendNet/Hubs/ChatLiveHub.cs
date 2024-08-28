@@ -1,5 +1,4 @@
-﻿using BackendNet.HubDto;
-using BackendNet.Models;
+﻿using BackendNet.Models;
 using BackendNet.Services.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;

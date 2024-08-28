@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BackendNet.Dtos;
+using BackendNet.Dtos.HubDto;
 using BackendNet.Dtos.Room;
 using BackendNet.Hubs;
 using BackendNet.Models;
@@ -170,6 +171,38 @@ namespace BackendNet.Controllers
                     return new ReturnModel(200, string.Empty, new {roomId, student});
                 }
                 return new ReturnModel(505, $"Có lỗi khi thêm {student.user_name} vào phòng", new {roomId, student});   
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        /// <summary>
+        /// user sử dụng api này khi yêu cầu tham gia phòng học, yêu cầu sẽ được hub gửi qua cho chủ phòng
+        /// </summary>
+        /// <param name="roomId"></param>
+        /// <param name="cmd">là tên sự kiện chủ phòng sẽ nhận, để rỗng hoặc không trùng với sự kiện ở client thì chủ phòng không nhận được yêu cầu</param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpPost("JoinRoomRequest")]
+        public async Task<ReturnModel> JoinRoomRequest([FromBody] JoinRoomRequestDto joinRoomRequestDto)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+                if (userId == "")
+                    return new ReturnModel(401, "User not found", null);
+                Task<SubUser> userT = userService.GetSubUser(userId);
+                Task<Rooms> roomT = roomService.GetRoomById(joinRoomRequestDto.RoomId);
+                await Task.WhenAll(userT, roomT);
+
+                SubUser user = await userT;
+                Rooms room = await roomT;
+
+                await roomService.SendRequestToTeacher(room, user, joinRoomRequestDto.Cmd);
+
+                return new ReturnModel(200, "Yêu cầu tham gia phòng thành công", null);
             }
             catch (Exception)
             {

@@ -15,14 +15,16 @@ namespace BackendNet.Services
     {
         private readonly IRoomRepository roomRepository;
         private readonly IUserService userService;
+        private readonly IHubContext<EduNimoHub> eduNimoHubContext;
         public RoomService(
             IRoomRepository roomRepository
             , IUserService userService
+            , IHubContext<EduNimoHub> eduNimoHubContext
         )
         {
             this.roomRepository = roomRepository;
             this.userService = userService;
-
+            this.eduNimoHubContext = eduNimoHubContext;
         }
         public async Task<ReturnModel> AddRoom(Rooms room)
         {
@@ -133,8 +135,28 @@ namespace BackendNet.Services
 
         public async Task<UpdateResult> AddStudentToRoom(string roomId, SubUser student)
         {
-            var updateDef = Builders<Rooms>.Update.Push(x => x.Attendees, student);
-            return await roomRepository.UpdateByKey(nameof(Rooms._id), roomId, null, updateDef);
+            try
+            {
+                var updateDef = Builders<Rooms>.Update.Push(x => x.Attendees, student);
+                return await roomRepository.UpdateByKey(nameof(Rooms._id), roomId, null, updateDef);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public async Task SendRequestToTeacher(Rooms rooms, SubUser subUser, string cmd)
+        {
+            try
+            {
+                await eduNimoHubContext.Clients.Group(rooms.Owner.user_id).SendAsync(cmd, subUser, rooms._id);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
     }
 }

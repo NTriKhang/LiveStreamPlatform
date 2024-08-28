@@ -14,6 +14,7 @@ namespace BackendNet.Services.IService
         Task<ReplaceOneResult> UpdateRoom(Rooms room);
         Task<bool> DeleteRoom(string roomId);
         Task<UpdateResult> AddStudentToRoom(string roomId, SubUser student);
+        Task SendRequestToTeacher(Rooms rooms, SubUser subUser, string cmd);
 
     }
 }
