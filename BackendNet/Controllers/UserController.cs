@@ -148,6 +148,7 @@ namespace BackendNet.Controllers
                 CookieOptions cookieOptions = new CookieOptions();
                 cookieOptions.HttpOnly = true;
                 cookieOptions.Expires = expired_time;
+
                 var url = HttpContext.Request.Headers["Origin"].ToString();
                 if (url.Contains(".hightfive.click"))
                 {
