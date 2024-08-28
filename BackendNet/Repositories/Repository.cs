@@ -137,7 +137,12 @@ namespace BackendNet.Repository
             var res = data.SingleOrDefault();  
             return res;
         }
-
+        public async Task<TEntity> GetByFilter(FilterDefinition<TEntity> Filter)
+        {
+            var data = await _collection.FindAsync(Filter);
+            var res = data.SingleOrDefault();
+            return res;
+        }
         #endregion
 
         #region aggregrate
@@ -195,13 +200,6 @@ namespace BackendNet.Repository
         public async Task<bool> IsExist(FilterDefinition<TEntity>? filter)
         {
             return await _collection.CountDocumentsAsync(filter) > 0;
-        }
-
-        public async Task<TEntity> GetByFilter( FilterDefinition<TEntity> Filter)
-        {
-            var data = await _collection.FindAsync(Filter);
-            var res = data.SingleOrDefault();
-            return res;
         }
     }
 }

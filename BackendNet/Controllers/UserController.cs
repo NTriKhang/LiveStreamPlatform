@@ -133,6 +133,7 @@ namespace BackendNet.Controllers
         {
             try
             {
+
                 var userAuth = await userService.AuthUser(user.UserName, user.Password);
                 if (userAuth == null)
                 {
@@ -147,7 +148,7 @@ namespace BackendNet.Controllers
                 CookieOptions cookieOptions = new CookieOptions();
                 cookieOptions.HttpOnly = true;
                 cookieOptions.Expires = expired_time;
-                string url = Request.Host.ToString();
+                var url = HttpContext.Request.Headers["Origin"].ToString();
                 if (url.Contains(".hightfive.click"))
                 {
                     cookieOptions.Domain = ".hightfive.click";
