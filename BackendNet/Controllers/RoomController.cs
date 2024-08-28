@@ -203,7 +203,7 @@ namespace BackendNet.Controllers
                 if (userId == "")
                     return new ReturnModel(401, "User not found", null);
                 Task<SubUser> userT = userService.GetSubUser(userId);
-                Task<Rooms> roomT = roomService.GetRoomById(joinRoomRequestDto.RoomId);
+                Task<Rooms> roomT = roomService.GetRoomByRoomKey(joinRoomRequestDto.RoomKey);
                 await Task.WhenAll(userT, roomT);
 
                 SubUser user = await userT;

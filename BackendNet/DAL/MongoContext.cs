@@ -20,11 +20,12 @@ namespace BackendNet.DAL
             //    });
             //};
 
-            var mongoClient = new MongoClient(settings);
+            Client = new MongoClient(settings);
 
-            Database = mongoClient.GetDatabase(setting.DatabaseName);
+            Database = Client.GetDatabase(setting.DatabaseName);
         }
 
         public IMongoDatabase Database { get; set; }
+        public IMongoClient Client { get; set; }
     }
 }

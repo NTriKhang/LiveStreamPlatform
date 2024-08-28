@@ -2,6 +2,6 @@
 {
     public class JoinRoomRequestDto : ModelHub
     {
-        public string RoomId { get; set; }
+        public string RoomKey { get; set; }
     }
 }
