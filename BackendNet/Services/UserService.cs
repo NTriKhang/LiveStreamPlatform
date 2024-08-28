@@ -96,6 +96,43 @@ namespace BackendNet.Services
                 throw;
             }
         }
+        public async Task<IEnumerable<Users>> GetUsersAsync()
+        {
+            return await _userRepository.GetAll();
+        }
+        public async Task<Users> GetUserById(string id)
+        {
+            return await _userRepository.GetByKey(nameof(Users.Id) ,id);
+        }
+        public async Task<Users> GetUserByStreamKey(string streamKey)
+        {
+            return await _userRepository.GetByKey("StreamInfo.Stream_token", streamKey);
+        }
+        public async Task<SubUser> GetSubUser(string id)
+        {
+            var projection = Builders<Users>.Projection
+                                        .Include(x => x.Id)
+                                        .Include(x => x.DislayName)
+                                        .Include(x => x.AvatarUrl);
+            var user = await _userRepository.GetByKey(nameof(Users.Id), id, projection);
+            return new SubUser(user.Id, user.DislayName, user.AvatarUrl);
+        }
+        public async Task<bool> IsStreamKeyInUse(string userId)
+        {
+            var filter = Builders<Users>.Filter.And(
+                Builders<Users>.Filter.Eq(x => x.Id, userId),
+                Builders<Users>.Filter.Eq(x => x.StreamInfo.Status, StreamStatus.Streaming.ToString())
+            );
+            return await _userRepository.IsExist(filter);
+        }
+        public async Task<bool> IsStreamKeyExist(string streamKey)
+        {
+            if ((await _userRepository.GetByKey("StreamInfo.Stream_token", streamKey)) != null)
+            {
+                return true;
+            }
+            return false;
+        }
         public async Task<UpdateResult> UpdateStreamStatusAsync(string user_id, string status)
         {
             return await _userRepository.UpdateStreamTokenAsync(user_id, status);
@@ -120,7 +157,7 @@ namespace BackendNet.Services
         {
             try
             {
-                if(streamInfo == null)
+                if (streamInfo == null)
                     streamInfo = new Models.Submodel.StreamInfo();
 
                 streamInfo.Status = StreamStatus.Idle.ToString();
@@ -136,47 +173,18 @@ namespace BackendNet.Services
                 throw;
             }
         }
-        public async Task<IEnumerable<Users>> GetUsersAsync()
+        public async Task<UpdateResult> UpdateUserAcitivity(string userId, CurrentActivity currentActivity)
         {
-            return await _userRepository.GetAll();
-        }
-
-        public async Task<Users> GetUserById(string id)
-        {
-            return await _userRepository.GetByKey(nameof(Users.Id) ,id);
-        }
-
-        public async Task<bool> IsStreamKeyExist(string streamKey)
-        {
-            if ((await _userRepository.GetByKey("StreamInfo.Stream_token", streamKey)) != null)
+            try
             {
-                return true;
+                var udateDef = Builders<Users>.Update.Set(x => x.CurrentActivity, currentActivity);
+                return await _userRepository.UpdateByKey(nameof(userId), userId, null, udateDef);
             }
-            return false;
-        }
+            catch (Exception)
+            {
 
-        public async Task<Users> GetUserByStreamKey(string streamKey)
-        {
-            return await _userRepository.GetByKey("StreamInfo.Stream_token", streamKey);
-        }
-
-        public async Task<SubUser> GetSubUser(string id)
-        {
-            var projection = Builders<Users>.Projection
-                                        .Include(x => x.Id)
-                                        .Include(x => x.DislayName)
-                                        .Include(x => x.AvatarUrl);
-            var user = await _userRepository.GetByKey(nameof(Users.Id), id, projection);
-            return new SubUser(user.Id, user.DislayName, user.AvatarUrl);
-        }
-
-        public async Task<bool> IsStreamKeyInUse(string userId)
-        {
-            var filter = Builders<Users>.Filter.And(
-                Builders<Users>.Filter.Eq(x => x.Id, userId),
-                Builders<Users>.Filter.Eq(x => x.StreamInfo.Status, StreamStatus.Streaming.ToString())
-            );
-            return await _userRepository.IsExist(filter);
+                throw;
+            }
         }
     }
 }

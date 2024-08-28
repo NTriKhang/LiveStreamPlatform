@@ -160,17 +160,26 @@ namespace BackendNet.Controllers
         /// <param name="student"></param>
         /// <returns></returns>
         [Authorize]
-        [HttpPut("AddStudentToRoom")]
-        public async Task<ReturnModel> AddStudentToRoom(string roomId, SubUser student)
+        [HttpPost("ResponseRoomRequest")]
+        public async Task<ReturnModel> AddStudentToRoom([FromBody] ResponseRoomRequest resRoomRequest)
         {
             try
             {
-                var res = await roomService.AddStudentToRoom(roomId, student);
+                if(resRoomRequest.Res == false)
+                {
+                    await roomService.ResponseRequestToStudent(resRoomRequest.RoomId, resRoomRequest.StudentId, resRoomRequest.Res, resRoomRequest.Cmd);
+                    return new ReturnModel(200, string.Empty, null);
+                }
+
+                var subUser = await userService.GetSubUser(resRoomRequest.StudentId);
+                var res = await roomService.AddStudentToRoom(resRoomRequest.RoomId, subUser);
                 if (res.ModifiedCount > 0)
                 {
-                    return new ReturnModel(200, string.Empty, new {roomId, student});
+                    await roomService.ResponseRequestToStudent(resRoomRequest.RoomId, resRoomRequest.StudentId, resRoomRequest.Res, resRoomRequest.Cmd);
+                    
+                    return new ReturnModel(200, string.Empty, null);
                 }
-                return new ReturnModel(505, $"Có lỗi khi thêm {student.user_name} vào phòng", new {roomId, student});   
+                return new ReturnModel(505, $"Có lỗi khi thêm {subUser.user_name} vào phòng", null);   
             }
             catch (Exception)
             {

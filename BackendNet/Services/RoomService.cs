@@ -158,5 +158,17 @@ namespace BackendNet.Services
                 throw;
             }
         }
+        public async Task ResponseRequestToStudent(string roomId,  string studentId, string cmd)
+        {
+            try
+            {
+                await eduNimoHubContext.Clients.Group(studentId).SendAsync(cmd, roomId, studentId);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }

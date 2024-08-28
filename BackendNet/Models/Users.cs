@@ -17,6 +17,6 @@ namespace BackendNet.Models
         public string Role {get;set;} = "";
         public string AvatarUrl { set; get; } = "";
         public StreamInfo StreamInfo { get; set; }
-
+        public CurrentActivity CurrentActivity { get; set; }
     }
 }
