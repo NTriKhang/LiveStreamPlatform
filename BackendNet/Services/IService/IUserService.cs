@@ -19,7 +19,7 @@ namespace BackendNet.Services.IService
         Task<bool> UpdateUser(Users user);
         Task<UpdateResult> UpdateStreamKey(string userId, Models.Submodel.StreamInfo streamInfo);
         Task<bool> IsStreamKeyInUse(string userId);
-        Task<UpdateResult> UpdateUserAcitivity(string userId, CurrentActivity currentActivity)
+        Task<UpdateResult> UpdateUserAcitivity(string userId, CurrentActivity currentActivity);
 
     }
 }
