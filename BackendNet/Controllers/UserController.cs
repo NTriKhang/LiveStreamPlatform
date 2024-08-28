@@ -150,11 +150,13 @@ namespace BackendNet.Controllers
                 cookieOptions.Expires = expired_time;
 
                 var url = HttpContext.Request.Headers["Origin"].ToString();
-                if (url.Contains(".hightfive.click"))
-                {
-                    cookieOptions.Domain = ".hightfive.click";
-                    cookieOptions.Secure = true;
-                }
+                cookieOptions.Domain = "localhost";
+                cookieOptions.Secure = true;
+                //if (url.Contains(".hightfive.click"))
+                //{
+                //    cookieOptions.Domain = ".hightfive.click";
+                //    cookieOptions.Secure = true;
+                //}
                 var token = GenerateJWTToken((userAuth.entity as Users)!);
                 Response.Cookies.Append("AuthToken", token, cookieOptions);
                     
