@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using BackendNet.Dtos;
-using BackendNet.Dtos.HubDto;
+using BackendNet.Dtos.HubDto.Room;
 using BackendNet.Dtos.Room;
 using BackendNet.Hubs;
 using BackendNet.Models;
@@ -193,7 +193,7 @@ namespace BackendNet.Controllers
         /// <returns></returns>
         [Authorize]
         [HttpPost("ResponseRoomRequest")]
-        public async Task<ReturnModel> AddStudentToRoom([FromBody] ResponseRoomRequest resRoomRequest)
+        public async Task<ReturnModel> ResponseRoomRequest([FromBody] ResponseRoomRequestDto resRoomRequest)
         {
             try
             {
@@ -205,10 +205,10 @@ namespace BackendNet.Controllers
 
                 var subUser = await userService.GetSubUser(resRoomRequest.StudentId);
                 var res = await roomService.AddStudentToRoom(resRoomRequest.RoomId, subUser);
-                if (res.ModifiedCount > 0)
+                if (res)
                 {
-                    await roomService.ResponseRequestToStudent(resRoomRequest.RoomId, resRoomRequest.StudentId, resRoomRequest.Res, resRoomRequest.Cmd);
-                    
+                    Task response = roomService.ResponseRequestToStudent(resRoomRequest.RoomId, resRoomRequest.StudentId, resRoomRequest.Res, resRoomRequest.Cmd);
+                    _ = response;
                     return new ReturnModel(200, string.Empty, null);
                 }
                 return new ReturnModel(505, $"Có lỗi khi thêm {subUser.user_name} vào phòng", null);   
@@ -234,14 +234,17 @@ namespace BackendNet.Controllers
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
                 if (userId == "")
                     return new ReturnModel(401, "User not found", null);
-                Task<SubUser> userT = userService.GetSubUser(userId);
+                Task<Users> userT = userService.GetUserById(userId);
                 Task<Rooms> roomT = roomService.GetRoomByRoomKey(joinRoomRequestDto.RoomKey);
                 await Task.WhenAll(userT, roomT);
 
-                SubUser user = await userT;
+                Users user = await userT;
                 Rooms room = await roomT;
 
-                await roomService.SendRequestToTeacher(room, user, joinRoomRequestDto.Cmd);
+                if(user.CurrentActivity != null)
+                    return new ReturnModel((int)HttpStatusCode.MethodNotAllowed, user.CurrentActivity.desc, joinRoomRequestDto.RoomKey);
+
+                await roomService.SendRequestToTeacher(room, new SubUser(user.Id, user.DislayName, user.AvatarUrl), joinRoomRequestDto.Cmd);
 
                 return new ReturnModel(200, "Yêu cầu tham gia phòng thành công", null);
             }
@@ -251,6 +254,25 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
+        [HttpPut("RemoveStudentFromRoom")]
+        public async Task<ReturnModel> RemoveStudentFromRoom(RemoveFromRoomDto removeFromRoomDto)
+        {
+            try
+            {
+                var res = await roomService.RemoveStudentFromRoom(removeFromRoomDto.RoomId, removeFromRoomDto.StudentId);
+                if (res)
+                {
+                    return new ReturnModel(200, string.Empty, removeFromRoomDto);
+                }
+                return new ReturnModel(500, "Internal server error", removeFromRoomDto);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
     }
 
 }

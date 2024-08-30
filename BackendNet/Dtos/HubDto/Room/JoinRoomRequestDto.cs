@@ -1,4 +1,4 @@
-﻿namespace BackendNet.Dtos.HubDto
+﻿namespace BackendNet.Dtos.HubDto.Room
 {
     public class JoinRoomRequestDto : ModelHub
     {

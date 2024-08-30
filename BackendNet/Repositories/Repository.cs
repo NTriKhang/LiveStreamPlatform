@@ -17,10 +17,12 @@ namespace BackendNet.Repository
     public abstract class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     {
         protected readonly IMongoDatabase _database;
+        protected readonly IMongoClient _client;
         protected readonly IMongoCollection<TEntity> _collection;
         public Repository(IMongoContext context)
         {
             _database = context.Database;
+            _client = context.Client;
             _collection = _database.GetCollection<TEntity>(typeof(TEntity).Name);
 
         }
@@ -200,6 +202,11 @@ namespace BackendNet.Repository
         public async Task<bool> IsExist(FilterDefinition<TEntity>? filter)
         {
             return await _collection.CountDocumentsAsync(filter) > 0;
+        }
+
+        public async Task<UpdateResult> UpdateByFilter(FilterDefinition<TEntity> filterDefinition, UpdateDefinition<TEntity> updateDefinition)
+        {
+            return await _collection.UpdateOneAsync(filterDefinition, updateDefinition);
         }
     }
 }

@@ -1,10 +1,13 @@
 ﻿using BackendNet.Models;
+using BackendNet.Models.Submodel;
 using BackendNet.Repository.IRepositories;
+using MongoDB.Driver;
 
 namespace BackendNet.Repositories.IRepositories
 {
     public interface IRoomRepository : IRepository<Rooms>
     {
-
+        Task<bool> AddStudentToRoom(string roomId, SubUser student);
+        Task<bool> RemoveStudentFromRoom(string roomId, string studentId);
     }
 }

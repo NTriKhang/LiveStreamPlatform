@@ -144,12 +144,11 @@ namespace BackendNet.Services
             }
         }
 
-        public async Task<UpdateResult> AddStudentToRoom(string roomId, SubUser student)
+        public async Task<bool> AddStudentToRoom(string roomId, SubUser student)
         {
             try
             {
-                var updateDef = Builders<Rooms>.Update.Push(x => x.Attendees, student);
-                return await roomRepository.UpdateByKey(nameof(Rooms._id), roomId, null, updateDef);
+                return await roomRepository.AddStudentToRoom(roomId, student);
             }
             catch (Exception)
             {
@@ -174,6 +173,19 @@ namespace BackendNet.Services
             try
             {
                 await eduNimoHubContext.Clients.Group(studentId).SendAsync(cmd, roomId, studentId, res);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<bool> RemoveStudentFromRoom(string roomId, string studentId)
+        {
+            try
+            {
+                return await roomRepository.RemoveStudentFromRoom(roomId, studentId);
             }
             catch (Exception)
             {

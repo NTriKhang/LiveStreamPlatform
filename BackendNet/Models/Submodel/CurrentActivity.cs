@@ -6,5 +6,6 @@
         public string key { get; set; }
         public string value { get; set; }
         public string role { get; set; }
+        public string desc { get; set; }
     }
 }

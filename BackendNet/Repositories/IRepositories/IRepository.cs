@@ -19,6 +19,7 @@ namespace BackendNet.Repository.IRepositories
         Task<PaginationModel<TEntity>> GetManyByKey(string key, string keyValue, int page , int size, FilterDefinition<TEntity>? additionalFilter = null, SortDefinition<TEntity>? sorDef = null);
         Task<IEnumerable<TEntity>> GetAll();
         Task<UpdateResult> UpdateByKey(string key, string keyValue, FilterDefinition<TEntity> addFilter, UpdateDefinition<TEntity> updateDefinition);
+        Task<UpdateResult> UpdateByFilter(FilterDefinition<TEntity> filterDefinition, UpdateDefinition<TEntity> updateDefinition);
         Task<ReplaceOneResult> ReplaceAsync(FilterDefinition<TEntity> filter, TEntity entity);
         Task<bool> RemoveByKey(string key, string keyValue);
         Task<bool> RemoveByKey(string key, string id, DeleteOptions deleteOptions);

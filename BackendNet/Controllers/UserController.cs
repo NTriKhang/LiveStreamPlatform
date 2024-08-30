@@ -133,6 +133,7 @@ namespace BackendNet.Controllers
         {
             try
             {
+                var url = HttpContext.Request.Headers["Origin"].ToString();
 
                 var userAuth = await userService.AuthUser(user.UserName, user.Password);
                 if (userAuth == null)
@@ -149,7 +150,6 @@ namespace BackendNet.Controllers
                 cookieOptions.HttpOnly = true;
                 cookieOptions.Expires = expired_time;
 
-                var url = HttpContext.Request.Headers["Origin"].ToString();
                 cookieOptions.Domain = "localhost";
                 //cookieOptions.Secure = true;
                 //if (url.Contains(".hightfive.click"))
