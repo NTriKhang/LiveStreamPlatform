@@ -1,4 +1,5 @@
 ﻿using BackendNet.Hubs;
+using BackendNet.Dtos.HubDto.Room;
 using BackendNet.Models;
 using BackendNet.Models.Submodel;
 using BackendNet.Repositories;
@@ -160,7 +161,11 @@ namespace BackendNet.Services
         {
             try
             {
-                await eduNimoHubContext.Clients.Group(rooms.Owner.user_id).SendAsync(cmd, subUser, rooms._id);
+                await eduNimoHubContext.Clients.Group(rooms.Owner.user_id).SendAsync(cmd
+                    , new ResponseRoomJoinRqDto(subUser.user_id
+                    , subUser.user_name
+                    , subUser.user_avatar
+                    , rooms._id));
             }
             catch (Exception)
             {
