@@ -169,7 +169,6 @@ namespace BackendNet.Services
             }
             catch (Exception)
             {
-
                 throw;
             }
         }

@@ -243,7 +243,8 @@ namespace BackendNet.Controllers
 
                 if(user.CurrentActivity != null)
                     return new ReturnModel((int)HttpStatusCode.MethodNotAllowed, user.CurrentActivity.desc, joinRoomRequestDto.RoomKey);
-
+                if (room == null)
+                    return new ReturnModel(404, "Không tìm thấy phòng với key: " + joinRoomRequestDto.RoomKey, joinRoomRequestDto);
                 await roomService.SendRequestToTeacher(room, new SubUser(user.Id, user.DislayName, user.AvatarUrl), joinRoomRequestDto.Cmd);
 
                 return new ReturnModel(200, "Yêu cầu tham gia phòng thành công", null);
