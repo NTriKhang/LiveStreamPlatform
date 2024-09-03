@@ -199,7 +199,7 @@ namespace BackendNet.Controllers
             {
                 if(resRoomRequest.Res == false)
                 {
-                    await roomService.ResponseRequestToStudent(resRoomRequest.RoomId, resRoomRequest.StudentId, resRoomRequest.Res, resRoomRequest.Cmd);
+                    await roomService.ResponseRequestToStudent(resRoomRequest);
                     return new ReturnModel(200, string.Empty, null);
                 }
 
@@ -207,7 +207,7 @@ namespace BackendNet.Controllers
                 var res = await roomService.AddStudentToRoom(resRoomRequest.RoomId, subUser);
                 if (res)
                 {
-                    Task response = roomService.ResponseRequestToStudent(resRoomRequest.RoomId, resRoomRequest.StudentId, resRoomRequest.Res, resRoomRequest.Cmd);
+                    Task response = roomService.ResponseRequestToStudent(resRoomRequest);
                     _ = response;
                     return new ReturnModel(200, string.Empty, null);
                 }

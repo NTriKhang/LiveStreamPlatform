@@ -1,4 +1,5 @@
-﻿using BackendNet.Models;
+﻿using BackendNet.Dtos.HubDto.Room;
+using BackendNet.Models;
 using BackendNet.Models.Submodel;
 using BackendNet.Setting;
 using MongoDB.Driver;
@@ -16,7 +17,7 @@ namespace BackendNet.Services.IService
         Task<bool> DeleteRoom(string roomId);
         Task<bool> AddStudentToRoom(string roomId, SubUser student);
         Task SendRequestToTeacher(Rooms rooms, SubUser subUser, string cmd);
-        Task ResponseRequestToStudent(string roomId, string studentId, bool res, string cmd);
+        Task ResponseRequestToStudent(ResponseRoomRequestDto response);
         Task<bool> RemoveStudentFromRoom(string roomId, string studentId);
     }
 }
