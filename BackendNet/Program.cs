@@ -15,6 +15,7 @@ using System.Reflection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Serilog;
+using Stripe;
 
 internal class Program
 {
@@ -127,7 +128,17 @@ internal class Program
                 ClockSkew = TimeSpan.Zero
             };
         });
+        builder.Services.ConfigureApplicationCookie(options =>
+        {
+            options.Cookie.SameSite = SameSiteMode.None; // or SameSiteMode.Strict/Lax
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        });
 
+        builder.Services.AddAntiforgery(options =>
+        {
+            options.Cookie.SameSite = SameSiteMode.None;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        });
         builder.Services.AddSignalR();
         builder.Services.AddAutoMapper(typeof(Program));
 

@@ -151,10 +151,9 @@ namespace BackendNet.Controllers
 
                 var url = HttpContext.Request.Headers["Origin"].ToString();
                 Uri uri = new Uri(url);
-                //cookieOptions.Domain = "localhost";
-                //cookieOptions.Secure = true;
                 cookieOptions.Domain = uri.Host;
-                if(uri.Scheme.Equals("https"))
+                cookieOptions.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
+                if (uri.Scheme.Equals("https"))
                     cookieOptions.Secure = true;
                 var token = GenerateJWTToken((userAuth.entity as Users)!);
                 Response.Cookies.Append("AuthToken", token, cookieOptions);

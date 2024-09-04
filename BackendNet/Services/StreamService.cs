@@ -1,5 +1,6 @@
 ﻿using Amazon.Runtime.Internal;
 using BackendNet.Controllers;
+using BackendNet.Dtos.HubDto.Stream;
 using BackendNet.Hubs;
 using BackendNet.Models;
 using BackendNet.Repositories.IRepositories;
@@ -12,7 +13,7 @@ namespace BackendNet.Services
     public class StreamService : IStreamService
     {
         private readonly IUserService _userService;
-
+        private readonly IConfiguration conf;
         private readonly IHubContext<RoomHub> _hubContext;
         private readonly string folderName;
 
@@ -21,6 +22,7 @@ namespace BackendNet.Services
         {
             _userService = userService;
             _hubContext = hubContext;
+            conf = configuration;
             folderName = configuration.GetValue<string>("FilePath")!;
 
         }
@@ -71,9 +73,11 @@ namespace BackendNet.Services
 
             if (user.CurrentActivity != null || user.StreamInfo == null || user.StreamInfo.Status == StreamStatus.Streaming.ToString())
                 return false;
+            StreamVideoUrlDto videoUrlDto = new StreamVideoUrlDto();
 
-            string message = StreamStatus.Streaming.ToString();
-            _ = _hubContext.Clients.Group(user.Id).SendAsync("OnStartStreaming", message);
+            videoUrlDto.videoUrl = Path.Combine(conf.GetValue<string>("NginxRtmpServer") ?? "", streamKey);
+            videoUrlDto.waitTime = 5;
+            _ = _hubContext.Clients.Group(user.CurrentActivity.value).SendAsync("OnStartStreaming", videoUrlDto);
             return true;
         }
         public async Task removeStreamVideo(string streamKey)
