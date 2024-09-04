@@ -3,14 +3,12 @@ using BackendNet.Dtos;
 using BackendNet.Dtos.User;
 using BackendNet.Hubs;
 using BackendNet.Models;
-using BackendNet.Services;
 using BackendNet.Services.IService;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -29,32 +27,15 @@ namespace BackendNet.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService userService;
-        private readonly IStripeService stripeService;
         private readonly IMapper mapper;
         private readonly IHubContext<StreamHub> hubContext;
         public UserController(IUserService userService
-            , IStripeService stripeService
             , IMapper mapper
             , IHubContext<StreamHub> hubContext)
         {
-            this.stripeService = stripeService;
             this.userService = userService;
             this.hubContext = hubContext;
             this.mapper = mapper;
-        }
-        [HttpGet("GetStripeAccount")]
-        public ActionResult GetStripeAccount()
-        {
-            try
-            {
-                var url = stripeService.CreateStripeAccount();
-                return Ok(url);
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
         }
         [Authorize]
         [HttpGet]
@@ -133,8 +114,6 @@ namespace BackendNet.Controllers
         {
             try
             {
-                var url = HttpContext.Request.Headers["Origin"].ToString();
-
                 var userAuth = await userService.AuthUser(user.UserName, user.Password);
                 if (userAuth == null)
                 {
@@ -144,19 +123,11 @@ namespace BackendNet.Controllers
                 {
                     return StatusCode(StatusCodes.Status303SeeOther, user);
                 }
-                var expired_time = DateTime.Now.AddDays(6); 
+                var expired_time = DateTime.Now.AddDays(1); 
 
                 CookieOptions cookieOptions = new CookieOptions();
                 cookieOptions.HttpOnly = true;
                 cookieOptions.Expires = expired_time;
-
-                cookieOptions.Domain = "localhost";
-                //cookieOptions.Secure = true;
-                //if (url.Contains(".hightfive.click"))
-                //{
-                //    cookieOptions.Domain = ".hightfive.click";
-                //    cookieOptions.Secure = true;
-                //}
                 var token = GenerateJWTToken((userAuth.entity as Users)!);
                 Response.Cookies.Append("AuthToken", token, cookieOptions);
                     
@@ -194,10 +165,7 @@ namespace BackendNet.Controllers
         {
             try
             {
-                Response.Cookies.Append("AuthToken", "", new CookieOptions
-                {
-                    Expires = DateTime.Now.AddDays(-1)
-                });
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 return NoContent();
             }
             catch (Exception)
@@ -220,35 +188,6 @@ namespace BackendNet.Controllers
                 if (res)
                     return NoContent();
                 return BadRequest(userProfileDto);
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-        }
-        /// <summary>
-        /// Cấp lại stream key cho user
-        /// </summary>
-        /// <returns></returns>
-        [HttpPut("UpdateStreamKey")]
-        [Authorize]
-        public async Task<ActionResult> UpdateStreamKey()
-        {
-            try
-            {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var user = await userService.GetUserById(userId);
-                if (user == null)
-                    return NotFound("can't find user");
-
-                if(user.Role != "Teacher" && user.StreamInfo != null && user.StreamInfo.Status == StreamStatus.Streaming.ToString())
-                    return StatusCode(StatusCodes.Status405MethodNotAllowed);
-
-                var res = await userService.UpdateStreamKey(userId, user.StreamInfo);
-                if (res.ModifiedCount > 0)
-                    return NoContent();
-                return StatusCode(StatusCodes.Status304NotModified);
             }
             catch (Exception)
             {
