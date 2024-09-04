@@ -32,16 +32,18 @@ namespace BackendNet.Services
             try
             {
                 var returmModel = new ReturnModel();
-                var isRemain = await IsUserRemainRoom(room.Owner.user_id);
-                if(isRemain)
+                var isRemain = IsUserRemainRoom(room.Owner.user_id);
+                var isStreamKeyInUse = userService.IsStreamKeyInUse(room.Owner.user_id);
+
+                await Task.WhenAll(isRemain, isStreamKeyInUse);
+                if(await isRemain)
                 {
                     returmModel.code = (int)HttpStatusCode.MethodNotAllowed;
                     returmModel.message = "Tồn tại phòng ở trạng thái chưa kết thúc";
                     returmModel.entity = room;
                     return returmModel;
                 }
-                var isStreamKeyInUse = await userService.IsStreamKeyInUse(room.Owner.user_id);
-                if(isStreamKeyInUse)
+                if(await isStreamKeyInUse)
                 {
                     returmModel.code = (int)HttpStatusCode.MethodNotAllowed;
                     returmModel.message = "Stream key của người dùng đang được sử dụng";
@@ -49,7 +51,7 @@ namespace BackendNet.Services
                     return returmModel;
                 }
 
-                var res = await roomRepository.Add(room);
+                var res = await roomRepository.AddRoom(room);
                 returmModel.entity = res;
                 returmModel.code = 200;
                 return returmModel;

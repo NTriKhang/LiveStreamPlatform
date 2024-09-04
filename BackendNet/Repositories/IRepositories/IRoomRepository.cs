@@ -7,6 +7,7 @@ namespace BackendNet.Repositories.IRepositories
 {
     public interface IRoomRepository : IRepository<Rooms>
     {
+        Task<Rooms> AddRoom(Rooms room);
         Task<bool> AddStudentToRoom(string roomId, SubUser student);
         Task<bool> RemoveStudentFromRoom(string roomId, string studentId);
     }

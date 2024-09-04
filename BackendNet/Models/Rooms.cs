@@ -17,6 +17,7 @@ namespace BackendNet.Models
         public DateTime CDate { set; get; }
         public SubUser Owner { set; get; }
         public List<SubUser> Attendees { set; get; }
+        public string VideoUrl { set; get; }
         //public Videos Video { get; set; }
     }
 }
