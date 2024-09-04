@@ -12,10 +12,11 @@ namespace BackendNet.Services
     public class StreamService : IStreamService
     {
         private readonly IUserService _userService;
-        private readonly IHubContext<StreamHub, IStreamHub> _hubContext;
+
+        private readonly IHubContext<RoomHub> _hubContext;
         private readonly string folderName;
 
-        public StreamService(IUserService userService,IHubContext<StreamHub,IStreamHub> hubContext,
+        public StreamService(IUserService userService,IHubContext<RoomHub> hubContext,
                             IConfiguration configuration)
         {
             _userService = userService;
@@ -44,34 +45,35 @@ namespace BackendNet.Services
                 {
                     _ = removeStreamVideo(streamKey);
                     string message = "200";
-                    _ = _hubContext.Clients.Group(streamKey).OnStopStreaming(message);
+                   // _ = _hubContext.Clients.Group(streamKey).OnStopStreaming(message);
                 }
                 else
                 {
                     await _userService.UpdateStreamStatusAsync(user.Id!, StreamStatus.Idle.ToString());
                     string message = streamKey;
-                    _ = _hubContext.Clients.Group(streamKey).OnStopStreaming(message);
+                    //_ = _hubContext.Clients.Group(streamKey).OnStopStreaming(message);
                 }
             }
             catch (Exception)
             {
                 _ = removeStreamVideo(streamKey);
                 string message = "200";
-                _ = _hubContext.Clients.Group(streamKey).OnStopStreaming(message);
+               // _ = _hubContext.Clients.Group(streamKey).OnStopStreaming(message);
                 throw;
             }
-             
+
         }
 
         public async Task<bool> onPublish(string requestBody)
         {
             string streamKey = getStreamKey(requestBody);
-            Console.WriteLine("On publish" + streamKey);
-            if ((await _userService.IsStreamKeyExist(streamKey)) == false)
+            var user = await _userService.GetUserByStreamKey(streamKey);
+
+            if (user.CurrentActivity != null || user.StreamInfo == null || user.StreamInfo.Status == StreamStatus.Streaming.ToString())
                 return false;
-            Console.WriteLine("On publish" + streamKey);
+
             string message = StreamStatus.Streaming.ToString();
-            _ = _hubContext.Clients.Group(streamKey).OnStartStreaming(message);
+            _ = _hubContext.Clients.Group(user.Id).SendAsync("OnStartStreaming", message);
             return true;
         }
         public async Task removeStreamVideo(string streamKey)

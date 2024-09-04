@@ -133,7 +133,6 @@ namespace BackendNet.Controllers
         {
             try
             {
-                var url = HttpContext.Request.Headers["Origin"].ToString();
 
                 var userAuth = await userService.AuthUser(user.UserName, user.Password);
                 if (userAuth == null)
@@ -150,13 +149,13 @@ namespace BackendNet.Controllers
                 cookieOptions.HttpOnly = true;
                 cookieOptions.Expires = expired_time;
 
-                cookieOptions.Domain = "localhost";
+                var url = HttpContext.Request.Headers["Origin"].ToString();
+                Uri uri = new Uri(url);
+                //cookieOptions.Domain = "localhost";
                 //cookieOptions.Secure = true;
-                //if (url.Contains(".hightfive.click"))
-                //{
-                //    cookieOptions.Domain = ".hightfive.click";
-                //    cookieOptions.Secure = true;
-                //}
+                cookieOptions.Domain = uri.Host;
+                if(uri.Scheme.Equals("https"))
+                    cookieOptions.Secure = true;
                 var token = GenerateJWTToken((userAuth.entity as Users)!);
                 Response.Cookies.Append("AuthToken", token, cookieOptions);
                     

@@ -117,11 +117,12 @@ namespace BackendNet.Services
             var user = await _userRepository.GetByKey(nameof(Users.Id), id, projection);
             return new SubUser(user.Id, user.DislayName, user.AvatarUrl);
         }
-        public async Task<bool> IsStreamKeyInUse(string userId)
+        public async Task<bool> IsStreamKeyValid(string userId)
         {
             var filter = Builders<Users>.Filter.And(
                 Builders<Users>.Filter.Eq(x => x.Id, userId),
-                Builders<Users>.Filter.Eq(x => x.StreamInfo.Status, StreamStatus.Streaming.ToString())
+                Builders<Users>.Filter.Exists(x => x.StreamInfo.Stream_token),
+                Builders<Users>.Filter.Eq(x => x.StreamInfo.Status, StreamStatus.Idle.ToString())
             );
             return await _userRepository.IsExist(filter);
         }

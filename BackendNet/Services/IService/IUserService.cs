@@ -18,7 +18,7 @@ namespace BackendNet.Services.IService
         Task<SubUser> GetSubUser(string id);
         Task<bool> UpdateUser(Users user);
         Task<UpdateResult> UpdateStreamKey(string userId, Models.Submodel.StreamInfo streamInfo);
-        Task<bool> IsStreamKeyInUse(string userId);
+        Task<bool> IsStreamKeyValid(string userId);
         Task<UpdateResult> UpdateUserAcitivity(string userId, CurrentActivity currentActivity);
 
     }
