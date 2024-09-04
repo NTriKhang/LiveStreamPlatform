@@ -150,11 +150,16 @@ namespace BackendNet.Controllers
                 cookieOptions.Expires = expired_time;
 
                 var url = HttpContext.Request.Headers["Origin"].ToString();
+                Console.WriteLine(url);
                 Uri uri = new Uri(url);
                 cookieOptions.Domain = uri.Host;
-                cookieOptions.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
+                Console.WriteLine(cookieOptions.Domain);
                 if (uri.Scheme.Equals("https"))
+                {
+                    cookieOptions.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
                     cookieOptions.Secure = true;
+                }
+
                 var token = GenerateJWTToken((userAuth.entity as Users)!);
                 Response.Cookies.Append("AuthToken", token, cookieOptions);
                     
