@@ -106,7 +106,8 @@ namespace BackendNet.Services
         }
         public async Task<Users> GetUserByStreamKey(string streamKey)
         {
-            return await _userRepository.GetByKey("StreamInfo.Stream_token", streamKey);
+            var filter = Builders<Users>.Filter.Eq(x => x.StreamInfo.Stream_token, streamKey);
+            return await _userRepository.GetByFilter(filter);
         }
         public async Task<SubUser> GetSubUser(string id)
         {

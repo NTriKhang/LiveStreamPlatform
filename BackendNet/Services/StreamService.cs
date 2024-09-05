@@ -69,15 +69,17 @@ namespace BackendNet.Services
         public async Task<bool> onPublish(string requestBody)
         {
             string streamKey = getStreamKey(requestBody);
+            Console.WriteLine(streamKey);
             var user = await _userService.GetUserByStreamKey(streamKey);
 
-            if (user.CurrentActivity != null || user.StreamInfo == null || user.StreamInfo.Status == StreamStatus.Streaming.ToString())
+            if (user == null || user.CurrentActivity == null || user.StreamInfo == null || user.StreamInfo.Status == StreamStatus.Streaming.ToString())
                 return false;
             StreamVideoUrlDto videoUrlDto = new StreamVideoUrlDto();
 
-            videoUrlDto.videoUrl = Path.Combine(conf.GetValue<string>("NginxRtmpServer") ?? "", streamKey);
+            videoUrlDto.videoUrl = Path.Combine(conf.GetValue<string>("NginxRtmpServer") ?? "", streamKey, "index.m3u8");
             videoUrlDto.waitTime = 5;
-            _ = _hubContext.Clients.Group(user.CurrentActivity.value).SendAsync("OnStartStreaming", videoUrlDto);
+            Console.WriteLine(videoUrlDto.videoUrl);
+            _ = _hubContext.Clients.Group(user.CurrentActivity.value).SendAsync("OnStreaming", videoUrlDto);
             return true;
         }
         public async Task removeStreamVideo(string streamKey)

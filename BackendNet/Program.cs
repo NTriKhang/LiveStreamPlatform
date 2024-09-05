@@ -16,6 +16,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Serilog;
 using Stripe;
+using MongoDB.Driver;
 
 internal class Program
 {
@@ -109,11 +110,13 @@ internal class Program
         builder.Services.AddScoped<IStripeService, StripeService>();
         builder.Services.AddScoped<IStatusService, StatusService>();
 
-        builder.Services.AddAuthentication(cfg => {
+        builder.Services.AddAuthentication(cfg =>
+        {
             cfg.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             cfg.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             cfg.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-        }).AddJwtBearer(x => {
+        }).AddJwtBearer(x =>
+        {
             x.RequireHttpsMetadata = false;
             x.SaveToken = false;
             x.TokenValidationParameters = new TokenValidationParameters
@@ -128,6 +131,12 @@ internal class Program
                 ClockSkew = TimeSpan.Zero
             };
         });
+        //.AddCookie(options =>
+        //{
+        //    options.Cookie.SameSite = SameSiteMode.None;
+        //    options.Cookie.HttpOnly = true;
+        //    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        //});
         //builder.Services.ConfigureApplicationCookie(options =>
         //{
         //    options.Cookie.SameSite = SameSiteMode.None; // or SameSiteMode.Strict/Lax
