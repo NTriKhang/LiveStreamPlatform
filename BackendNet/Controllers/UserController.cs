@@ -152,13 +152,13 @@ namespace BackendNet.Controllers
                 var url = HttpContext.Request.Headers["Origin"].ToString();
                 Console.WriteLine(url);
                 Uri uri = new Uri(url);
-                cookieOptions.Domain = uri.Host;
-                Console.WriteLine(cookieOptions.Domain);
-                if (uri.Scheme.Equals("https"))
-                {
-                    cookieOptions.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
-                    cookieOptions.Secure = true;
-                }
+                cookieOptions.Domain = "localhost";
+               // Console.WriteLine(cookieOptions.Domain);
+                //if (uri.Scheme.Equals("https"))
+                //{
+                    //cookieOptions.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
+                    //cookieOptions.Secure = true;
+                //}
 
                 var token = GenerateJWTToken((userAuth.entity as Users)!);
                 Response.Cookies.Append("AuthToken", token, cookieOptions);
