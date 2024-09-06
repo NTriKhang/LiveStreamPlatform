@@ -149,9 +149,9 @@ namespace BackendNet.Controllers
                 cookieOptions.HttpOnly = true;
                 cookieOptions.Expires = expired_time;
 
-                var url = HttpContext.Request.Headers["Origin"].ToString();
-                Console.WriteLine(url);
-                Uri uri = new Uri(url);
+                //var url = HttpContext.Request.Headers["Origin"].ToString();
+                //Console.WriteLine(url);
+                //Uri uri = new Uri(url);
                 cookieOptions.Domain = "localhost";
                // Console.WriteLine(cookieOptions.Domain);
                 //if (uri.Scheme.Equals("https"))
