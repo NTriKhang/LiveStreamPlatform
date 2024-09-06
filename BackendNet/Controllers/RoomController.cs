@@ -27,19 +27,16 @@ namespace BackendNet.Controllers
     {
         private readonly IMapper mapper;
         private readonly IRoomService roomService;
-        private readonly IVideoService videoService;
         private readonly IUserService userService;
         private readonly IStatusService statusService;
         public RoomController(IRoomService roomService
             , IMapper mapper
-            , IVideoService videoService
             , IUserService userService
             , IStatusService statusService
             )
         {
             this.mapper = mapper;
             this.roomService = roomService;
-            this.videoService = videoService;
             this.userService = userService; 
             this.statusService = statusService;
         }
@@ -260,7 +257,7 @@ namespace BackendNet.Controllers
         {
             try
             {
-                var res = await roomService.RemoveStudentFromRoom(removeFromRoomDto.RoomId, removeFromRoomDto.StudentId);
+                var res = await roomService.RemoveStudentFromRoom(removeFromRoomDto);
                 if (res)
                 {
                     return new ReturnModel(200, string.Empty, removeFromRoomDto);

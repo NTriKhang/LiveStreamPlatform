@@ -18,6 +18,6 @@ namespace BackendNet.Services.IService
         Task<bool> AddStudentToRoom(string roomId, SubUser student);
         Task SendRequestToTeacher(Rooms rooms, SubUser subUser, string cmd);
         Task ResponseRequestToStudent(ResponseRoomRequestDto response);
-        Task<bool> RemoveStudentFromRoom(string roomId, string studentId);
+        Task<bool> RemoveStudentFromRoom(RemoveFromRoomDto removeFrom);
     }
 }

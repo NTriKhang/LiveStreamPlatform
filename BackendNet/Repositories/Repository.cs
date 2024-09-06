@@ -1,4 +1,5 @@
-﻿using BackendNet.DAL;
+﻿using Amazon.S3.Model;
+using BackendNet.DAL;
 using BackendNet.Repository.IRepositories;
 using BackendNet.Setting;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
@@ -10,6 +11,7 @@ using MongoDB.Driver.Linq;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq.Expressions;
+using System.Security.Policy;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BackendNet.Repository
@@ -207,6 +209,19 @@ namespace BackendNet.Repository
         public async Task<UpdateResult> UpdateByFilter(FilterDefinition<TEntity> filterDefinition, UpdateDefinition<TEntity> updateDefinition)
         {
             return await _collection.UpdateOneAsync(filterDefinition, updateDefinition);
+        }
+
+        public async Task<PaginationModel<TEntity>> GetManyByFilter(int page, int pageSize, FilterDefinition<TEntity> filter, SortDefinition<TEntity> sorDef)
+        {
+            var data = await _collection.Find(filter).Sort(sorDef).Skip(pageSize * (page - 1)).Limit(pageSize).ToListAsync();
+            var model = new PaginationModel<TEntity>();
+            model.data = data.ToList();
+            model.page = page;
+            model.pageSize = pageSize;
+            model.total_rows = (int)(await _collection.Find(filter).CountDocumentsAsync());
+            model.total_pages = (int)Math.Ceiling(model.total_rows / (double)pageSize);
+
+            return model;
         }
     }
 }

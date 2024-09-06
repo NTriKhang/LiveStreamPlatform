@@ -17,11 +17,11 @@ namespace BackendNet.Controllers
         }
 
         [HttpGet("{roomId}")]
-        public async Task<PaginationModel<ChatLive>> getChatLives(string roomId,[FromQuery] int page = 1)
+        public async Task<PaginationModel<ChatLive>> getChatLives(string roomId, [FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Chat)
         {
             try
             {
-                return await _chatliveService.GetChatsPagination(roomId, page);
+                return await _chatliveService.GetChatsPagination(roomId, page, pageSize);
             }
             catch (Exception)
             {

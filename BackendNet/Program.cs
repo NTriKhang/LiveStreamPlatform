@@ -109,28 +109,39 @@ internal class Program
         builder.Services.AddScoped<ICourseService, CourseService>();
         builder.Services.AddScoped<IStripeService, StripeService>();
         builder.Services.AddScoped<IStatusService, StatusService>();
-
-        builder.Services.AddAuthentication(cfg =>
+        builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+        .AddCookie(options =>
         {
-            cfg.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            cfg.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            cfg.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-        }).AddJwtBearer(x =>
-        {
-            x.RequireHttpsMetadata = false;
-            x.SaveToken = false;
-            x.TokenValidationParameters = new TokenValidationParameters
+            options.Events.OnRedirectToLogin = (context) =>
             {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8
-                    .GetBytes("this is my top jwt secret key for authentication and i append it to have enough lenght")
-                ),
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ClockSkew = TimeSpan.Zero
+                context.Response.StatusCode = 401;
+                return Task.CompletedTask;
             };
+            options.Cookie.SameSite = SameSiteMode.None;
+            options.Cookie.HttpOnly = true;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         });
+        //builder.Services.AddAuthentication(cfg =>
+        //{
+        //    cfg.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        //    cfg.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        //    cfg.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        //}).AddJwtBearer(x =>
+        //{
+        //    x.RequireHttpsMetadata = false;
+        //    x.SaveToken = false;
+        //    x.TokenValidationParameters = new TokenValidationParameters
+        //    {
+        //        ValidateIssuerSigningKey = true,
+        //        IssuerSigningKey = new SymmetricSecurityKey(
+        //            Encoding.UTF8
+        //            .GetBytes("this is my top jwt secret key for authentication and i append it to have enough lenght")
+        //        ),
+        //        ValidateIssuer = false,
+        //        ValidateAudience = false,
+        //        ClockSkew = TimeSpan.Zero
+        //    };
+        //});
         //.AddCookie(options =>
         //{
         //    options.Cookie.SameSite = SameSiteMode.None;
@@ -186,7 +197,7 @@ internal class Program
         app.UseCors("AllowFE");
         app.UseHttpsRedirection();
 
-        app.UseMiddleware<JwtCookieMiddleware>();
+       // app.UseMiddleware<JwtCookieMiddleware>();
 
         app.UseAuthentication();
         app.UseAuthorization();

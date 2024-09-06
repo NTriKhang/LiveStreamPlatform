@@ -143,16 +143,33 @@ namespace BackendNet.Controllers
                 {
                     return StatusCode(StatusCodes.Status303SeeOther, user);
                 }
-                var expired_time = DateTime.Now.AddDays(6); 
+                var expired_time = DateTime.Now.AddDays(6);
 
-                CookieOptions cookieOptions = new CookieOptions();
-                cookieOptions.HttpOnly = true;
-                cookieOptions.Expires = expired_time;
+
+                var claims = new List<Claim>
+                {
+                    new Claim(type: ClaimTypes.NameIdentifier,value: (userAuth.entity as Users).Id!),
+                    new Claim(type: ClaimTypes.UserData, value: (userAuth.entity as Users).Role!)
+                };
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(identity),
+                    new AuthenticationProperties
+                    {
+                        IsPersistent = true,
+                        AllowRefresh = true,
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(14),
+                    }
+                );
+    //            CookieOptions cookieOptions = new CookieOptions();
+  //              cookieOptions.HttpOnly = true;
+//                cookieOptions.Expires = expired_time;
 
                 //var url = HttpContext.Request.Headers["Origin"].ToString();
                 //Console.WriteLine(url);
                 //Uri uri = new Uri(url);
-                cookieOptions.Domain = "localhost";
+                //cookieOptions.Domain = "localhost";
                // Console.WriteLine(cookieOptions.Domain);
                 //if (uri.Scheme.Equals("https"))
                 //{
@@ -160,8 +177,8 @@ namespace BackendNet.Controllers
                     //cookieOptions.Secure = true;
                 //}
 
-                var token = GenerateJWTToken((userAuth.entity as Users)!);
-                Response.Cookies.Append("AuthToken", token, cookieOptions);
+               // var token = GenerateJWTToken((userAuth.entity as Users)!);
+                //Response.Cookies.Append("AuthToken", token, cookieOptions);
                     
                 return Ok(userAuth.entity);
             }

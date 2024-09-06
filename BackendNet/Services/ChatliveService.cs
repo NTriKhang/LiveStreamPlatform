@@ -20,10 +20,11 @@ namespace BackendNet.Services
             return await _chatliveRepository.Add(chat);
         }
 
-        public async Task<PaginationModel<ChatLive>> GetChatsPagination(string roomId,int page)
+        public async Task<PaginationModel<ChatLive>> GetChatsPagination(string roomId,int page, int pageSize)
         {
+            var filterDef = Builders<ChatLive>.Filter.Eq(x => x.room_id, roomId);
             SortDefinition<ChatLive> sort = Builders<ChatLive>.Sort.Descending(x => x.createdAt);
-            return await _chatliveRepository.GetManyByKey(nameof(ChatLive.room_id), roomId, page, (int)PaginationCount.Chat,null, sort);
+            return await _chatliveRepository.GetManyByFilter(page, (int)pageSize, filterDef, sort);
         }
     }
 }

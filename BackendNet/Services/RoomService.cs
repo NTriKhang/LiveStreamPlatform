@@ -17,15 +17,18 @@ namespace BackendNet.Services
         private readonly IRoomRepository roomRepository;
         private readonly IUserService userService;
         private readonly IHubContext<EduNimoHub> eduNimoHubContext;
+        private readonly IHubContext<RoomHub> roomHubContext;
         public RoomService(
             IRoomRepository roomRepository
             , IUserService userService
             , IHubContext<EduNimoHub> eduNimoHubContext
+            , IHubContext<RoomHub> roomHubContext
         )
         {
             this.roomRepository = roomRepository;
             this.userService = userService;
             this.eduNimoHubContext = eduNimoHubContext;
+            this.roomHubContext = roomHubContext;
         }
         public async Task<ReturnModel> AddRoom(Rooms room)
         {
@@ -179,6 +182,8 @@ namespace BackendNet.Services
             try
             {
                 await eduNimoHubContext.Clients.Group(response.StudentId).SendAsync(response.Cmd, response);
+                if(response.Res)
+                    await roomHubContext.Clients.Group(response.RoomId).SendAsync(response.Cmd, response);
             }
             catch (Exception)
             {
@@ -187,11 +192,16 @@ namespace BackendNet.Services
             }
         }
 
-        public async Task<bool> RemoveStudentFromRoom(string roomId, string studentId)
+        public async Task<bool> RemoveStudentFromRoom(RemoveFromRoomDto removeFromRoomDto)
         {
             try
             {
-                return await roomRepository.RemoveStudentFromRoom(roomId, studentId);
+                var res = await roomRepository.RemoveStudentFromRoom(removeFromRoomDto.RoomId, removeFromRoomDto.StudentId);
+
+                if(res)
+                    await roomHubContext.Clients.Group(removeFromRoomDto.RoomId).SendAsync(removeFromRoomDto.Cmd, removeFromRoomDto);
+
+                return res;
             }
             catch (Exception)
             {
