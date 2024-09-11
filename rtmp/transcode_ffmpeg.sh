@@ -1,6 +1,7 @@
 # #!/bin/bash
-
 stream_key="$1"
+echo "Stream key: $stream_key" >> /tmp/ffmpeg_exec.log 2>&1
+
 rtmp_url_in="rtmp://localhost/live/$stream_key"
 rtmp_url_out_720p="rtmp://localhost/hls/${stream_key}_720p2628kbs"
 rtmp_url_out_480p="rtmp://localhost/hls/${stream_key}_480p1128kbs"

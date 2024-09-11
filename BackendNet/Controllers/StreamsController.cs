@@ -25,9 +25,12 @@ namespace BackendNet.Controllers
         [HttpPost("on_publish_done")]
         public async Task<int> OnPublishDone()
         {
-            string requestbody = await Request.Body.ReadAsStringAsync();
-            await _streamService.onPublishDone(requestbody);
-            return 200;
+            //string requestbody = await Request.Body.ReadAsStringAsync();
+            //await _streamService.onPublishDone(requestbody);
+            Console.WriteLine("publish done");
+            await Task.Delay(10000);
+
+            return 400;
         }
         [HttpPost("on_publish")]
         public async Task<int> OnPublish()
