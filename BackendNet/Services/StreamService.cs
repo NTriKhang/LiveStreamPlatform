@@ -103,7 +103,8 @@ namespace BackendNet.Services
 
             videoUrlDto.videoUrl = Path.Combine(conf.GetValue<string>("NginxRtmpServer") ?? "", streamKey, "index.m3u8");
             videoUrlDto.waitTime = 5;
-            _ = _hubContext.Clients.Group(user.CurrentActivity.value).SendAsync(OnStreamingEvent, videoUrlDto);
+            Console.WriteLine(user.CurrentActivity.value);
+            await _hubContext.Clients.Group(user.CurrentActivity.value).SendAsync(OnStreamingEvent, videoUrlDto);
 
             _ = Task.Run(async () =>
             {

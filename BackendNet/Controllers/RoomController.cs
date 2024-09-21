@@ -60,7 +60,18 @@ namespace BackendNet.Controllers
                     return new ReturnModel(400, "Phòng này hiện đang đóng", roomId);
                 else if (rooms.Status == (int)RoomStatus.Expired)
                     return new ReturnModel(400, "Phòng này đã hết hạn", roomId);
-                return new ReturnModel(200, string.Empty, rooms);
+
+                string streamUrl = "rtmp://192.168.18.219/live";
+
+                var user = await userService.GetUserById(rooms.Owner.user_id);
+                if (user == null)
+                    return new ReturnModel(404, "User not found", roomId);
+
+                string streamKey = user.StreamInfo?.Stream_token ?? "";
+
+                object returnObj = new {streamUrl = streamUrl, streamKey = streamKey, room = rooms};
+
+                return new ReturnModel(200, string.Empty, returnObj);
             }
             catch (Exception)
             {
