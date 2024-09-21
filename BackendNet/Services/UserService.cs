@@ -137,7 +137,9 @@ namespace BackendNet.Services
         }
         public async Task<UpdateResult> UpdateStreamStatusAsync(string user_id, string status)
         {
-            return await _userRepository.UpdateStreamTokenAsync(user_id, status);
+            var updDef = Builders<Users>.Update.Set(x => x.StreamInfo.Status, status);
+            var filterDef = Builders<Users>.Filter.Eq(x => x.Id, user_id);
+            return await _userRepository.UpdateByFilter(filterDef, updDef);
         }
         public async Task<bool> UpdateUser(Users user)
         {
@@ -166,8 +168,9 @@ namespace BackendNet.Services
                 streamInfo.Stream_token = Utility.GenerateStreamKey(10);
                 streamInfo.Last_stream = null;
 
+                var filterDef = Builders<Users>.Filter.Eq(x => x.Id, userId);
                 var updateDef = Builders<Users>.Update.Set(x => x.StreamInfo, streamInfo);
-                return await _userRepository.UpdateByKey(nameof(Users.Id), userId, null, updateDef);
+                return await _userRepository.UpdateByFilter(filterDef, updateDef);
             }
             catch (Exception)
             {
@@ -179,8 +182,9 @@ namespace BackendNet.Services
         {
             try
             {
+                var filterDef = Builders<Users>.Filter.Eq(x => x.Id, userId);
                 var udateDef = Builders<Users>.Update.Set(x => x.CurrentActivity, currentActivity);
-                return await _userRepository.UpdateByKey(nameof(userId), userId, null, udateDef);
+                return await _userRepository.UpdateByFilter(filterDef, udateDef);
             }
             catch (Exception)
             {

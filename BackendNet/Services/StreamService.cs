@@ -5,23 +5,38 @@ using BackendNet.Hubs;
 using BackendNet.Models;
 using BackendNet.Repositories.IRepositories;
 using BackendNet.Services.IService;
+using BackendNet.Setting;
 using Microsoft.AspNetCore.SignalR;
 using SharpCompress.Common;
+using ZstdSharp.Unsafe;
 
 namespace BackendNet.Services
 {
     public class StreamService : IStreamService
     {
+        const string OnStreamingEvent = "OnStreaming";
+        const string OnStopStreamEvent = "OnStopStream";
+
         private readonly IUserService _userService;
+        private readonly IRoomService _roomService;
+        private readonly IStatusService _statusService;
         private readonly IConfiguration conf;
         private readonly IHubContext<RoomHub> _hubContext;
+        private readonly IHubContext<EduNimoHub> _eduNimoHub;
         private readonly string folderName;
 
-        public StreamService(IUserService userService,IHubContext<RoomHub> hubContext,
-                            IConfiguration configuration)
+        public StreamService(IUserService userService
+            , IRoomService roomService
+            , IStatusService statusService
+            , IHubContext<RoomHub> hubContext
+            , IHubContext<EduNimoHub> eduNimoHUb
+            , IConfiguration configuration)
         {
             _userService = userService;
             _hubContext = hubContext;
+            _roomService = roomService;
+            _eduNimoHub = eduNimoHUb;
+            _statusService = statusService;
             conf = configuration;
             folderName = configuration.GetValue<string>("FilePath")!;
 
@@ -43,24 +58,35 @@ namespace BackendNet.Services
             try
             {
                 Users user = await _userService.GetUserByStreamKey(streamKey);
-                if (user.StreamInfo.Status == StreamStatus.Idle.ToString())
+                if (user == null)
+                    return;
+
+                var res = await _userService.UpdateStreamStatusAsync(user.Id, StreamStatus.Idle.ToString());
+                if (res.ModifiedCount == 0)
                 {
-                    _ = removeStreamVideo(streamKey);
-                    string message = "200";
-                   // _ = _hubContext.Clients.Group(streamKey).OnStopStreaming(message);
+                    var retunModel = new ReturnModel(400, "Lỗi hệ thống, file video sẽ bị mất hoặc bạn có thể tải file video record xuống", new { videoKey = streamKey });
+                    await _eduNimoHub.Clients.Group(user.Id).SendAsync(OnStopStreamEvent, retunModel);
                 }
                 else
                 {
-                    await _userService.UpdateStreamStatusAsync(user.Id!, StreamStatus.Idle.ToString());
-                    string message = streamKey;
-                    //_ = _hubContext.Clients.Group(streamKey).OnStopStreaming(message);
+                    var roomStatus = _statusService.GetStatus("Room");
+                    var videoStatus = _statusService.GetStatus("Video");
+
+                    await Task.WhenAll(roomStatus, videoStatus);
+                    
+                    var retunRoomModel = new ReturnModel(200, "Thao tác kết thúc", 
+                        new
+                        {
+                            room = new { desc = "Thao tác với room", roomStatus.Result},
+                            video = new {desc = "Thao tác với video", videoStatus.Result}
+                        }    
+                    );
+
+                    await _eduNimoHub.Clients.Group(user.Id).SendAsync(OnStopStreamEvent, retunRoomModel);
                 }
             }
             catch (Exception)
             {
-                _ = removeStreamVideo(streamKey);
-                string message = "200";
-               // _ = _hubContext.Clients.Group(streamKey).OnStopStreaming(message);
                 throw;
             }
 
@@ -69,7 +95,6 @@ namespace BackendNet.Services
         public async Task<bool> onPublish(string requestBody)
         {
             string streamKey = getStreamKey(requestBody);
-            Console.WriteLine(streamKey);
             var user = await _userService.GetUserByStreamKey(streamKey);
 
             if (user == null || user.CurrentActivity == null || user.StreamInfo == null || user.StreamInfo.Status == StreamStatus.Streaming.ToString())
@@ -78,8 +103,14 @@ namespace BackendNet.Services
 
             videoUrlDto.videoUrl = Path.Combine(conf.GetValue<string>("NginxRtmpServer") ?? "", streamKey, "index.m3u8");
             videoUrlDto.waitTime = 5;
-            Console.WriteLine(videoUrlDto.videoUrl);
-            _ = _hubContext.Clients.Group(user.CurrentActivity.value).SendAsync("OnStreaming", videoUrlDto);
+            _ = _hubContext.Clients.Group(user.CurrentActivity.value).SendAsync(OnStreamingEvent, videoUrlDto);
+
+            _ = Task.Run(async () =>
+            {
+                var room = await _roomService.GetRoomByRoomKey(streamKey);
+                room.VideoUrl = videoUrlDto.videoUrl;
+                await _roomService.UpdateRoom(room);
+            });
             return true;
         }
         public async Task removeStreamVideo(string streamKey)

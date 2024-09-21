@@ -57,6 +57,9 @@ namespace BackendNet.Services
                 var res = await roomRepository.AddRoom(room);
                 returmModel.entity = res;
                 returmModel.code = 200;
+
+                _ = userService.UpdateStreamStatusAsync(room.Owner.user_id, StreamStatus.Streaming.ToString());
+
                 return returmModel;
             }
             catch (Exception)
