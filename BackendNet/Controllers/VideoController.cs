@@ -26,23 +26,21 @@ namespace BackendNet.Controllers
     public class VideoController : ControllerBase
     {
         private readonly IVideoService _videoService;
-        //private readonly IRoomService _roomService;
         private readonly IConfiguration _configuration;
         private readonly IAwsService _awsService;
-        //private readonly IStreamService _streamService;
         private readonly IUserService _userService;
-
+        private readonly ITrainModelService _trainModelService;
         public VideoController(IVideoService videoService
-                                , IAwsService awsService
-                                , IConfiguration configuration
-                                , IUserService userService)
+            , IAwsService awsService
+            , IConfiguration configuration
+            , IUserService userService
+            , ITrainModelService trainModelService)
         {
             _userService = userService;
             _videoService = videoService;
-            //_roomService = roomService;
             _configuration = configuration;
             _awsService = awsService;
-            //_streamService = streamService;
+            _trainModelService = trainModelService;
         }
         //[HttpGet("delete/{streamKey}")]
         //public void DeleteVideo(string streamKey)
@@ -54,17 +52,25 @@ namespace BackendNet.Controllers
         {
             try
             {
+                string userId = User?.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+
                 var video = await _videoService.GetVideoAsync(videoId);
+                if (video == null)
+                    return NotFound();
                 var subuser = await _userService.GetSubUser(video.User_id);
                 string videoUrl = _configuration.GetValue<string>("CloudFrontEduVideo") ?? "";
                 videoUrl += "/" + video.Id;
                 VideoViewDto videoViewDto = new VideoViewDto(video, subuser, videoUrl);
 
+                if(userId != string.Empty)
+                {
+                    _ = _trainModelService.UpdateInfo(userId, videoId);
+                }
+
                 return StatusCode(StatusCodes.Status200OK, videoViewDto);
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -190,7 +196,7 @@ namespace BackendNet.Controllers
                     var subUser = await _userService.GetSubUser(video.User_id);
 
                     VideoViewDto videoViewDto = new VideoViewDto(video, subUser, videoUrl);
-                    videoView.Add(videoViewDto);    
+                    videoView.Add(videoViewDto);
                 }
                 var paginationModel = new PaginationModel<VideoViewDto>()
                 {

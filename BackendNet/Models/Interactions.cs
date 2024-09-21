@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace BackendNet.Models
 {
-    public class TrainInfoModel
+    public class Interactions
     {
         [BsonRepresentation(BsonType.ObjectId)]
         public string videoId { get; set; }

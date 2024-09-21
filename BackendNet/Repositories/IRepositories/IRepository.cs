@@ -27,6 +27,6 @@ namespace BackendNet.Repository.IRepositories
         Task<bool> IsExist(FilterDefinition<TEntity> filter);
         Task<IEnumerable<BsonDocument>> ExecAggre(BsonDocument[] pipeline);
         Task<IEnumerable<TEntity>> ExecAggre(PipelineDefinition<TEntity,TEntity> pipeline);
-
+        Task<TEntity> FindOneAndUpdateAsync(FilterDefinition<TEntity> filter, UpdateDefinition<TEntity> update);
     }
 }

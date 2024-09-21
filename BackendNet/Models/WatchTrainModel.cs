@@ -8,6 +8,6 @@ namespace BackendNet.Models
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string? Id { get; set; }
-        public TrainInfoModel TrainInfoModel { get; set; }
+        public List<Interactions> TrainInfoModel { get; set; }
     }
 }

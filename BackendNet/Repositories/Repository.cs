@@ -223,5 +223,13 @@ namespace BackendNet.Repository
 
             return model;
         }
+        public async Task<TEntity> FindOneAndUpdateAsync(FilterDefinition<TEntity> filter, UpdateDefinition<TEntity> update)
+        {
+            return await _collection.FindOneAndUpdateAsync(filter, update, new FindOneAndUpdateOptions<TEntity>
+            {
+                IsUpsert = true,
+                ReturnDocument = ReturnDocument.After
+            }); ;
+        }
     }
 }
