@@ -42,7 +42,7 @@ namespace BackendNet.Hubs
 
                 chat.createdAt = DateTime.Now;
                 await chatLiveService.AddChat(chat);
-                await Clients.Group(chat.room_id).SendAsync("onChatLive", chat);
+                await Clients.Group(chat.room_id).SendAsync(chatLive.Cmd, chat);
             }
             catch (Exception)
             {

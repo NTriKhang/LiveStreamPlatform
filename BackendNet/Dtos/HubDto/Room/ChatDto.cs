@@ -1,6 +1,6 @@
 ﻿namespace BackendNet.Dtos.HubDto.Room
 {
-    public class ChatDto
+    public class ChatDto : ModelHub
     {
         public string userId { get; set; }
         public string userName { get; set; }
