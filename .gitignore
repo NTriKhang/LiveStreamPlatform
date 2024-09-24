@@ -8,6 +8,8 @@ docker-compose.dcproj
 key.env
 FrontAng/
 
+RecommendModel/__pycache__/
+
 BackendNet/bin/
 BackendNet/obj/
 BackendNet/appsettings.Docker.json

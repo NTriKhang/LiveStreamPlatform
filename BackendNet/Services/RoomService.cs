@@ -58,7 +58,7 @@ namespace BackendNet.Services
                 returmModel.entity = res;
                 returmModel.code = 200;
 
-                _ = userService.UpdateStreamStatusAsync(room.Owner.user_id, StreamStatus.Streaming.ToString());
+                //_ = userService.UpdateStreamStatusAsync(room.Owner.user_id, StreamStatus.Streaming.ToString());
 
                 return returmModel;
             }

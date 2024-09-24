@@ -215,6 +215,16 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
+        [HttpGet("GetRecommendVideos")]
+        public async Task<ActionResult<PaginationModel<Videos>>> GetRecommendVideos([FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Video)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+            if (userId == string.Empty)
+                return StatusCode(StatusCodes.Status401Unauthorized);
+
+            var res = await _videoService.GetRecommendVideo(page, pageSize, userId);
+            return StatusCode(StatusCodes.Status200OK, res);
+        }
         [HttpDelete("DeleteS3Video/{videoId}")]
         public async Task<ActionResult> DeleteS3Video(string videoId)
         {

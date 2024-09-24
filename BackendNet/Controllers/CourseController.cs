@@ -286,7 +286,7 @@ namespace BackendNet.Controllers
                 List<CoursePresignedUrl> res = new List<CoursePresignedUrl>();
                 for (int i = 0; i < (n > 5 ? 5 : n); i++)
                 {
-                    string videoId = _videoService.GetIdYet();
+                    string videoId = _videoService.GetAvailableId();
                     string url = _awsService.GenerateVideoPostPresignedUrl(videoId, 0);
                     res.Add(new CoursePresignedUrl(url,videoId));
                 }
