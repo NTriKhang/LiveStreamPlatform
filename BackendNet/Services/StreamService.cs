@@ -61,6 +61,8 @@ namespace BackendNet.Services
                 if (user == null)
                     return;
 
+                Console.WriteLine("On publish done");
+
                 var res = await _userService.UpdateStreamStatusAsync(user.Id, StreamStatus.Idle.ToString());
                 if (res.ModifiedCount == 0)
                 {
