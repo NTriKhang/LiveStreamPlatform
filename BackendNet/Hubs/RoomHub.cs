@@ -24,7 +24,11 @@ namespace BackendNet.Hubs
         {
             string roomId = Context.GetHttpContext().Request.Query["roomId"].ToString() ?? "";
             if (roomId != "")
-                Groups.AddToGroupAsync(Context.ConnectionId, roomId);
+                _ = Groups.AddToGroupAsync(Context.ConnectionId, roomId);
+
+            Console.WriteLine("ConnectionId: " + Context.ConnectionId);
+            Console.WriteLine("RoomId: " + roomId);
+
             return base.OnConnectedAsync();
         }
         public override Task OnDisconnectedAsync(Exception? exception)

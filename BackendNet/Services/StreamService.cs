@@ -63,14 +63,14 @@ namespace BackendNet.Services
 
                 Console.WriteLine("On publish done");
 
-                var res = await _userService.UpdateStreamStatusAsync(user.Id, StreamStatus.Idle.ToString());
-                if (res.ModifiedCount == 0)
-                {
-                    var retunModel = new ReturnModel(400, "Lỗi hệ thống, file video sẽ bị mất hoặc bạn có thể tải file video record xuống", new { videoKey = streamKey });
-                    await _eduNimoHub.Clients.Group(user.Id).SendAsync(OnStopStreamEvent, retunModel);
-                }
-                else
-                {
+                //var res = await _userService.UpdateStreamStatusAsync(user.Id, StreamStatus.Idle.ToString());
+                //if (res.ModifiedCount == 0)
+                //{
+                //    var retunModel = new ReturnModel(400, "Lỗi hệ thống, file video sẽ bị mất hoặc bạn có thể tải file video record xuống", new { videoKey = streamKey });
+                //    await _eduNimoHub.Clients.Group(user.Id).SendAsync(OnStopStreamEvent, retunModel);
+                //}
+                //else
+                //{
                     var roomStatus = _statusService.GetStatus("Room");
                     var videoStatus = _statusService.GetStatus("Video");
 
@@ -85,7 +85,7 @@ namespace BackendNet.Services
                     );
 
                     await _eduNimoHub.Clients.Group(user.Id).SendAsync(OnStopStreamEvent, retunRoomModel);
-                }
+               // }
             }
             catch (Exception)
             {
