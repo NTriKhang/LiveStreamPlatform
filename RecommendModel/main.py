@@ -62,7 +62,7 @@ def read_train():
             ratings_dict['rating'].append(play_time)
     
     df = pd.DataFrame(ratings_dict)
-    reader = Reader(rating_scale=(1, 10))  # Adjust rating scale if necessary
+    reader = Reader(rating_scale=(1, 10)) 
     data = Dataset.load_from_df(df[['user_id', 'item_id', 'rating']], reader)
     trainset, testset = train_test_split(data, test_size=0.2)
     model = SVD()

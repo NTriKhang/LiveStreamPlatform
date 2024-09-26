@@ -4,6 +4,7 @@ using BackendNet.Repositories;
 using BackendNet.Repositories.IRepositories;
 using BackendNet.Services.IService;
 using BackendNet.Setting;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using StackExchange.Redis;
@@ -14,14 +15,17 @@ namespace BackendNet.Services
     {
         private readonly IVideoRepository _videoRepository;
         private readonly IConnectionMultiplexer _redisConnect;
+        private readonly ITrainModelService _trainModelService;
         public VideoService(
             IVideoRepository video
+            , ITrainModelService trainModelService
             , IConnectionMultiplexer redisConnect
 
         )
         {
             _videoRepository = video;
             _redisConnect = redisConnect;
+            _trainModelService = trainModelService;
         }
         public async Task<Videos> AddVideoAsync(Videos video)
         {
@@ -90,8 +94,16 @@ namespace BackendNet.Services
                     .Take(pageSize)
                     .ToList();
 
-                var filterDef = Builders<Videos>.Filter.In(x => x.Id, recModel);
-                return await _videoRepository.GetManyByFilter(page, pageSize ,filterDef, null);
+                //if (recModel.Count > 0)
+               //{
+                    var filterDef = Builders<Videos>.Filter.In(x => x.Id, recModel);
+                    return await _videoRepository.GetManyByFilter(page, pageSize, filterDef, null);
+                //}
+                //else
+                //{
+
+                //}
+                //return await _trainModelService.OrderByInteraction(page, pageSize);
             }
             catch (Exception)
             {

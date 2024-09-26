@@ -219,8 +219,8 @@ namespace BackendNet.Controllers
         public async Task<ActionResult<PaginationModel<Videos>>> GetRecommendVideos([FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Video)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            if (userId == string.Empty)
-                return StatusCode(StatusCodes.Status401Unauthorized);
+            //if (userId == string.Empty)
+            //    return StatusCode(StatusCodes.Status401Unauthorized);
 
             var res = await _videoService.GetRecommendVideo(page, pageSize, userId);
             return StatusCode(StatusCodes.Status200OK, res);

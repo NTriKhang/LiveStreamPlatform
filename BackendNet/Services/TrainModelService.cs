@@ -1,6 +1,9 @@
 ﻿using BackendNet.Models;
+using BackendNet.Repositories;
 using BackendNet.Repositories.IRepositories;
 using BackendNet.Services.IService;
+using BackendNet.Setting;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace BackendNet.Services
@@ -42,6 +45,40 @@ namespace BackendNet.Services
                 };
                 await trainModelRepository.Add(newModel);
             }
+        }
+        public async Task<PaginationModel<Videos>> OrderByInteraction(int page, int pageSize)
+        {
+            var pipeline = new[]
+            {
+                new BsonDocument
+                {
+                    { "$limit", 10 }
+                },
+                new BsonDocument
+                {
+                    { "$unwind", "$Interactions" }
+                },
+                //new BsonDocument
+                //{
+                //    { "$group", new BsonDocument
+                //        {
+                //            { "_id", "$Interactions.videoId" },
+                //            { "interactionCount", new BsonDocument { { "$sum", 1 } } }
+                //        }
+                //    }
+                //},
+                //new BsonDocument
+                //{
+                //    { "$sort", new BsonDocument { { "interactionCount", -1 } } }
+                //}
+            };
+            var result = await trainModelRepository.ExecAggre(pipeline);
+            if (result.Any())
+            {
+                var doc = result.First();
+            }
+            return null;
+
         }
     }
 }
