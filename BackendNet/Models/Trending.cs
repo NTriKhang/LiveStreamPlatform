@@ -4,7 +4,7 @@ using BackendNet.Models.Submodel;
 
 namespace BackendNet.Models
 {
-    public class VideoViewTrack
+    public class Trending
     {
         /// <summary>
         /// Video Id

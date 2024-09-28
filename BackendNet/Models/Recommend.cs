@@ -3,7 +3,7 @@ using MongoDB.Bson;
 
 namespace BackendNet.Models
 {
-    public class WatchTrainModel
+    public class Recommend
     {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]

@@ -3,7 +3,7 @@ using BackendNet.Repository.IRepositories;
 
 namespace BackendNet.Repositories.IRepositories
 {
-    public interface ITrainModelRepository : IRepository<WatchTrainModel>
+    public interface ITrendingRepository : IRepository<Trending>
     {
 
     }

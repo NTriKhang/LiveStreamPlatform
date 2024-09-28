@@ -5,9 +5,9 @@ using BackendNet.Repository;
 
 namespace BackendNet.Repositories
 {
-    public class TrainModelRepository : Repository<WatchTrainModel>, ITrainModelRepository
+    public class TrendingRepository : Repository<Trending>, ITrendingRepository
     {
-        public TrainModelRepository(IMongoContext context) : base(context)
+        public TrendingRepository(IMongoContext context) : base(context)
         {
         }
     }

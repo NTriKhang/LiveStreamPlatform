@@ -15,10 +15,10 @@ namespace BackendNet.Services
     {
         private readonly IVideoRepository _videoRepository;
         private readonly IConnectionMultiplexer _redisConnect;
-        private readonly ITrainModelService _trainModelService;
+        private readonly IRecommendService _trainModelService;
         public VideoService(
             IVideoRepository video
-            , ITrainModelService trainModelService
+            , IRecommendService trainModelService
             , IConnectionMultiplexer redisConnect
 
         )
@@ -96,8 +96,8 @@ namespace BackendNet.Services
 
                 //if (recModel.Count > 0)
                //{
-                    var filterDef = Builders<Videos>.Filter.In(x => x.Id, recModel);
-                    return await _videoRepository.GetManyByFilter(page, pageSize, filterDef, null);
+                var filterDef = Builders<Videos>.Filter.In(x => x.Id, recModel);
+                return await _videoRepository.GetManyByFilter(page, pageSize, filterDef, null);
                 //}
                 //else
                 //{

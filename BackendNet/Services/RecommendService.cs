@@ -5,36 +5,43 @@ using BackendNet.Services.IService;
 using BackendNet.Setting;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace BackendNet.Services
 {
-    public class TrainModelService : ITrainModelService
+    public class RecommendService : IRecommendService
     {
-        private readonly ITrainModelRepository trainModelRepository;
-        public TrainModelService(
-            ITrainModelRepository trainModelRepository    
+        private readonly IRecommendRepository trainModelRepository;
+        public RecommendService(
+            IRecommendRepository trainModelRepository    
         )
         {
             this.trainModelRepository = trainModelRepository;
         }
-        public async Task UpdateInfo(string userId, string videoId)
+        public async Task UpdateRecommendInfo(string userId, string videoId)
         {
-            var filDef = Builders<WatchTrainModel>.Filter.And(
-                Builders<WatchTrainModel>.Filter.Eq(x => x.Id, userId),
-                Builders<WatchTrainModel>.Filter.ElemMatch
+            try
+            {
+                var filDef = Builders<Recommend>.Filter.And(
+                Builders<Recommend>.Filter.Eq(x => x.Id, userId),
+                Builders<Recommend>.Filter.ElemMatch
                 (
                     x => x.TrainInfoModel,
-                    Builders<Interactions>.Filter.Eq(x => x.videoId,videoId)
+                    Builders<Interactions>.Filter.Eq(x => x.videoId, videoId)
                 ));
-            var upDef = Builders<WatchTrainModel>.Update.Inc(x => x.TrainInfoModel[-1].playTime, 1);
 
-            var res = await trainModelRepository.FindOneAndUpdateAsync(filDef, upDef);  
-            if(res == null)
-            {
-                var newModel = new WatchTrainModel()
+                var recommend = await trainModelRepository.GetByFilter(filDef);
+                if(recommend != null)
                 {
-                    Id = userId,
-                    TrainInfoModel = new List<Interactions>
+                    var upDef = Builders<Recommend>.Update.Inc(x => x.TrainInfoModel.FirstMatchingElement().playTime, 1);
+                    await trainModelRepository.UpdateByFilter(filDef, upDef);
+                }
+                else if (recommend == null)
+                {
+                    var newModel = new Recommend()
+                    {
+                        Id = userId,
+                        TrainInfoModel = new List<Interactions>
                     {
                         new Interactions()
                         {
@@ -42,8 +49,14 @@ namespace BackendNet.Services
                             playTime = 1
                         }
                     }
-                };
-                await trainModelRepository.Add(newModel);
+                    };
+                    await trainModelRepository.Add(newModel);
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
         }
         public async Task<PaginationModel<Videos>> OrderByInteraction(int page, int pageSize)

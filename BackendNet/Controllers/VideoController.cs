@@ -29,18 +29,22 @@ namespace BackendNet.Controllers
         private readonly IConfiguration _configuration;
         private readonly IAwsService _awsService;
         private readonly IUserService _userService;
-        private readonly ITrainModelService _trainModelService;
+        private readonly IRecommendService _recommendService;
+        private readonly ITrendingService _trendingService;
         public VideoController(IVideoService videoService
             , IAwsService awsService
             , IConfiguration configuration
             , IUserService userService
-            , ITrainModelService trainModelService)
+            , IRecommendService recommendService
+            , ITrendingService trendingService
+            )
         {
             _userService = userService;
             _videoService = videoService;
             _configuration = configuration;
             _awsService = awsService;
-            _trainModelService = trainModelService;
+            _recommendService = recommendService;
+            _trendingService = trendingService;
         }
         //[HttpGet("delete/{streamKey}")]
         //public void DeleteVideo(string streamKey)
@@ -62,10 +66,17 @@ namespace BackendNet.Controllers
                 videoUrl += "/" + video.Id;
                 VideoViewDto videoViewDto = new VideoViewDto(video, subuser, videoUrl);
 
-                if(userId != string.Empty)
+                _ = Task.Run(async () =>
                 {
-                    _ = _trainModelService.UpdateInfo(userId, videoId);
-                }
+                    Console.WriteLine("Process model");
+                    await _videoService.UpdateVideoView(videoId);
+                    if (userId != string.Empty)
+                    {
+                        await _recommendService.UpdateRecommendInfo(userId, videoId);
+                    }
+                    await _trendingService.ProcessTrend(videoId, (int)videoViewDto.View + 1);
+                });
+
 
                 return StatusCode(StatusCodes.Status200OK, videoViewDto);
             }

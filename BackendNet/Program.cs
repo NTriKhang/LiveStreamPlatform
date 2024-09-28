@@ -97,7 +97,8 @@ internal class Program
         builder.Services.AddScoped<IFollowRepository, FollowRepository>();
         builder.Services.AddScoped<ICourseRepository, CourseRepository>();
         builder.Services.AddScoped<IStatusRepository, StatusRepository>();
-        builder.Services.AddScoped<ITrainModelRepository, TrainModelRepository>();
+        builder.Services.AddScoped<IRecommendRepository, RecommendRepository>();
+        builder.Services.AddScoped<ITrendingRepository, TrendingRepository>();
 
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IVideoService, VideoService>();
@@ -110,7 +111,8 @@ internal class Program
         builder.Services.AddScoped<ICourseService, CourseService>();
         builder.Services.AddScoped<IStripeService, StripeService>();
         builder.Services.AddScoped<IStatusService, StatusService>();
-        builder.Services.AddScoped<ITrainModelService, TrainModelService>();
+        builder.Services.AddScoped<IRecommendService, RecommendService>();
+        builder.Services.AddScoped<ITrendingService, TrendingService>();
         builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
         .AddCookie(options =>
         {
