@@ -73,9 +73,29 @@ namespace BackendNet.Controllers
 
             //return StatusCode(StatusCodes.Status307TemporaryRedirect);
             var res = await _courseService.BuyCourse(courseId, new CourseStudent(userId, user.user_name, user.user_avatar));
-            if (res.ModifiedCount > 0)
-                return NoContent();
-            return StatusCode(StatusCodes.Status500InternalServerError);
+            if (res.ModifiedCount == 0)
+                return StatusCode(StatusCodes.Status500InternalServerError);
+
+
+
+            _ = Task.Run(async () =>
+            {
+                var crs = await _courseService.GetCourse(courseId);
+                var subIncome = new SubTrade()
+                {
+                    CourseId = courseId,
+                    CourseTitle = crs.Title,
+                    CourseImage = crs.CourseImage,
+                    Price = crs.Price,
+                    DateIncome = DateTime.UtcNow
+                };
+                Task income = _userService.UpdateIncome(crs.Cuser.user_id, subIncome);
+                Task outcome = _userService.UpdateOutcome(userId, subIncome);
+
+                await Task.WhenAll(income, outcome);
+            });
+
+            return NoContent();
         }
         /// <summary>
         /// Get course mới nhất

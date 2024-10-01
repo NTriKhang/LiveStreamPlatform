@@ -1,5 +1,6 @@
 ﻿using BackendNet.Dtos;
 using BackendNet.Models;
+using BackendNet.Models.IModels;
 using BackendNet.Models.Submodel;
 using BackendNet.Repositories;
 using BackendNet.Repositories.IRepositories;
@@ -102,7 +103,10 @@ namespace BackendNet.Services
         }
         public async Task<Users> GetUserById(string id)
         {
-            return await _userRepository.GetByKey(nameof(Users.Id) ,id);
+            var filterDef = Builders<Users>.Filter.Eq(x => x.Id, id);
+            var user = await _userRepository.GetByFilter(filterDef);
+            
+            return user;
         }
         public async Task<Users> GetUserByStreamKey(string streamKey)
         {
@@ -191,6 +195,21 @@ namespace BackendNet.Services
 
                 throw;
             }
+        }
+
+        public async Task<UpdateResult> UpdateIncome(string userId, SubTrade subTrade)
+        {
+            var filterDef = Builders<Users>.Filter.Eq(x => x.Id, userId);
+            var updateDef = Builders<Users>.Update.PushEach(x => x.Incomes, new[] { subTrade }, position: 0);
+
+            return await _userRepository.UpdateByFilter(filterDef, updateDef);
+        }
+        public async Task<UpdateResult> UpdateOutcome(string userId, SubTrade subTrade)
+        {
+            var filterDef = Builders<Users>.Filter.Eq(x => x.Id, userId);
+            var updateDef = Builders<Users>.Update.PushEach(x => x.Outcomes, new[] { subTrade }, position: 0);
+
+            return await _userRepository.UpdateByFilter(filterDef, updateDef);
         }
     }
 }

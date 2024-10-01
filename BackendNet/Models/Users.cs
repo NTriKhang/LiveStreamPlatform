@@ -1,4 +1,5 @@
-﻿using BackendNet.Models.Submodel;
+﻿using BackendNet.Models.IModels;
+using BackendNet.Models.Submodel;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -14,9 +15,11 @@ namespace BackendNet.Models
         public bool IsEmailActive {get; set;} = false;
         public string DislayName { get; set; } = "";
         public string Password { get; set; } = "";
-        public string Role {get;set;} = "";
+        public string Role { get; set; } = "";
         public string AvatarUrl { set; get; } = "";
         public StreamInfo StreamInfo { get; set; }
         public CurrentActivity CurrentActivity { get; set; }
+        public List<SubTrade> Incomes { get; set; }
+        public List<SubTrade> Outcomes { get; set; }
     }
 }

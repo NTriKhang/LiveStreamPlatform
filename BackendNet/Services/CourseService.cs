@@ -26,6 +26,7 @@ namespace BackendNet.Services
         public async Task<UpdateResult> BuyCourse(string courseId, CourseStudent courseStudent)
         {
             var updateDef = Builders<Course>.Update.Push(x => x.Students, courseStudent);
+
             return await courseRepository.UpdateByKey(nameof(Course._id), courseId, null, updateDef);
         }
         public async Task<Course> AddCourse(Course course)
