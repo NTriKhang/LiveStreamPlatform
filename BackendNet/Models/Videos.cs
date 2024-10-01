@@ -25,5 +25,6 @@ namespace BackendNet.Models
         public long VideoSize { set; get; }
         public string FileType { set; get; }
         public List<string> Tags { set; get; }
+        public string VideoUrl { set; get; }
     }
 }

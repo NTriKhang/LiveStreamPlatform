@@ -2,6 +2,7 @@
 using BackendNet.Models.Submodel;
 using BackendNet.Repositories.IRepositories;
 using BackendNet.Services.IService;
+using BackendNet.Setting;
 using MongoDB.Driver;
 
 namespace BackendNet.Services
@@ -27,13 +28,13 @@ namespace BackendNet.Services
                 {
                     Id = videoId,
                     GrowthRate = 0,
-                    NewestViewAt = DateTime.Now,
+                    NewestViewAt = DateTime.UtcNow,
                     TotalView = videoView,
-                    ViewTrackHistories = new List<Models.Submodel.ViewTrackHistory>()
+                    ViewTrackHistories = new List<ViewTrackHistory>()
                 };
-                newTrend.ViewTrackHistories.Add(new Models.Submodel.ViewTrackHistory()
+                newTrend.ViewTrackHistories.Add(new ViewTrackHistory()
                 {
-                    timeStamp = DateTime.Now,
+                    timeStamp = DateTime.UtcNow,
                     views = 1
                 });
                 newTrend = await _trendRepository.Add(newTrend);
@@ -45,28 +46,31 @@ namespace BackendNet.Services
         }
         private async Task CaculateGrowthRate(Trending trending)
         {
-            if (trending.ViewTrackHistories[0].timeStamp.AddMinutes(ShortWindow) < DateTime.Now)
+            if (trending.ViewTrackHistories[0].timeStamp.AddMinutes(ShortWindow) < DateTime.UtcNow)
             {
                 var newViewTrack = new ViewTrackHistory()
                 {
-                    timeStamp = DateTime.Now,
+                    timeStamp = DateTime.UtcNow,
                     views = 0
                 };
                 trending.ViewTrackHistories.Insert(0, newViewTrack);
             }
             trending.TotalView++;
             trending.ViewTrackHistories[0].views++;
-
+            
             double scalingFactor = trending.ViewTrackHistories.Count == 1 ? 0.1 : 1.0;
-
             int preView = 1;
+            
             if(trending.ViewTrackHistories.Count > 1)
             {
                 preView = trending.ViewTrackHistories[1].views;
             }
             trending.GrowthRate = scalingFactor * ((double)(trending.ViewTrackHistories[0].views * 100) / preView);
             var filterDef = Builders<Trending>.Filter.Eq(x => x.Id, trending.Id);
+
+            trending.NewestViewAt = DateTime.UtcNow;
             await _trendRepository.ReplaceAsync(filterDef, trending);
         }
+
     }
 }

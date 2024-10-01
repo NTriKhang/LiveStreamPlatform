@@ -22,18 +22,34 @@ namespace BackendNet.Services
         {
             try
             {
-                var filDef = Builders<Recommend>.Filter.And(
-                Builders<Recommend>.Filter.Eq(x => x.Id, userId),
-                Builders<Recommend>.Filter.ElemMatch
-                (
-                    x => x.TrainInfoModel,
-                    Builders<Interactions>.Filter.Eq(x => x.videoId, videoId)
-                ));
-
+                //var filDef = Builders<Recommend>.Filter.And(
+                //Builders<Recommend>.Filter.Eq(x => x.Id, userId),
+                //Builders<Recommend>.Filter.ElemMatch
+                //(
+                //    x => x.TrainInfoModel,
+                //    Builders<Interactions>.Filter.Eq(x => x.videoId, videoId)
+                //));
+                var filDef = Builders<Recommend>.Filter.Eq(x => x.Id, userId);
                 var recommend = await trainModelRepository.GetByFilter(filDef);
+
                 if(recommend != null)
                 {
-                    var upDef = Builders<Recommend>.Update.Inc(x => x.TrainInfoModel.FirstMatchingElement().playTime, 1);
+                    var exists = recommend.TrainInfoModel.Exists(x => x.videoId == videoId);
+                    UpdateDefinition<Recommend> upDef;
+                    if(exists)
+                    {
+                        filDef = Builders<Recommend>.Filter.And(
+
+                            Builders<Recommend>.Filter.Eq(x => x.Id, userId),
+                            Builders<Recommend>.Filter.ElemMatch(x => x.TrainInfoModel, m => m.videoId == videoId)
+                        );
+
+                        upDef = Builders<Recommend>.Update.Inc(x => x.TrainInfoModel.FirstMatchingElement().playTime, 1);
+                    }
+                    else
+                    {
+                        upDef = Builders<Recommend>.Update.Push(x => x.TrainInfoModel,  new Interactions() { videoId = videoId, playTime = 1 });
+                    }
                     await trainModelRepository.UpdateByFilter(filDef, upDef);
                 }
                 else if (recommend == null)

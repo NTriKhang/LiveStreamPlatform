@@ -15,17 +15,17 @@ namespace BackendNet.Services
     {
         private readonly IVideoRepository _videoRepository;
         private readonly IConnectionMultiplexer _redisConnect;
-        private readonly IRecommendService _trainModelService;
+        private readonly ITrendingService _trendingService;
         public VideoService(
             IVideoRepository video
-            , IRecommendService trainModelService
+            , ITrendingService trendingService
             , IConnectionMultiplexer redisConnect
 
         )
         {
             _videoRepository = video;
             _redisConnect = redisConnect;
-            _trainModelService = trainModelService;
+            _trendingService = trendingService;
         }
         public async Task<Videos> AddVideoAsync(Videos video)
         {
@@ -75,9 +75,8 @@ namespace BackendNet.Services
         public async Task<PaginationModel<Videos>> GetNewestVideo(int page, int pageSize)
         {
             SortDefinition<Videos> sort = Builders<Videos>.Sort.Descending(x => x.Time);
-            var filter = Builders<Videos>.Filter.Ne(u => u.StatusNum, (int)VideoStatus.TestData);
 
-            return await _videoRepository.GetMany(page, pageSize, filter, sort);
+            return await _videoRepository.GetMany(page, pageSize, null, sort);
         }
         public async Task<PaginationModel<Videos>> GetRecommendVideo(int page, int pageSize, string userId)
         {
@@ -114,6 +113,11 @@ namespace BackendNet.Services
         public string GetAvailableId()
         {
             return _videoRepository.GenerateKey();
+        }
+
+        public Task<PaginationModel<Videos>> GetTrendingVideo(int page, int pageSize, string userId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

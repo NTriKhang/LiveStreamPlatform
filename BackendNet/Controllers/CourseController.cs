@@ -135,7 +135,7 @@ namespace BackendNet.Controllers
                 foreach(var video in course.Videos)
                 {
                     string videoUrl = _configuration.GetValue<string>("CloudFrontEduVideo") ?? "";
-                    videoUrl += "/" + video.Id;
+                    videoUrl += "/" + video.VideoUrl;
                     courseView.Videos.Add(new VideoViewDto(video, course.Cuser, videoUrl));
                 }
 

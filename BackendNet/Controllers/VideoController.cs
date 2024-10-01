@@ -63,7 +63,7 @@ namespace BackendNet.Controllers
                     return NotFound();
                 var subuser = await _userService.GetSubUser(video.User_id);
                 string videoUrl = _configuration.GetValue<string>("CloudFrontEduVideo") ?? "";
-                videoUrl += "/" + video.Id;
+                videoUrl += "/" + video.VideoUrl;
                 VideoViewDto videoViewDto = new VideoViewDto(video, subuser, videoUrl);
 
                 _ = Task.Run(async () =>
@@ -92,8 +92,11 @@ namespace BackendNet.Controllers
             try
             {
                 string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+                string videoId = _videoService.GetAvailableId();
+
                 var video = await _videoService.AddVideoAsync(new Videos
                 {
+                    Id = videoId,
                     Title = uploadVideoDto.title,
                     User_id = user_id,
                     StatusNum = (int)VideoStatus.Upload,
@@ -104,7 +107,8 @@ namespace BackendNet.Controllers
                     Thumbnail = uploadVideoDto.image_url ?? "https://t4.ftcdn.net/jpg/04/73/25/49/360_F_473254957_bxG9yf4ly7OBO5I0O5KABlN930GwaMQz.jpg",
                     Tags = uploadVideoDto.tags,
                     VideoSize = uploadVideoDto.video_size,
-                    FileType = uploadVideoDto.file_type
+                    FileType = uploadVideoDto.file_type,
+                    VideoUrl = videoId
                 });
                 if (video == null)
                     return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi không thể lưu thông tin video");
@@ -203,7 +207,7 @@ namespace BackendNet.Controllers
                 foreach (var video in listVideo.data)
                 {
                     string videoUrl = _configuration.GetValue<string>("CloudFrontEduVideo") ?? "";
-                    videoUrl += "/" + video.Id;
+                    videoUrl += "/" + video.VideoUrl;
                     var subUser = await _userService.GetSubUser(video.User_id);
 
                     VideoViewDto videoViewDto = new VideoViewDto(video, subUser, videoUrl);
@@ -230,11 +234,14 @@ namespace BackendNet.Controllers
         public async Task<ActionResult<PaginationModel<Videos>>> GetRecommendVideos([FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Video)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-            //if (userId == string.Empty)
-            //    return StatusCode(StatusCodes.Status401Unauthorized);
 
             var res = await _videoService.GetRecommendVideo(page, pageSize, userId);
             return StatusCode(StatusCodes.Status200OK, res);
+        }
+        [HttpGet("GetTrendingVideo")]
+        public async Task<ActionResult<PaginationModel<Videos>>> GetTrendingVideo([FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Video)
+        {
+            throw new NotImplementedException();
         }
         [HttpDelete("DeleteS3Video/{videoId}")]
         public async Task<ActionResult> DeleteS3Video(string videoId)
