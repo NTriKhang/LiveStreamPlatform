@@ -68,7 +68,6 @@ namespace BackendNet.Controllers
 
                 _ = Task.Run(async () =>
                 {
-                    Console.WriteLine("Process model");
                     await _videoService.UpdateVideoView(videoId);
                     if (userId != string.Empty)
                     {
@@ -226,7 +225,6 @@ namespace BackendNet.Controllers
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -283,74 +281,6 @@ namespace BackendNet.Controllers
         //        throw;
         //    }
         //}
-        //[Authorize]
-        //[HttpPost("on_stream")]
-        //public async Task<ActionResult<Rooms>> PublicVideoStream([FromForm] string streamInfo)
-        //{
-        //    try
-        //    {
-        //        string? videoStreamingId = Request.Cookies["VideoStreamingId"];
-        //        if (videoStreamingId != null)
-        //            return StatusCode(StatusCodes.Status405MethodNotAllowed);
-
-        //        var streamInfoDto = JsonConvert.DeserializeObject<OnPublicDto>(streamInfo);
-
-        //        if (streamInfoDto == null)
-        //            return StatusCode(StatusCodes.Status400BadRequest, default(Videos));
-
-        //        var thumbnail = Request.Form.Files[0];
-
-        //        string? streamKey = User.FindFirstValue(ClaimTypes.UserData);
-        //        if (streamKey == null)
-        //            return StatusCode(StatusCodes.Status401Unauthorized);
-        //        string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-
-        //        var video = await _videoService.AddVideoAsync(new Videos
-        //        {
-        //            Title = streamInfoDto.title,
-        //            User_id = user_id,
-        //            Status = VideoStatus.Keep.ToString(),
-        //            Description = streamInfoDto.description ?? null,
-        //            Like = 0,
-        //            Time = DateTime.Now,
-        //            View = 0
-        //        }, thumbnail);
-        //        if (video == null)
-        //            return BadRequest("VIdeo is null");
-
-        //        var room = await _roomService.AddRoom(new Rooms { RoomKey = Guid.NewGuid().ToString().Substring(0,32), Status = RoomStatus.Opening.ToString(),
-        //                                        StreamKey = streamKey,Video = video  });
-
-        //        Response.Cookies.Append("VideoStreamingId", video.Id);
-        //        Response.Cookies.Append("RoomKey", room.RoomKey);
-        //        return Ok(room);
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Console.WriteLine(e.ToString());
-        //        return NotFound();
-        //    }
-        //}
-        //[Authorize]
-        //[HttpGet("generateKey")]
-        //public async Task<ActionResult<string>> generateKey()
-        //{
-        //    try
-        //    {
-        //        string user_id = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        //        if (user_id == null)
-        //            return BadRequest();
-        //        var key = _videoService.generateKey();
-        //        var streamToken = key + Utitlity.SplitKeyStream + user_id;
-        //        var userUpdate = await _userService.UpdateStreamTokenAsync(user_id, key, StreamTokenStatus.Init.ToString());
-        //        return Ok(new StreamKeyDto() { Key = streamToken });
-        //    }
-        //    catch (Exception)
-        //    {
-
-        //        throw;
-        //    }
-        //}
-
+      
     }
 }

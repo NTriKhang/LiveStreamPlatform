@@ -1,6 +1,5 @@
 ﻿using BackendNet.Dtos;
 using BackendNet.Models;
-using BackendNet.Models.IModels;
 using BackendNet.Models.Submodel;
 using BackendNet.Repositories;
 using BackendNet.Repositories.IRepositories;

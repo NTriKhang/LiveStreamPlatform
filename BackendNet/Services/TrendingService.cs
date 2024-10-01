@@ -71,6 +71,6 @@ namespace BackendNet.Services
             trending.NewestViewAt = DateTime.UtcNow;
             await _trendRepository.ReplaceAsync(filterDef, trending);
         }
-
+        
     }
 }

@@ -1,5 +1,4 @@
-﻿using BackendNet.Models.IModels;
-using BackendNet.Models.Submodel;
+﻿using BackendNet.Models.Submodel;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
