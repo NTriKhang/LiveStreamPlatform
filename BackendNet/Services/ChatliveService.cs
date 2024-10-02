@@ -24,7 +24,7 @@ namespace BackendNet.Services
         {
             var filterDef = Builders<ChatLive>.Filter.Eq(x => x.room_id, roomId);
             SortDefinition<ChatLive> sort = Builders<ChatLive>.Sort.Descending(x => x.createdAt);
-            return await _chatliveRepository.GetManyByFilter(page, (int)pageSize, filterDef, sort);
+            return await _chatliveRepository.GetManyByFilter(page, (int)pageSize, filterDef, sort, null);
         }
     }
 }

@@ -93,16 +93,8 @@ namespace BackendNet.Services
                     .Take(pageSize)
                     .ToList();
 
-                //if (recModel.Count > 0)
-               //{
                 var filterDef = Builders<Videos>.Filter.In(x => x.Id, recModel);
-                return await _videoRepository.GetManyByFilter(page, pageSize, filterDef, null);
-                //}
-                //else
-                //{
-
-                //}
-                //return await _trainModelService.OrderByInteraction(page, pageSize);
+                return await _videoRepository.GetManyByFilter(page, pageSize, filterDef, null, null);
             }
             catch (Exception)
             {
@@ -115,9 +107,6 @@ namespace BackendNet.Services
             return _videoRepository.GenerateKey();
         }
 
-        public Task<PaginationModel<Videos>> GetTrendingVideo(int page, int pageSize, string userId)
-        {
-            throw new NotImplementedException();
-        }
+
     }
 }

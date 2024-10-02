@@ -9,7 +9,7 @@ namespace BackendNet.Services.IService
         Task<Videos> GetVideoAsync(string videoId);
         Task<PaginationModel<Videos>> GetNewestVideo(int page, int pageSize);
         Task<PaginationModel<Videos>> GetRecommendVideo(int page, int pageSize, string userId);
-        Task<PaginationModel<Videos>> GetTrendingVideo(int page, int pageSize, string userId);
+ 
         Task<PaginationModel<Videos>> GetUserVideos(string userId, int page);
         Task UpdateVideoStatus(int status, string id);
         Task UpdateVideoView(string videoId);

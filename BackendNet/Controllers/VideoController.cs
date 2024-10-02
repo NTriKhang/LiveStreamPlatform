@@ -236,10 +236,16 @@ namespace BackendNet.Controllers
             var res = await _videoService.GetRecommendVideo(page, pageSize, userId);
             return StatusCode(StatusCodes.Status200OK, res);
         }
+        /// <summary>
+        /// spam api getVideo/{videoId} để tăng GrowthRate trong collection Trending để video đc xem là trend trước
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
         [HttpGet("GetTrendingVideo")]
         public async Task<ActionResult<PaginationModel<Videos>>> GetTrendingVideo([FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Video)
         {
-            throw new NotImplementedException();
+            return await _trendingService.GetTrendingVideo(page, pageSize);
         }
         [HttpDelete("DeleteS3Video/{videoId}")]
         public async Task<ActionResult> DeleteS3Video(string videoId)

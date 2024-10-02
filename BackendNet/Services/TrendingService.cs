@@ -9,14 +9,49 @@ namespace BackendNet.Services
 {
     public class TrendingService : ITrendingService
     {
-        int ShortWindow = 2; // minutes
-        int LongWindow = 30; // minutes
+        int ShortWindow = 10; // hours
         private readonly ITrendingRepository _trendRepository;
+        private readonly IVideoRepository _videoRepository;
         public TrendingService(
             ITrendingRepository trendingRepository
-            )
+            , IVideoRepository videoRepository
+        )
         {
             _trendRepository = trendingRepository;
+            _videoRepository = videoRepository;
+        }
+        public async Task<PaginationModel<Videos>> GetTrendingVideo(int page, int pageSize)
+        {
+            int longWindow = 2; // days
+            int threashold = 100;
+
+            var filterWinthinLongWindow = Builders<Trending>.Filter.And(
+                Builders<Trending>.Filter.Gt(x => x.NewestViewAt, DateTime.UtcNow.AddDays(-longWindow)),
+                Builders<Trending>.Filter.Gt(x => x.GrowthRate, threashold)
+            );
+            var sortWithinLongWindow = Builders<Trending>.Sort.Descending(x => x.GrowthRate);
+            var projDef = Builders<Trending>.Projection.Exclude(x => x.ViewTrackHistories);
+
+            var trendingVideo = await _trendRepository.GetManyByFilter(page, pageSize, filterWinthinLongWindow, sortWithinLongWindow, projDef);
+            if(trendingVideo.data == null)
+            {
+                return new PaginationModel<Videos>()
+                {
+                    data = null,
+                    page = 1,
+                    pageSize = 0,
+                    total_pages = 0,
+                    total_rows = 0,
+                };
+            }
+            var growthRates = trendingVideo.data.ToDictionary(x => x.Id, x => x.GrowthRate);
+
+
+            var filterVideo = Builders<Videos>.Filter.In(x => x.Id, trendingVideo.data.Select(x => x.Id));
+            var res = await _videoRepository.GetManyByFilter(page, pageSize, filterVideo, null);
+
+            res.data = res.data.OrderByDescending(x => growthRates[x.Id]).ToList();
+            return res;
         }
         public async Task ProcessTrend(string videoId, int videoView)
         {
@@ -46,7 +81,7 @@ namespace BackendNet.Services
         }
         private async Task CaculateGrowthRate(Trending trending)
         {
-            if (trending.ViewTrackHistories[0].timeStamp.AddMinutes(ShortWindow) < DateTime.UtcNow)
+            if (trending.ViewTrackHistories[0].timeStamp.AddHours(ShortWindow) < DateTime.UtcNow)
             {
                 var newViewTrack = new ViewTrackHistory()
                 {

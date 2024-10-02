@@ -213,13 +213,52 @@ namespace BackendNet.Repository
 
         public async Task<PaginationModel<TEntity>> GetManyByFilter(int page, int pageSize, FilterDefinition<TEntity> filter, SortDefinition<TEntity> sorDef)
         {
-            var data = await _collection.Find(filter).Sort(sorDef).Skip(pageSize * (page - 1)).Limit(pageSize).ToListAsync();
+            var data = await _collection.Find(filter)
+                .Sort(sorDef)
+                .Skip(pageSize * (page - 1))
+                .Limit(pageSize)
+                .ToListAsync();
             var model = new PaginationModel<TEntity>();
+            if (data.Count == 0)
+            {
+                model.data = null;
+                model.page = page;
+                model.pageSize = data.Count;
+                model.total_rows = 0;
+                model.total_pages = 0;
+                return model;
+            }
             model.data = data.ToList();
             model.page = page;
-            model.pageSize = pageSize;
+            model.pageSize = data.Count;
             model.total_rows = (int)(await _collection.Find(filter).CountDocumentsAsync());
-            model.total_pages = (int)Math.Ceiling(model.total_rows / (double)pageSize);
+            model.total_pages = (int)Math.Ceiling(model.total_rows / (double)data.Count);
+
+            return model;
+        }
+        public async Task<PaginationModel<TEntity>> GetManyByFilter(int page, int pageSize, FilterDefinition<TEntity> filter, SortDefinition<TEntity> sorDef, ProjectionDefinition<TEntity> projDef)
+        {
+            var data = await _collection.Find(filter)
+                .Sort(sorDef)
+                .Project<TEntity>(projDef)
+                .Skip(pageSize * (page - 1))
+                .Limit(pageSize)
+                .ToListAsync();
+            var model = new PaginationModel<TEntity>();
+            if (data.Count == 0)
+            {
+                model.data = null;
+                model.page = page;
+                model.pageSize = data.Count;
+                model.total_rows = 0;
+                model.total_pages = 0;
+                return model;
+            }
+            model.data = data.ToList();
+            model.page = page;
+            model.pageSize = data.Count;
+            model.total_rows = (int)(await _collection.Find(filter).CountDocumentsAsync());
+            model.total_pages = (int)Math.Ceiling(model.total_rows / (double)data.Count);
 
             return model;
         }
