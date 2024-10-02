@@ -80,11 +80,12 @@ namespace BackendNet.Controllers
             }
         }
         /// <summary>
-        /// 
+        /// Đăng nhập trước khi sử dụng
         /// </summary>
         /// <param name="roomId"></param>
         /// <returns></returns>
         [HttpGet("GetUserRoom")]
+        [Authorize]
         public async Task<ReturnModel> GetRoom()
         {
             try
@@ -110,6 +111,7 @@ namespace BackendNet.Controllers
         }
         /// <summary>
         /// Để ý giá trị status khi tạo, người dùng phải kết thúc phòng cũ ( status = expired ) mới được tạo phòng mới
+        /// Đăng nhập trước khi sử dụng
         /// </summary>
         /// <param name="roomCreate"></param>
         /// <returns></returns>
@@ -229,6 +231,7 @@ namespace BackendNet.Controllers
         }
         /// <summary>
         /// user sử dụng api này khi yêu cầu tham gia phòng học, yêu cầu sẽ được hub gửi qua cho chủ phòng
+        /// Đăng nhập trước khi sử dụng
         /// </summary>
         /// <param name="roomId"></param>
         /// <param name="cmd">là tên sự kiện chủ phòng sẽ nhận, để rỗng hoặc không trùng với sự kiện ở client thì chủ phòng không nhận được yêu cầu</param>

@@ -56,6 +56,10 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
+        /// <summary>
+        /// Đăng nhập trước khi sử dụng
+        /// </summary>
+        /// <returns></returns>
         [Authorize]
         [HttpGet]
         public async Task<ActionResult> getUser()
@@ -249,6 +253,7 @@ namespace BackendNet.Controllers
         }
         /// <summary>
         /// Cấp lại stream key cho user
+        /// Đăng nhập trước khi sử dụng
         /// </summary>
         /// <returns></returns>
         [HttpPut("UpdateStreamKey")]

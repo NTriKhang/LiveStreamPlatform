@@ -84,6 +84,11 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
+        /// <summary>
+        /// Đăng nhập trước khi sử dụng
+        /// </summary>
+        /// <param name="uploadVideoDto"></param>
+        /// <returns></returns>
         [HttpPost("getPresignedUrl")]
         [Authorize]
         public async Task<ActionResult> getPresignedUrl([FromBody] VideoCreateDto uploadVideoDto)
@@ -228,7 +233,15 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
+
+        /// <summary>
+        /// Đăng nhập trước khi sử dụng
+        /// </summary>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
         [HttpGet("GetRecommendVideos")]
+        [Authorize]
         public async Task<ActionResult<PaginationModel<Videos>>> GetRecommendVideos([FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Video)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;

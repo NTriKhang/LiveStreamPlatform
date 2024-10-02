@@ -169,11 +169,13 @@ namespace BackendNet.Controllers
         }
         /// <summary>
         /// Get các course mà user đó đã mua
+        /// Đăng nhập trước khi sử dụng
         /// </summary>
         /// <param name="page"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
         [HttpGet("GetCourse")]
+        [Authorize]
         public async Task<PaginationModel<Course>> getCourse([FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Course)
         {
             try
@@ -210,6 +212,7 @@ namespace BackendNet.Controllers
         }
         /// <summary>
         /// use in application
+        /// Đăng nhập trước khi sử dụng
         /// </summary>
         /// <param name="courseCreateDto"></param>
         /// <returns></returns>
@@ -235,6 +238,12 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
+        /// <summary>
+        /// Đăng nhập trước khi sử dụng
+        /// </summary>
+        /// <param name="courseId"></param>
+        /// <param name="courseCreateDto"></param>
+        /// <returns></returns>
         [HttpPut("{courseId}")]
         [Authorize]
         public async Task<ActionResult> putCourse(string courseId, [FromBody] CourseCreateDto courseCreateDto)
@@ -266,6 +275,11 @@ namespace BackendNet.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        /// <summary>
+        /// Đăng nhập trước khi sử dụng
+        /// </summary>
+        /// <param name="courseCreateDto"></param>
+        /// <returns></returns>
         [HttpPost]
         [Authorize]
         public async Task<ActionResult> postCourse([FromBody] CourseCreateDto courseCreateDto)
