@@ -18,6 +18,7 @@ namespace BackendNet.Services
         }
         public async Task<PaginationModel<Follow>> GetFollower(string followed_id, int page)
         {
+
             return await followRepository.GetManyByKey(nameof(Follow.Followed) + '.' + nameof(Follow.Followed.user_id), followed_id, page, (int)PaginationCount.Follow, additionalFilter: null);
         }
 

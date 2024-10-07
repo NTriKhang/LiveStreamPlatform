@@ -46,7 +46,8 @@ namespace BackendNet.Services
         }
         public Task<Videos> GetVideoAsync(string videoId)
         {
-            return _videoRepository.GetByKey(nameof(Videos.Id), videoId);
+            var filDef = Builders<Videos>.Filter.Eq(x => x.Id, videoId);
+            return _videoRepository.GetByFilter(filDef);
         }
         public async Task<PaginationModel<Videos>> GetUserVideos(string userId, int page)
         {
@@ -55,15 +56,17 @@ namespace BackendNet.Services
         }
         public async Task UpdateVideoStatus(int status, string id)
         {
+            var filter = Builders<Videos>.Filter.Eq(x => x.Id, id);
             var updateDefine = Builders<Videos>.Update.Set(x => x.StatusNum, status);
-            await _videoRepository.UpdateByKey(nameof(Videos.Id), id, null, updateDefine);
+            await _videoRepository.UpdateByFilter(filter, updateDefine);
         }
         public Task UpdateVideoView(string videoId)
         {
             try
             {
+                var filter = Builders<Videos>.Filter.Eq(x => x.Id, videoId);
                 var updateDefine = Builders<Videos>.Update.Inc(x => x.View, 1);
-                _ = _videoRepository.UpdateByKey(nameof(Videos.Id), videoId, null, updateDefine);
+                _ = _videoRepository.UpdateByFilter(filter, updateDefine);
                 return Task.CompletedTask;
             }
             catch (Exception)
@@ -94,7 +97,7 @@ namespace BackendNet.Services
                     .ToList();
 
                 var filterDef = Builders<Videos>.Filter.In(x => x.Id, recModel);
-                return await _videoRepository.GetManyByFilter(page, pageSize, filterDef, null, null);
+                return await _videoRepository.GetManyByFilter(page, pageSize, filterDef, null);
             }
             catch (Exception)
             {

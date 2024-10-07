@@ -46,10 +46,18 @@ namespace BackendNet.Controllers
             _recommendService = recommendService;
             _trendingService = trendingService;
         }
-        //[HttpGet("delete/{streamKey}")]
-        //public void DeleteVideo(string streamKey)
+        //[HttpGet("findVideos/{title}")]
+        //public async Task<PaginationModel<VideoViewDto>> FindVideos(string title)
         //{
-        //    _videoService.removeStreamVideo(streamKey);
+        //    try
+        //    {
+
+        //    }
+        //    catch (Exception)
+        //    {
+
+        //        throw;
+        //    }
         //}
         [HttpGet("getVideo/{videoId}")]
         public async Task<ActionResult<VideoViewDto>> GetVideo(string videoId)
@@ -163,40 +171,6 @@ namespace BackendNet.Controllers
                 return BadRequest(videoId);
             return NoContent();
         }
-
-        //[HttpPost("stream_video")]
-        //[Authorize]
-        //public async Task<HttpStatusCode> Stream_video([FromBody] UploadVideoDto uploadVideoDto)
-        //{
-        //    try
-        //    {
-        //        string? videoStreamingId = Request.Cookies["VideoStreamingId"];
-
-        //        if(videoStreamingId == null) 
-        //            return HttpStatusCode.BadRequest;
-
-        //        if (uploadVideoDto.option == VideoStatus.Upload.ToString())
-        //        {
-        //            await _awsService.UploadStreamVideo(uploadVideoDto.streamKey, videoStreamingId);
-        //            await _videoService.UpdateVideoStatus(VideoStatus.Public.ToString(), videoStreamingId);
-        //        }
-        //        else if(uploadVideoDto.option == VideoStatus.Remove.ToString())
-        //        {
-        //            await _videoService.UpdateVideoStatus(VideoStatus.Private.ToString(), videoStreamingId);
-        //            await _streamService.removeStreamVideo(uploadVideoDto.streamKey);
-        //        }
-        //        string? roomKey = Request.Cookies["RoomKey"];
-        //        await _roomService.UpdateRoomStatus(RoomStatus.Expired.ToString(), roomKey);                
-        //        Response.Cookies.Delete("VideoStreamingId");
-        //        Response.Cookies.Delete("RoomKey");
-        //        return HttpStatusCode.NoContent;
-        //    }
-        //    catch (Exception)
-        //    {
-
-        //        throw;
-        //    }
-        //}
         [HttpGet]
         public async Task<ActionResult<List<Videos>>> GetVideos([FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Video)
         {

@@ -106,7 +106,8 @@ namespace BackendNet.Services
         {
             try
             {
-                return await roomRepository.GetByKey(nameof(Rooms._id), roomId);
+                var filDef = Builders<Rooms>.Filter.Eq(x => x._id, roomId);
+                return await roomRepository.GetByFilter(filDef);
             }
             catch (Exception)
             {
@@ -118,6 +119,7 @@ namespace BackendNet.Services
         {
             try
             {
+                var filter = Builders<Rooms>.Filter.Eq(x => x.Owner.user_id, userId);
                 return await roomRepository.GetManyByKey(nameof(Rooms.Owner) + "." + nameof(Rooms.Owner.user_id), userId);
             }
             catch (Exception)
@@ -130,7 +132,8 @@ namespace BackendNet.Services
         {
             try
             {
-                return await roomRepository.GetByKey(nameof(Rooms.RoomKey), roomKey);
+                var filDef = Builders<Rooms>.Filter.Eq(x => x.RoomKey, roomKey);
+                return await roomRepository.GetByFilter(filDef);
             }
             catch (Exception)
             {

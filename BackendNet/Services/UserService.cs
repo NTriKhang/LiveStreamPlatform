@@ -114,11 +114,9 @@ namespace BackendNet.Services
         }
         public async Task<SubUser> GetSubUser(string id)
         {
-            var projection = Builders<Users>.Projection
-                                        .Include(x => x.Id)
-                                        .Include(x => x.DislayName)
-                                        .Include(x => x.AvatarUrl);
-            var user = await _userRepository.GetByKey(nameof(Users.Id), id, projection);
+            var filter = Builders<Users>.Filter.Eq(x => x.Id, id);
+
+            var user = await _userRepository.GetByFilter(filter);
             return new SubUser(user.Id, user.DislayName, user.AvatarUrl);
         }
         public async Task<bool> IsStreamKeyValid(string userId)
@@ -132,7 +130,8 @@ namespace BackendNet.Services
         }
         public async Task<bool> IsStreamKeyExist(string streamKey)
         {
-            if ((await _userRepository.GetByKey("StreamInfo.Stream_token", streamKey)) != null)
+            var filter = Builders<Users>.Filter.Eq(x => x.StreamInfo.Stream_token, streamKey);
+            if ((await _userRepository.GetByFilter(filter)) != null)
             {
                 return true;
             }
