@@ -33,7 +33,8 @@ namespace BackendNet.Repositories
 
         public async Task<bool> IsTokenExist(string token)
         {
-            if((await GetByKey(nameof(Users.StreamInfo.Stream_token), token)) != null)
+            var filter = Builders<Users>.Filter.Eq(x => x.StreamInfo.Stream_token, token);
+            if(await GetByFilter(filter) != null)
             {
                 return true;
             }

@@ -103,44 +103,10 @@ namespace BackendNet.Repository
 
             return model;
         }
-
-        public async Task<PaginationModel<TEntity>> GetManyByKey(string key, string keyValue, int page, int size, FilterDefinition<TEntity>? additionalFilter = null, SortDefinition<TEntity>? sorDef = null)
-        {
-
-            IEnumerable<TEntity> data;
-            var filter = FilterId(key, keyValue);
-
-            if (additionalFilter != null)
-                filter &= additionalFilter;
-
-
-            data = await _collection.Find(filter).Sort(sorDef).Skip(size * (page - 1)).Limit(size).ToListAsync();
-            var model = new PaginationModel<TEntity>();
-            model.data = data.ToList();
-            model.page = page;
-            model.pageSize = size;
-            model.total_rows = (int)(await _collection.Find(filter).CountDocumentsAsync());
-            model.total_pages = (int)Math.Ceiling(model.total_rows / (double)size);
-
-            return model;
-        }
         #endregion
 
         #region get one
-        public virtual async Task<TEntity> GetByKey(string key, string id)
-        {
-            var data = await _collection.FindAsync(FilterId(key, id));
-            var res = data.SingleOrDefault();
-            return res;
-        }
-        public virtual async Task<TEntity> GetByKey(string key, string id, ProjectionDefinition<TEntity> projectionDefinition)
-        {
-            var data = await _collection.Find(FilterId(key, id))
-                                            .Project<TEntity>(projectionDefinition)
-                                            .ToListAsync();
-            var res = data.SingleOrDefault();  
-            return res;
-        }
+
         public async Task<TEntity> GetByFilter(FilterDefinition<TEntity> Filter)
         {
             var data = await _collection.FindAsync(Filter);
@@ -165,14 +131,6 @@ namespace BackendNet.Repository
         #endregion
 
         #region Update method
-        public async Task<UpdateResult> UpdateByKey(string key, string keyValue, FilterDefinition<TEntity> addFilter, UpdateDefinition<TEntity> updateDefinition)
-        {
-            var filter = FilterId(key, keyValue);
-            if (addFilter != null)
-                filter &= addFilter;
-            return await _collection.UpdateOneAsync(filter, updateDefinition);
-
-        }
         public async Task<ReplaceOneResult> ReplaceAsync(FilterDefinition<TEntity> filter, TEntity entity)
         {
             return await _collection.ReplaceOneAsync(filter, entity);
