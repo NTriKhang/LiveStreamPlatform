@@ -25,9 +25,10 @@ namespace BackendNet.Services
         }
         public async Task<UpdateResult> BuyCourse(string courseId, CourseStudent courseStudent)
         {
+            var filter = Builders<Course>.Filter.Eq(x => x._id, courseId);
             var updateDef = Builders<Course>.Update.Push(x => x.Students, courseStudent);
 
-            return await courseRepository.UpdateByKey(nameof(Course._id), courseId, null, updateDef);
+            return await courseRepository.UpdateByFilter(filter, updateDef);
         }
         public async Task<Course> AddCourse(Course course)
         {
@@ -41,20 +42,20 @@ namespace BackendNet.Services
                 return true;
             return false;
         }
-        public Task<IEnumerable<Course>> GetAll()
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<Course> GetCourse(string courseId)
         {
-            return await courseRepository.GetByKey(nameof(Course._id), courseId);
+            var filter = Builders<Course>.Filter.Eq(x => x._id, courseId);
+
+            return await courseRepository.GetByFilter(filter);
         }
 
         public async Task<PaginationModel<Course>> GetUserCourses(string userId, int page, int pageSize)
         {
-            SortDefinition<Course> sort = Builders<Course>.Sort.Descending(x => x.Cdate);
-            return await courseRepository.GetManyByKey($"{nameof(Course.Cuser)}.{nameof(Course.Cuser.user_id)}", userId, page, pageSize, null, sort);
+            var filter = Builders<Course>.Filter.Eq(x => x.Cuser.user_id, userId);
+            var sort = Builders<Course>.Sort.Descending(x => x.Cdate);
+            var proj = Builders<Course>.Projection.Exclude(x => x.Videos);
+
+            return await courseRepository.GetManyByFilter(page, pageSize, filter, sort, proj);
         }
 
         public async Task<bool> DeleteCourse(string courseId)
@@ -64,31 +65,40 @@ namespace BackendNet.Services
 
         public async Task<UpdateResult> AddVideoToCrs(string courseId, Videos videos)
         {
+            var filterDef = Builders<Course>.Filter.Eq(x => x._id, courseId);
             var updateDef = Builders<Course>.Update.Push(x => x.Videos, videos);
-            return await courseRepository.UpdateByKey(nameof(Course._id), courseId, null, updateDef);
+            return await courseRepository.UpdateByFilter(filterDef, updateDef);
         }
 
         public async Task<UpdateResult> DeleteVideoFromCrs(string courseId, string videoId)
         {
-            var updateDef = Builders<Course>.Update.PullFilter(s => s.Videos, f => f.Id == videoId);
             var userId = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
-            var addFilter = Builders<Course>.Filter.Eq(x => x.Cuser.user_id, userId);
-            return await courseRepository.UpdateByKey(nameof(Course._id), courseId, addFilter, updateDef);
+
+            var filter = Builders<Course>.Filter.And(
+                Builders<Course>.Filter.Eq(x => x._id, courseId),
+                Builders<Course>.Filter.Eq(x => x.Cuser.user_id, userId) 
+            );
+            var updateDef = Builders<Course>.Update.PullFilter(s => s.Videos, f => f.Id == videoId);
+            return await courseRepository.UpdateByFilter(filter, updateDef);
         }
 
         public async Task<PaginationModel<Course>> GetCourses(string userId, int page, int pageSize)
         {
-            SortDefinition<Course> sort = Builders<Course>.Sort.Descending(x => x.Cdate);
+            var sort = Builders<Course>.Sort.Descending(x => x.Cdate);
             var filter = Builders<Course>.Filter.ElemMatch(x => x.Students, o => o.user_id == userId);
-            return await courseRepository.GetMany(page, pageSize, filter, sort);
+            var proj = Builders<Course>.Projection.Exclude(x => x.Videos);
+
+            return await courseRepository.GetManyByFilter(page, pageSize, filter, sort, proj);
         }
 
         public async Task<PaginationModel<Course>> GetNewestCourses(int page, int pageSize)
         {
-            SortDefinition<Course> sort = Builders<Course>.Sort.Descending(x => x.Cdate);
+            var filter = Builders<Course>.Filter.Empty;
+            var sort = Builders<Course>.Sort.Descending(x => x.Cdate);
+            var proj = Builders<Course>.Projection.Exclude(x => x.Videos);
             //var filter = Builders<Videos>.Filter.Ne(u => u.StatusNum, (int)VideoStatus.TestData);
 
-            return await courseRepository.GetMany(page, pageSize, null, sort);
+            return await courseRepository.GetManyByFilter(page, pageSize, filter, sort, proj);
         }
     }
 }
