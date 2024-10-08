@@ -18,6 +18,7 @@ namespace BackendNet.Dtos.Video
         public List<string> Tags { set; get; }
         public string FileType { set; get; }
         public string VideoUrl { set; get; }
+        public int Subscribe { set; get; }
         public VideoViewDto()
         {
             

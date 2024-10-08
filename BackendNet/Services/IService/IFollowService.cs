@@ -11,5 +11,7 @@ namespace BackendNet.Services.IService
         Task<Follow> PostFollow(Follow follow);
         Task<bool> RemoveFollow(string Id);
         Task<BsonArray> GetFollowerEmail(string followedId);
+        Task<int> GetTotalFollow(string userId);
+
     }
 }

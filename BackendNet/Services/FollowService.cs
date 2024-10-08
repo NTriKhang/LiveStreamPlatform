@@ -16,6 +16,12 @@ namespace BackendNet.Services
         {
             this.followRepository = followRepository;
         }
+        public async Task<int> GetTotalFollow(string userId)
+        {
+            var filter = Builders<Follow>.Filter.Eq(x => x.Followed.user_id, userId);
+            var res = await followRepository.GetAll(filter, null);
+            return res.Count();
+        }
         public async Task<PaginationModel<Follow>> GetFollower(string followed_id, int page)
         {
 

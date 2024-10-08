@@ -31,12 +31,14 @@ namespace BackendNet.Controllers
         private readonly IUserService _userService;
         private readonly IRecommendService _recommendService;
         private readonly ITrendingService _trendingService;
+        private readonly IFollowService _followService;
         public VideoController(IVideoService videoService
             , IAwsService awsService
             , IConfiguration configuration
             , IUserService userService
             , IRecommendService recommendService
             , ITrendingService trendingService
+            , IFollowService followService
             )
         {
             _userService = userService;
@@ -45,6 +47,7 @@ namespace BackendNet.Controllers
             _awsService = awsService;
             _recommendService = recommendService;
             _trendingService = trendingService;
+            _followService = followService;
         }
         //[HttpGet("findVideos/{title}")]
         //public async Task<PaginationModel<VideoViewDto>> FindVideos(string title)
@@ -73,6 +76,8 @@ namespace BackendNet.Controllers
                 string videoUrl = _configuration.GetValue<string>("CloudFrontEduVideo") ?? "";
                 videoUrl += "/" + video.VideoUrl;
                 VideoViewDto videoViewDto = new VideoViewDto(video, subuser, videoUrl);
+
+                videoViewDto.Subscribe = await _followService.GetTotalFollow(video.User_id);
 
                 _ = Task.Run(async () =>
                 {
