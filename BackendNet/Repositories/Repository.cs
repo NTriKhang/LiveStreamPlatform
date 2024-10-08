@@ -38,10 +38,10 @@ namespace BackendNet.Repository
         #endregion
 
         #region get many
-        public async Task<IEnumerable<TEntity>> GetAll()
+        public async Task<IEnumerable<TEntity>> GetAll(FilterDefinition<TEntity> filter, SortDefinition<TEntity> sortDefinition)
         {
-            var all = await _collection.FindAsync(Builders<TEntity>.Filter.Empty);
-            return all.ToList();
+            var all = _collection.Find(filter).Sort(sortDefinition);
+            return await all.ToListAsync();
         }
         public async Task<IEnumerable<TEntity>> GetMany(int page, int size)
         {

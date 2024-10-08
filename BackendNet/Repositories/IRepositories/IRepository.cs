@@ -26,7 +26,7 @@ namespace BackendNet.Repository.IRepositories
         // old version
         Task<IEnumerable<TEntity>> GetManyByKey(string key, string keyValue, FilterDefinition<TEntity>? additionalFilter = null);
         Task<PaginationModel<TEntity>> GetManyByKey(string key, string keyValue, int page, int size, FilterDefinition<TEntity>? additionalFilter = null);
-        Task<IEnumerable<TEntity>> GetAll();
+        Task<IEnumerable<TEntity>> GetAll(FilterDefinition<TEntity> filter, SortDefinition<TEntity> sortDefinition);
 
     }
 }

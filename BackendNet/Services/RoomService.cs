@@ -120,7 +120,8 @@ namespace BackendNet.Services
             try
             {
                 var filter = Builders<Rooms>.Filter.Eq(x => x.Owner.user_id, userId);
-                return await roomRepository.GetManyByKey(nameof(Rooms.Owner) + "." + nameof(Rooms.Owner.user_id), userId);
+                var sort = Builders<Rooms>.Sort.Descending(x => x.CDate);
+                return await roomRepository.GetAll(filter, sort);
             }
             catch (Exception)
             {

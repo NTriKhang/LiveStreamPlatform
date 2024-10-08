@@ -98,7 +98,7 @@ namespace BackendNet.Services
         }
         public async Task<IEnumerable<Users>> GetUsersAsync()
         {
-            return await _userRepository.GetAll();
+            return await _userRepository.GetAll(Builders<Users>.Filter.Empty, null);
         }
         public async Task<Users> GetUserById(string id)
         {
