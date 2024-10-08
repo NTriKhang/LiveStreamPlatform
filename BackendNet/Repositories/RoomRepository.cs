@@ -85,7 +85,41 @@ namespace BackendNet.Repositories
             }
 
         }
+        public async Task<bool> RemoveRoom(string roomId)
+        {
+            using (var session = await _client.StartSessionAsync())
+            {
+                session.StartTransaction();
+                try
+                {
+                    FilterDefinition<Rooms> filterRoomDef = Builders<Rooms>.Filter.Eq(x => x._id, roomId);
+                    var room = await GetByFilter(filterRoomDef);
 
+                    var filterOwnerDef = Builders<Users>.Filter.Eq(x => x.Id, room.Owner.user_id);
+                    var updateOwnerDef = Builders<Users>.Update.Unset(x => x.CurrentActivity);
+                    await _userRepository.UpdateByFilter(filterOwnerDef, updateOwnerDef);
+
+                    foreach (var student in room.Attendees)
+                    {
+                        var filterStudentDef = Builders<Users>.Filter.Eq(x => x.Id, student.user_id);
+                        var updateStudentDef = Builders<Users>.Update.Unset(x => x.CurrentActivity);
+                        await _userRepository.UpdateByFilter(filterStudentDef, updateStudentDef);
+                    }
+
+                    var res = await RemoveByKey(nameof(Rooms._id), roomId);
+
+                    await session.CommitTransactionAsync();
+
+                    return res;
+                }
+                catch (Exception ex)
+                {
+                    await session.AbortTransactionAsync();
+                    Console.WriteLine(ex.StackTrace);
+                    return false;
+                }
+            }
+        }
         public async Task<bool> RemoveStudentFromRoom(string roomId, string studentId)
         {
             using (var session = await _client.StartSessionAsync())

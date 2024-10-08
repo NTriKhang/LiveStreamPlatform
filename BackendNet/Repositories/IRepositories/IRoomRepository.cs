@@ -10,5 +10,7 @@ namespace BackendNet.Repositories.IRepositories
         Task<Rooms> AddRoom(Rooms room);
         Task<bool> AddStudentToRoom(string roomId, SubUser student);
         Task<bool> RemoveStudentFromRoom(string roomId, string studentId);
+        Task<bool> RemoveRoom(string roomId);
+
     }
 }

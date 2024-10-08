@@ -92,7 +92,7 @@ namespace BackendNet.Services
         {
             try
             {
-                var res = await roomRepository.RemoveByKey(nameof(Rooms._id), roomId);
+                var res = await roomRepository.RemoveRoom(roomId);
                 return res;
             }
             catch (Exception)
