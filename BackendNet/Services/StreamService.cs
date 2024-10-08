@@ -108,12 +108,21 @@ namespace BackendNet.Services
             Console.WriteLine("Log on publish: " + user.CurrentActivity.value);
             await _hubContext.Clients.Group(user.CurrentActivity.value).SendAsync(OnStreamingEvent, videoUrlDto);
 
-            _ = Task.Run(async () =>
+            //_ = Task.Run(async () =>
+            //{
+            //    var room = await _roomService.GetRoomByRoomKey(streamKey);
+            //    room.VideoUrl = videoUrlDto.videoUrl;
+            //    await _roomService.UpdateRoom(room);
+            //});
+            var room = await _roomService.GetActiveRoomByStreamKey(streamKey);
+            if (room == null)
             {
-                var room = await _roomService.GetRoomByRoomKey(streamKey);
-                room.VideoUrl = videoUrlDto.videoUrl;
-                await _roomService.UpdateRoom(room);
-            });
+                Console.WriteLine("room is null");
+                return false;
+            }
+            room.VideoUrl = videoUrlDto.videoUrl;
+            await _roomService.UpdateRoom(room);
+
             return true;
         }
         public async Task removeStreamVideo(string streamKey)

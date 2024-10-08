@@ -142,7 +142,16 @@ namespace BackendNet.Services
                 throw;
             }
         }
+        public async Task<Rooms> GetActiveRoomByStreamKey(string streamKey)
+        {
+            var user = await userService.GetUserByStreamKey(streamKey);
 
+            if (user.CurrentActivity == null || user.CurrentActivity.code != "Room")
+                return null;
+
+            var filter = Builders<Rooms>.Filter.Eq(x => x._id, user.CurrentActivity.value);
+            return await roomRepository.GetByFilter(filter);
+        }
         public async Task<ReplaceOneResult> UpdateRoom(Rooms room)
         {
             try
