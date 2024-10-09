@@ -1,4 +1,6 @@
-﻿using BackendNet.Models;
+﻿using BackendNet.Dtos.Follow;
+using BackendNet.Models;
+using BackendNet.Models.Submodel;
 using BackendNet.Repositories;
 using BackendNet.Repositories.IRepositories;
 using BackendNet.Services.IService;
@@ -12,9 +14,14 @@ namespace BackendNet.Services
     public class FollowService : IFollowService
     {
         private readonly IFollowRepository followRepository;
-        public FollowService(IFollowRepository followRepository)
+        private readonly IUserService userService;
+        public FollowService(
+            IFollowRepository followRepository
+            , IUserService userService
+        )
         {
             this.followRepository = followRepository;
+            this.userService = userService;
         }
         public async Task<int> GetTotalFollow(string userId)
         {
@@ -84,8 +91,33 @@ namespace BackendNet.Services
             return await followRepository.GetManyByKey(nameof(Follow.Follower) + '.' + nameof(Follow.Follower.user_id), follower_id, page, (int)PaginationCount.Follow, additionalFilter: null);
         }
 
-        public async Task<Follow> PostFollow(Follow follow)
+        public async Task<Follow> PostFollow(FollowPostDto followDto, string userId)
         {
+            var followerTask = userService.GetSubUser(userId);
+            var followedTask = userService.GetSubUser(followDto.userId);
+
+            try
+            {
+                await Task.WhenAll(followedTask, followerTask);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
+            if (!followedTask.IsCompletedSuccessfully || !followerTask.IsCompletedSuccessfully)
+                return null;
+
+            var followed = await followedTask;
+            var follower = await followerTask;
+
+            var follow = new Follow()
+            {
+                FollowDate = DateTime.UtcNow,
+                Followed = new FollowInfo(followed.user_id, followed.user_name, followed.user_avatar),
+                Follower = new FollowInfo(follower.user_id, follower.user_name, follower.user_avatar)
+            };
+
             return await followRepository.Add(follow);
         }
 

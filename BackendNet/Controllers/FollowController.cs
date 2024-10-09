@@ -1,7 +1,10 @@
-﻿using BackendNet.Models;
+﻿using BackendNet.Dtos.Follow;
+using BackendNet.Models;
 using BackendNet.Services.IService;
 using BackendNet.Setting;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -38,10 +41,16 @@ namespace BackendNet.Controllers
 
         // POST api/<FollowController>
         [HttpPost("PostFollow")]
-        public async Task<ActionResult> Post([FromBody] Follow follow)
+        [Authorize]
+        public async Task<ActionResult> Post([FromBody] FollowPostDto follow)
         {
-            var res = await followService.PostFollow(follow);
-            return CreatedAtAction("GetFollower", new { followed_id = follow.Followed.user_id}, res);
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var res = await followService.PostFollow(follow, userId);
+
+            if(res == null)
+                return BadRequest(follow);
+
+            return CreatedAtAction("GetFollower", new { followed_id = follow.userId}, res);
         }
 
         //// PUT api/<FollowController>/5
