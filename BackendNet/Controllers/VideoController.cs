@@ -252,6 +252,14 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
+
+        [HttpGet("GetVideoOfCurrentUser")]
+        [Authorize]
+        public async Task<ActionResult<PaginationModel<Videos>>> GetVideoOfCurrentUser([FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Video)
+        {
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return await _videoService.GetUserVideos(page, pageSize, userId);
+        }
         //[HttpGet("following/{page}")]
         //[Authorize]
         //public async Task<ActionResult<List<Videos>>> GetFollowingVideos(int page)
@@ -279,6 +287,6 @@ namespace BackendNet.Controllers
         //        throw;
         //    }
         //}
-      
+
     }
 }

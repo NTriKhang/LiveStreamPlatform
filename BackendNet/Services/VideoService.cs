@@ -49,10 +49,13 @@ namespace BackendNet.Services
             var filDef = Builders<Videos>.Filter.Eq(x => x.Id, videoId);
             return _videoRepository.GetByFilter(filDef);
         }
-        public async Task<PaginationModel<Videos>> GetUserVideos(string userId, int page)
+        public async Task<PaginationModel<Videos>> GetUserVideos(int page, int pageSize, string userId)
         {
-            var additionalFilter = Builders<Videos>.Filter.Ne(nameof(Videos.Status), VideoStatus.Keep.ToString());
-            return await _videoRepository.GetManyByKey(nameof(Videos.User_id), userId, page, (int)PaginationCount.Video, additionalFilter);
+            //var additionalFilter = Builders<Videos>.Filter.Ne(nameof(Videos.Status), VideoStatus.Keep.ToString());
+            return await _videoRepository.GetManyByFilter(page, pageSize,
+                Builders<Videos>.Filter.Eq(x => x.User_id, userId),
+                Builders<Videos>.Sort.Descending(x => x.Time)
+            );
         }
         public async Task UpdateVideoStatus(int status, string id)
         {
