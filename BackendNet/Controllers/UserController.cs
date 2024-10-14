@@ -153,7 +153,7 @@ namespace BackendNet.Controllers
                 var claims = new List<Claim>
                 {
                     new Claim(type: ClaimTypes.NameIdentifier,value: (userAuth.entity as Users).Id!),
-                    new Claim(type: ClaimTypes.UserData, value: (userAuth.entity as Users).Role!)
+                    new Claim(type: ClaimTypes.Role, value: (userAuth.entity as Users).Role!),
                 };
                 var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 await HttpContext.SignInAsync(
@@ -257,7 +257,7 @@ namespace BackendNet.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPut("UpdateStreamKey")]
-        [Authorize]
+        [Authorize(Roles = "Teacher")]
         public async Task<ActionResult> UpdateStreamKey()
         {
             try
