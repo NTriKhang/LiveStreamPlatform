@@ -139,6 +139,7 @@ namespace BackendNet.Controllers
                     room.Status = (int)RoomStatus.Opening;
                     room.Mode = (int)Mode.Public;
                     room.Owner = new Models.Submodel.SubUser(user.Id, user.DislayName, user.AvatarUrl);
+                    room.RoomType = roomCreate.RoomType;
                     var res = await roomService.AddRoom(room);
                     return res;
                 }

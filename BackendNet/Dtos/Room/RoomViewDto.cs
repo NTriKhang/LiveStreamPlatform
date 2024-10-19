@@ -11,6 +11,7 @@ namespace BackendNet.Dtos.Room
         public int Status { get; set; }
         public string StatusName { get; set; }
         public int Mode { get; set; }
+        public int RoomType { get; set; }
         public DateTime CDate { set; get; }
         public List<SubUser> Attendees { set; get; }
     }

@@ -66,6 +66,11 @@ namespace BackendNet
         Closed,
         Expired,
     }
+    public enum RoomType
+    {
+        Meeting,
+        LiveStream
+    }
     public enum Mode
     {
         Public,
