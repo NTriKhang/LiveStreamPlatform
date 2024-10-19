@@ -46,14 +46,32 @@ namespace BackendNet.Services
             if (user.Role == RoleKey.Teacher.ToString())
                 user.StreamInfo = new Models.Submodel.StreamInfo();
             
-            
+            user.Password = CryptPassword(user.Password);
             return await _userRepository.Add(user);
         }
         public async Task<ReturnModel> AuthUser(string username, string password)
         {
-            var user = await _userRepository.AuthAsync(username, password);
+            var filterDef = Builders<Users>.Filter.Eq(x => x.UserName, username);
+            var user = await _userRepository.GetByFilter(filterDef);
+
             if (user == null)
                 return null!;
+
+            if (user.IsScript && !BCrypt.Net.BCrypt.Verify(password, user.Password))
+            {
+                return new ReturnModel(400, "Sai mật khẩu", null);
+            }
+
+            if (user.IsScript == false)
+            {
+                var newPassword = CryptPassword(user.Password);
+
+                user.IsScript = true;
+                user.Password = newPassword;
+
+                var filter = Builders<Users>.Filter.Eq(x => x.Id, user.Id);
+                _ = _userRepository.ReplaceAsync(filter, user);
+            }
             return new ReturnModel(200, string.Empty, user);
 
             //var userAgent = _contextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString() ?? string.Empty;
@@ -95,6 +113,10 @@ namespace BackendNet.Services
                 //await db.KeyDeleteAsync(user.Id);
                 throw;
             }
+        }
+        private string CryptPassword(string password)
+        {
+            return BCrypt.Net.BCrypt.HashPassword(password);
         }
         public async Task<IEnumerable<Users>> GetUsersAsync()
         {

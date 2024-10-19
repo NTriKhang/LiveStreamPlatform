@@ -16,6 +16,7 @@ namespace BackendNet.Models
         public string Password { get; set; } = "";
         public string Role { get; set; } = "";
         public string AvatarUrl { set; get; } = "";
+        public bool IsScript { set; get; }
         public StreamInfo StreamInfo { get; set; }
         public CurrentActivity CurrentActivity { get; set; }
         public List<SubTrade> Incomes { get; set; }

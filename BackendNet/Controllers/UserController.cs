@@ -116,6 +116,7 @@ namespace BackendNet.Controllers
                         DislayName = user.DislayName,
                         Role = user.Role,
                         AvatarUrl = "https://thumbs.dreamstime.com/b/default-avatar-profile-icon-vector-social-media-user-photo-183042379.jpg"
+                        , IsScript = true
                     }
                 );
                 
@@ -146,6 +147,10 @@ namespace BackendNet.Controllers
                 if(userAuth.code == 300)
                 {
                     return StatusCode(StatusCodes.Status303SeeOther, user);
+                }
+                if(userAuth.code == 400)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, "Sai mật khẩu");
                 }
                 var expired_time = DateTime.Now.AddDays(6);
 
