@@ -42,9 +42,6 @@ namespace BackendNet.Services
                 return new Users() { Email = "409" };
             else if (task2.Result)
                 return new Users() { UserName = "409" };
-
-            if (user.Role == RoleKey.Teacher.ToString())
-                user.StreamInfo = new Models.Submodel.StreamInfo();
             
             user.Password = CryptPassword(user.Password);
             return await _userRepository.Add(user);

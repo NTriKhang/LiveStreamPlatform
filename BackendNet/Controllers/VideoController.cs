@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BackendNet.Dtos;
+using BackendNet.Dtos.Comment;
 using BackendNet.Dtos.Video;
 using BackendNet.Hubs;
 using BackendNet.Models;
@@ -32,6 +33,7 @@ namespace BackendNet.Controllers
         private readonly IRecommendService _recommendService;
         private readonly ITrendingService _trendingService;
         private readonly IFollowService _followService;
+        private readonly ICommentService _commentService;
         public VideoController(IVideoService videoService
             , IAwsService awsService
             , IConfiguration configuration
@@ -39,6 +41,7 @@ namespace BackendNet.Controllers
             , IRecommendService recommendService
             , ITrendingService trendingService
             , IFollowService followService
+            , ICommentService commentService
             )
         {
             _userService = userService;
@@ -48,6 +51,7 @@ namespace BackendNet.Controllers
             _recommendService = recommendService;
             _trendingService = trendingService;
             _followService = followService;
+            _commentService = commentService;
         }
         //[HttpGet("findVideos/{title}")]
         //public async Task<PaginationModel<VideoViewDto>> FindVideos(string title)
@@ -259,6 +263,44 @@ namespace BackendNet.Controllers
         {
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             return await _videoService.GetUserVideos(page, pageSize, userId);
+        }
+        [HttpGet("GetComment")]
+        public async Task<PaginationModel<Comment>> GetComment(
+            [FromQuery] string moduleId
+            , [FromQuery] int page = 1
+            , [FromQuery] int pageSize = (int)PaginationCount.Course
+        )
+        {
+            try
+            {
+                return await _commentService.GetComments("Video", moduleId, page, pageSize);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        [HttpGet("PostComment")]
+        [Authorize]
+        public async Task<Comment> PostComment(
+            CommentCreateDto createDto
+        )
+        {
+            try
+            {
+                var res = await _commentService.AddComment(
+                    createDto
+                    , User.FindFirstValue(ClaimTypes.NameIdentifier)
+                    , "Video"
+                );
+                return res;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
         //[HttpGet("following/{page}")]
         //[Authorize]
