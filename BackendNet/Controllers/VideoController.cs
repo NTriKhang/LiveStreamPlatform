@@ -281,7 +281,7 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
-        [HttpGet("PostComment")]
+        [HttpPost("PostComment")]
         [Authorize]
         public async Task<Comment> PostComment(
             CommentCreateDto createDto

@@ -25,7 +25,7 @@ namespace BackendNet.Services
         }
         public async Task<Comment> AddComment(CommentCreateDto commentDto, string userId, string module)
         {
-            Comment cmt = null;
+            Comment cmt = new Comment();
 
             _mapper.Map(commentDto, cmt);
 
