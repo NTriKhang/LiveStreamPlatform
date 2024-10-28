@@ -11,15 +11,20 @@ namespace BackendNet.Services.IService
     {
         Task<Rooms> GetRoomByRoomKey(string roomKey);
         Task<Rooms> GetRoomById(string roomId);
+        Task<Rooms> GetActiveRoomByStreamKey(string streamKey);
         Task<IEnumerable<Rooms>> GetRoomByUserId(string userId);
+
         Task<ReturnModel> AddRoom(Rooms room);
-        Task<ReplaceOneResult> UpdateRoom(Rooms room);
-        Task<bool> DeleteRoom(string roomId);
         Task<bool> AddStudentToRoom(string roomId, SubUser student);
+
+        Task<ReplaceOneResult> UpdateRoom(Rooms room);
+
+        Task<bool> DeleteRoom(string roomId);
+
         Task SendRequestToTeacher(Rooms rooms, SubUser subUser, string cmd);
         Task ResponseRequestToStudent(ResponseRoomRequestDto response);
         Task<bool> RemoveStudentFromRoom(RemoveFromRoomDto removeFrom);
-        Task<Rooms> GetActiveRoomByStreamKey(string streamKey);
 
+        Task<bool> IsRoomHasUserId(string roomKey, string userId);
     }
 }

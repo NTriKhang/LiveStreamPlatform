@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using AgoraIO.Media;
+using AutoMapper;
 using BackendNet.Dtos;
 using BackendNet.Dtos.HubDto.Room;
 using BackendNet.Dtos.Room;
@@ -16,6 +17,8 @@ using Microsoft.AspNetCore.SignalR;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Driver;
+using Org.BouncyCastle.Asn1.Cmp;
+using System;
 using System.Net;
 using System.Security.Claims;
 
@@ -285,7 +288,41 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
+        [HttpGet("GenerateMeetingToken")]
+        [Authorize]
+        public async Task<ReturnModel> GenerateRtcToken(string channelName)
+        {
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var room = await roomService.GetRoomByRoomKey(channelName);
 
+            string userName = "";
+
+            if (room.Attendees.Where(x => x.user_id == userId).Any())
+                userName = room.Attendees.Where(x => x.user_id == userId).Select(x => x.user_name).FirstOrDefault();
+
+            if(room.Owner.user_id == userId)
+                userName = room.Owner.user_name;
+
+            if(userName == "")
+                return new ReturnModel(400, "Không tìm thấy phòng hoặc người dùng không có trong phòng", null);
+            
+            string _appId = "2a1f82d264aa44cd915e30f6bfd0505a";
+            //string _appCertificate = "4f3398988a4f41d0b23b641d30a5bb92";
+            string userRole = "";
+            if (room.Owner.user_id == userId)
+                userRole = "host";
+            else
+                userRole = "audience";
+
+            return new ReturnModel(200, "", new
+            {
+                role = userRole,
+                appId = _appId,
+                userName = userName,
+                screenSharing = userRole == "host" ? true : false,
+                showPopUpBeforeRemoteMute = userRole == "host" ? true : false,
+            });
+        }
     }
 
 }

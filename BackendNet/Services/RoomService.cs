@@ -225,5 +225,17 @@ namespace BackendNet.Services
                 throw;
             }
         }
+
+        public async Task<bool> IsRoomHasUserId(string roomKey, string userId)
+        {
+            var filter = Builders<Rooms>.Filter.And(
+                Builders<Rooms>.Filter.Eq(x => x.RoomKey, roomKey),
+                Builders<Rooms>.Filter.Or(
+                    Builders<Rooms>.Filter.ElemMatch(x => x.Attendees, x => x.user_id == userId),
+                    Builders<Rooms>.Filter.Eq(x => x.Owner.user_id, userId)
+                )
+            );
+            return await roomRepository.IsExist(filter);
+        }
     }
 }

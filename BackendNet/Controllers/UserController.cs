@@ -223,7 +223,7 @@ namespace BackendNet.Controllers
         {
             try
             {
-                Response.Cookies.Append("AuthToken", "", new CookieOptions
+                Response.Cookies.Append(".AspNetCore.Cookies", "", new CookieOptions
                 {
                     Expires = DateTime.Now.AddDays(-1)
                 });
