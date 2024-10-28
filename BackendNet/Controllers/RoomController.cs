@@ -321,6 +321,7 @@ namespace BackendNet.Controllers
                 userName = userName,
                 screenSharing = userRole == "host" ? true : false,
                 showPopUpBeforeRemoteMute = userRole == "host" ? true : false,
+                disableRtm = userRole == "host" ? false : true, 
             });
         }
     }
