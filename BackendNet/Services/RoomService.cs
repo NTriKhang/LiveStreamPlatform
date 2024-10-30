@@ -221,7 +221,7 @@ namespace BackendNet.Services
             try
             {
                 bool res = false;
-                var filter = Builders<Rooms>.Filter.Eq(x => x._id, removeFromRoomDto.RoomId);
+                var filter = Builders<Rooms>.Filter.Eq(x => x.RoomKey, removeFromRoomDto.RoomId);
                 var room = await roomRepository.GetByFilter(filter);
 
                 if (room == null)
@@ -230,7 +230,7 @@ namespace BackendNet.Services
                 if(room.Owner.user_id == removeFromRoomDto.UserId)
                     res = await roomRepository.RemoveRoom(room);
                 else
-                    res = await roomRepository.RemoveFromRoom(removeFromRoomDto.RoomId, removeFromRoomDto.UserId);
+                    res = await roomRepository.RemoveFromRoom(room._id, removeFromRoomDto.UserId);
                    
 
                 if (res)

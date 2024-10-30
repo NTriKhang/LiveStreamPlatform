@@ -271,10 +271,14 @@ namespace BackendNet.Controllers
             }
         }
         [HttpPut("RemoveFromRoom")]
+        [Authorize]
         public async Task<ReturnModel> RemoveFromRoom(RemoveFromRoomDto removeFromRoomDto)
         {
             try
             {
+                if (removeFromRoomDto.UserId == null || removeFromRoomDto.UserId == "")
+                    removeFromRoomDto.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
                 var res = await roomService.RemoveFromRoom(removeFromRoomDto);
                 if (res)
                 {
@@ -294,6 +298,9 @@ namespace BackendNet.Controllers
         {
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var room = await roomService.GetRoomByRoomKey(channelName);
+
+            if (room == null)
+                return new ReturnModel(404, "Phòng học không tồn tại", null);
 
             string userName = "";
 

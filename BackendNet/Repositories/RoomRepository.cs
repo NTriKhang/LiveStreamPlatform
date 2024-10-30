@@ -96,13 +96,16 @@ namespace BackendNet.Repositories
                     var updateOwnerDef = Builders<Users>.Update.Unset(x => x.CurrentActivity);
                     await _userRepository.UpdateByFilter(filterOwnerDef, updateOwnerDef);
 
-                    foreach (var student in room.Attendees)
+                    if(room.Attendees != null)
                     {
-                        var filterStudentDef = Builders<Users>.Filter.Eq(x => x.Id, student.user_id);
-                        var updateStudentDef = Builders<Users>.Update.Unset(x => x.CurrentActivity);
-                        await _userRepository.UpdateByFilter(filterStudentDef, updateStudentDef);
-                    }
+                        foreach (var student in room.Attendees)
+                        {
+                            var filterStudentDef = Builders<Users>.Filter.Eq(x => x.Id, student.user_id);
+                            var updateStudentDef = Builders<Users>.Update.Unset(x => x.CurrentActivity);
+                            await _userRepository.UpdateByFilter(filterStudentDef, updateStudentDef);
+                        }
 
+                    }
                     var res = await RemoveByKey(nameof(Rooms._id), room._id);
 
                     await session.CommitTransactionAsync();
@@ -112,6 +115,7 @@ namespace BackendNet.Repositories
                 catch (Exception ex)
                 {
                     await session.AbortTransactionAsync();
+                    Console.WriteLine(ex.Message);
                     Console.WriteLine(ex.StackTrace);
                     return false;
                 }
