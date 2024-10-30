@@ -35,6 +35,7 @@ services:
     ports:
       - 1935:1935
       - 8000:8000
+      - 8888:8888
     volumes:
       - ./Hls_video:/tmp/hls
 

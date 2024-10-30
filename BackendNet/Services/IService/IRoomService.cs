@@ -23,7 +23,7 @@ namespace BackendNet.Services.IService
 
         Task SendRequestToTeacher(Rooms rooms, SubUser subUser, string cmd);
         Task ResponseRequestToStudent(ResponseRoomRequestDto response);
-        Task<bool> RemoveStudentFromRoom(RemoveFromRoomDto removeFrom);
+        Task<bool> RemoveFromRoom(RemoveFromRoomDto removeFrom);
 
         Task<bool> IsRoomHasUserId(string roomKey, string userId);
     }

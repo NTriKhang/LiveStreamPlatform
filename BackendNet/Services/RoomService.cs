@@ -9,6 +9,7 @@ using BackendNet.Setting;
 using Microsoft.AspNetCore.SignalR;
 using MongoDB.Driver;
 using System.Net;
+using System.Security.Claims;
 
 namespace BackendNet.Services
 {
@@ -18,17 +19,20 @@ namespace BackendNet.Services
         private readonly IUserService userService;
         private readonly IHubContext<EduNimoHub> eduNimoHubContext;
         private readonly IHubContext<RoomHub> roomHubContext;
+        private readonly IHttpContextAccessor httpContextAccessor;
         public RoomService(
             IRoomRepository roomRepository
             , IUserService userService
             , IHubContext<EduNimoHub> eduNimoHubContext
             , IHubContext<RoomHub> roomHubContext
+            , IHttpContextAccessor httpContextAccessor
         )
         {
             this.roomRepository = roomRepository;
             this.userService = userService;
             this.eduNimoHubContext = eduNimoHubContext;
             this.roomHubContext = roomHubContext;
+            this.httpContextAccessor = httpContextAccessor;
         }
         public async Task<ReturnModel> AddRoom(Rooms room)
         {
@@ -92,7 +96,11 @@ namespace BackendNet.Services
         {
             try
             {
-                var res = await roomRepository.RemoveRoom(roomId);
+                var filter = Builders<Rooms>.Filter.Eq(x => x._id, roomId);
+                var room = await roomRepository.GetByFilter(filter);
+                if (room == null)
+                    return false;
+                var res = await roomRepository.RemoveRoom(room);
                 return res;
             }
             catch (Exception)
@@ -208,13 +216,24 @@ namespace BackendNet.Services
             }
         }
 
-        public async Task<bool> RemoveStudentFromRoom(RemoveFromRoomDto removeFromRoomDto)
+        public async Task<bool> RemoveFromRoom(RemoveFromRoomDto removeFromRoomDto)
         {
             try
             {
-                var res = await roomRepository.RemoveStudentFromRoom(removeFromRoomDto.RoomId, removeFromRoomDto.StudentId);
+                bool res = false;
+                var filter = Builders<Rooms>.Filter.Eq(x => x._id, removeFromRoomDto.RoomId);
+                var room = await roomRepository.GetByFilter(filter);
 
-                if(res)
+                if (room == null)
+                    return false;
+
+                if(room.Owner.user_id == removeFromRoomDto.UserId)
+                    res = await roomRepository.RemoveRoom(room);
+                else
+                    res = await roomRepository.RemoveFromRoom(removeFromRoomDto.RoomId, removeFromRoomDto.UserId);
+                   
+
+                if (res)
                     await roomHubContext.Clients.Group(removeFromRoomDto.RoomId).SendAsync(removeFromRoomDto.Cmd, removeFromRoomDto);
 
                 return res;

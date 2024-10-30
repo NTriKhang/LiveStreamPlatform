@@ -270,12 +270,12 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
-        [HttpPut("RemoveStudentFromRoom")]
-        public async Task<ReturnModel> RemoveStudentFromRoom(RemoveFromRoomDto removeFromRoomDto)
+        [HttpPut("RemoveFromRoom")]
+        public async Task<ReturnModel> RemoveFromRoom(RemoveFromRoomDto removeFromRoomDto)
         {
             try
             {
-                var res = await roomService.RemoveStudentFromRoom(removeFromRoomDto);
+                var res = await roomService.RemoveFromRoom(removeFromRoomDto);
                 if (res)
                 {
                     return new ReturnModel(200, string.Empty, removeFromRoomDto);
