@@ -85,28 +85,28 @@ namespace BackendNet.Repositories
             }
 
         }
-        public async Task<bool> RemoveRoom(string roomId)
+        public async Task<bool> RemoveRoom(Rooms room)
         {
             using (var session = await _client.StartSessionAsync())
             {
                 session.StartTransaction();
                 try
                 {
-                    FilterDefinition<Rooms> filterRoomDef = Builders<Rooms>.Filter.Eq(x => x._id, roomId);
-                    var room = await GetByFilter(filterRoomDef);
-
                     var filterOwnerDef = Builders<Users>.Filter.Eq(x => x.Id, room.Owner.user_id);
                     var updateOwnerDef = Builders<Users>.Update.Unset(x => x.CurrentActivity);
                     await _userRepository.UpdateByFilter(filterOwnerDef, updateOwnerDef);
 
-                    foreach (var student in room.Attendees)
+                    if(room.Attendees != null)
                     {
-                        var filterStudentDef = Builders<Users>.Filter.Eq(x => x.Id, student.user_id);
-                        var updateStudentDef = Builders<Users>.Update.Unset(x => x.CurrentActivity);
-                        await _userRepository.UpdateByFilter(filterStudentDef, updateStudentDef);
-                    }
+                        foreach (var student in room.Attendees)
+                        {
+                            var filterStudentDef = Builders<Users>.Filter.Eq(x => x.Id, student.user_id);
+                            var updateStudentDef = Builders<Users>.Update.Unset(x => x.CurrentActivity);
+                            await _userRepository.UpdateByFilter(filterStudentDef, updateStudentDef);
+                        }
 
-                    var res = await RemoveByKey(nameof(Rooms._id), roomId);
+                    }
+                    var res = await RemoveByKey(nameof(Rooms._id), room._id);
 
                     await session.CommitTransactionAsync();
 
@@ -115,12 +115,13 @@ namespace BackendNet.Repositories
                 catch (Exception ex)
                 {
                     await session.AbortTransactionAsync();
+                    Console.WriteLine(ex.Message);
                     Console.WriteLine(ex.StackTrace);
                     return false;
                 }
             }
         }
-        public async Task<bool> RemoveStudentFromRoom(string roomId, string studentId)
+        public async Task<bool> RemoveFromRoom(string roomId, string studentId)
         {
             using (var session = await _client.StartSessionAsync())
             {
@@ -128,6 +129,7 @@ namespace BackendNet.Repositories
                 try
                 {
                     FilterDefinition<Rooms> filterRoomDef = Builders<Rooms>.Filter.Eq(x => x._id, roomId);
+
                     var updateRoomDef = Builders<Rooms>.Update.PullFilter(
                         x => x.Attendees,
                         Builders<SubUser>.Filter.Eq(x => x.user_id, studentId)
