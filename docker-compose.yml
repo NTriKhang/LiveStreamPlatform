@@ -18,7 +18,14 @@ services:
     #     - path: .
     # depends_on:
     #   - mongodb
-    
+  
+  # fastapi:
+  #   image: fastapi
+  #   build: 
+  #     context: ./Python   
+  #   ports:
+  #     - "800:8000"
+  #   command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
   nginx_rtmp_server:
     image: nginx_rtmp_server
@@ -27,6 +34,7 @@ services:
       dockerfile: ./rtmp/Dockerfile
     ports:
       - 1935:1935
+      - 7135:7135
       - 8888:8888
     volumes:
       - ./Hls_video:/tmp/hls

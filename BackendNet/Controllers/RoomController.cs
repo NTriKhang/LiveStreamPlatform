@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using AgoraIO.Media;
+using AutoMapper;
 using BackendNet.Dtos;
 using BackendNet.Dtos.HubDto.Room;
 using BackendNet.Dtos.Room;
@@ -16,6 +17,8 @@ using Microsoft.AspNetCore.SignalR;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.IdGenerators;
 using MongoDB.Driver;
+using Org.BouncyCastle.Asn1.Cmp;
+using System;
 using System.Net;
 using System.Security.Claims;
 
@@ -50,6 +53,9 @@ namespace BackendNet.Controllers
         {
             try
             {
+                if (roomId == string.Empty)
+                    return new ReturnModel(400, "", "");
+
                 var rooms = await roomService.GetRoomById(roomId);
 
                 if (rooms == null)
@@ -70,6 +76,43 @@ namespace BackendNet.Controllers
                 string streamKey = user.StreamInfo?.Stream_token ?? "";
 
                 object returnObj = new {streamUrl = streamUrl, streamKey = streamKey, room = rooms};
+
+                return new ReturnModel(200, string.Empty, returnObj);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        [HttpGet("GetRoomByKey/{roomKey}")]
+        public async Task<ReturnModel> GetRoomByKey(string roomKey)
+        {
+            try
+            {
+                if (roomKey == string.Empty)
+                    return new ReturnModel(400, "", "");
+
+                var rooms = await roomService.GetRoomByRoomKey(roomKey);
+
+                if (rooms == null)
+                    return new ReturnModel(400, "Không tìm thấy phòng này", roomKey);
+
+                //_ = videoService.UpdateVideoView(rooms.Video.Id!);
+                if (rooms.Status == (int)RoomStatus.Closed)
+                    return new ReturnModel(400, "Phòng này hiện đang đóng", roomKey);
+                else if (rooms.Status == (int)RoomStatus.Expired)
+                    return new ReturnModel(400, "Phòng này đã hết hạn", roomKey);
+
+                string streamUrl = "rtmp://192.168.18.219/live";
+
+                var user = await userService.GetUserById(rooms.Owner.user_id);
+                if (user == null)
+                    return new ReturnModel(404, "User not found", roomKey);
+
+                string streamKey = user.StreamInfo?.Stream_token ?? "";
+
+                object returnObj = new { streamUrl = streamUrl, streamKey = streamKey, room = rooms };
 
                 return new ReturnModel(200, string.Empty, returnObj);
             }
@@ -267,12 +310,16 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
-        [HttpPut("RemoveStudentFromRoom")]
-        public async Task<ReturnModel> RemoveStudentFromRoom(RemoveFromRoomDto removeFromRoomDto)
+        [HttpPut("RemoveFromRoom")]
+        [Authorize]
+        public async Task<ReturnModel> RemoveFromRoom(RemoveFromRoomDto removeFromRoomDto)
         {
             try
             {
-                var res = await roomService.RemoveStudentFromRoom(removeFromRoomDto);
+                if (removeFromRoomDto.UserId == null || removeFromRoomDto.UserId == "")
+                    removeFromRoomDto.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                var res = await roomService.RemoveFromRoom(removeFromRoomDto);
                 if (res)
                 {
                     return new ReturnModel(200, string.Empty, removeFromRoomDto);
@@ -285,7 +332,45 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
+        [HttpGet("GenerateMeetingToken")]
+        [Authorize]
+        public async Task<ReturnModel> GenerateRtcToken(string channelName)
+        {
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var room = await roomService.GetRoomByRoomKey(channelName);
 
+            if (room == null)
+                return new ReturnModel(404, "Phòng học không tồn tại", null);
+
+            string userName = "";
+
+            if (room.Attendees.Where(x => x.user_id == userId).Any())
+                userName = room.Attendees.Where(x => x.user_id == userId).Select(x => x.user_name).FirstOrDefault();
+
+            if(room.Owner.user_id == userId)
+                userName = room.Owner.user_name;
+
+            if(userName == "")
+                return new ReturnModel(400, "Không tìm thấy phòng hoặc người dùng không có trong phòng", null);
+            
+            string _appId = "2a1f82d264aa44cd915e30f6bfd0505a";
+            //string _appCertificate = "4f3398988a4f41d0b23b641d30a5bb92";
+            string userRole = "";
+            if (room.Owner.user_id == userId)
+                userRole = "host";
+            else
+                userRole = "audience";
+
+            return new ReturnModel(200, "", new
+            {
+                role = userRole,
+                appId = _appId,
+                userName = userName,
+                screenSharing = userRole == "host" ? true : false,
+                showPopUpBeforeRemoteMute = userRole == "host" ? true : false,
+                disableRtm = userRole == "host" ? false : true, 
+            });
+        }
     }
 
 }

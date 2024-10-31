@@ -12,6 +12,15 @@ from surprise.model_selection import train_test_split
 import redis
 import json 
 
+import sys
+import hashlib
+
+sys.path.append('./Tools/DynamicKey/AgoraDynamicKey/python/src')
+from Tools.DynamicKey.AgoraDynamicKey.python.src.RtcTokenBuilder2 import RtcTokenBuilder, Role_Subscriber # type: ignore
+
+app_id = "c1b98689c58b489a9988c2eac3a65f5e"
+app_certificate = "4f3398988a4f41d0b23b641d30a5bb92"
+
 app = FastAPI()
 
 client = MongoClient('mongodb+srv://caohieeu2003:5qqJ1I5aVbOVfd0X@educationlivesream.gbct01s.mongodb.net/?retryWrites=true&w=majority&appName=EducationLivesream')
@@ -74,3 +83,19 @@ def read_train():
     redis_client.set('svd_predictions', json.dumps(results))
 
     return {"message": "Predictions stored in Redis", "predictions_count": len(results)}
+
+@app.get("/GetToken")
+def getToken(UserId: str, channel_name: str):
+    token_expiration_in_seconds = 3600
+    privilege_expiration_in_seconds = 3600
+
+    hash_object = hashlib.sha256(UserId.encode())
+    hash_hex = hash_object.hexdigest()
+    user_id_hash_int = int(hash_hex, 16)
+
+    if not app_id or not app_certificate:
+        return {"error": "Need to set AGORA_APP_ID and AGORA_APP_CERTIFICATE"}
+
+    token = RtcTokenBuilder.build_token_with_uid(app_id, app_certificate, channel_name, user_id_hash_int, Role_Subscriber,
+                                                 token_expiration_in_seconds, privilege_expiration_in_seconds)
+    return {"token": token}
