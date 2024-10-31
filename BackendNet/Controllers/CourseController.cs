@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BackendNet.Dtos.Comment;
 using BackendNet.Dtos.Course;
 using BackendNet.Dtos.Video;
 using BackendNet.Models;
@@ -25,6 +26,8 @@ namespace BackendNet.Controllers
         private readonly IStripeService _paymentService;
         private readonly IConfiguration _configuration;
         private readonly IMapper _mapper;
+        private readonly ICommentService _commentService;
+
         public CourseController(
             ICourseService courseService
             , IUserService userService
@@ -33,6 +36,8 @@ namespace BackendNet.Controllers
             , IStripeService paymentService
             , IConfiguration configuration
             , IMapper mapper
+            , ICommentService commentService
+
         )
         {
             _courseService = courseService;
@@ -42,6 +47,8 @@ namespace BackendNet.Controllers
             _paymentService = paymentService;
             _configuration = configuration;
             _mapper = mapper;
+            _commentService = commentService;
+
         }
         //[HttpGet("GetUserCourse")]
         //public async Task<IEnumerable<Course>> getCourse(string userId, [FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Course)
@@ -378,6 +385,44 @@ namespace BackendNet.Controllers
                     return NoContent();
 
                 return BadRequest();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        [HttpGet("GetComment")]
+        public async Task<PaginationModel<Comment>> GetComment(
+            [FromQuery] string moduleId
+            , [FromQuery] int page = 1
+            , [FromQuery] int pageSize = (int)PaginationCount.Course
+        )
+        {
+            try
+            {
+                return await _commentService.GetComments("Course", moduleId, page, pageSize);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        [HttpPost("PostComment")]
+        [Authorize]
+        public async Task<Comment> PostComment(
+            CommentCreateDto createDto
+        )
+        {
+            try
+            {
+                var res = await _commentService.AddComment(
+                    createDto
+                    , User.FindFirstValue(ClaimTypes.NameIdentifier)
+                    , "Course"
+                );
+                return res;
             }
             catch (Exception)
             {
