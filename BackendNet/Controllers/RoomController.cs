@@ -53,6 +53,9 @@ namespace BackendNet.Controllers
         {
             try
             {
+                if (roomId == string.Empty)
+                    return new ReturnModel(400, "", "");
+
                 var rooms = await roomService.GetRoomById(roomId);
 
                 if (rooms == null)
@@ -73,6 +76,43 @@ namespace BackendNet.Controllers
                 string streamKey = user.StreamInfo?.Stream_token ?? "";
 
                 object returnObj = new {streamUrl = streamUrl, streamKey = streamKey, room = rooms};
+
+                return new ReturnModel(200, string.Empty, returnObj);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        [HttpGet("GetRoomByKey/{roomKey}")]
+        public async Task<ReturnModel> GetRoomByKey(string roomKey)
+        {
+            try
+            {
+                if (roomKey == string.Empty)
+                    return new ReturnModel(400, "", "");
+
+                var rooms = await roomService.GetRoomByRoomKey(roomKey);
+
+                if (rooms == null)
+                    return new ReturnModel(400, "Không tìm thấy phòng này", roomKey);
+
+                //_ = videoService.UpdateVideoView(rooms.Video.Id!);
+                if (rooms.Status == (int)RoomStatus.Closed)
+                    return new ReturnModel(400, "Phòng này hiện đang đóng", roomKey);
+                else if (rooms.Status == (int)RoomStatus.Expired)
+                    return new ReturnModel(400, "Phòng này đã hết hạn", roomKey);
+
+                string streamUrl = "rtmp://192.168.18.219/live";
+
+                var user = await userService.GetUserById(rooms.Owner.user_id);
+                if (user == null)
+                    return new ReturnModel(404, "User not found", roomKey);
+
+                string streamKey = user.StreamInfo?.Stream_token ?? "";
+
+                object returnObj = new { streamUrl = streamUrl, streamKey = streamKey, room = rooms };
 
                 return new ReturnModel(200, string.Empty, returnObj);
             }
