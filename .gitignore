@@ -8,7 +8,9 @@ docker-compose.dcproj
 key.env
 FrontAng/
 
+
 Python/__pycache__
+
 
 BackendNet/bin/
 BackendNet/obj/

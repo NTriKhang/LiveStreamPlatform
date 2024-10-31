@@ -190,7 +190,7 @@ namespace BackendNet.Repository
             model.page = page;
             model.pageSize = data.Count;
             model.total_rows = (int)(await _collection.Find(filter).CountDocumentsAsync());
-            model.total_pages = (int)Math.Ceiling(model.total_rows / (double)data.Count);
+            model.total_pages = (int)Math.Ceiling(model.total_rows / (double)pageSize);
 
             return model;
         }
@@ -216,7 +216,7 @@ namespace BackendNet.Repository
             model.page = page;
             model.pageSize = data.Count;
             model.total_rows = (int)(await _collection.Find(filter).CountDocumentsAsync());
-            model.total_pages = (int)Math.Ceiling(model.total_rows / (double)data.Count);
+            model.total_pages = (int)Math.Ceiling(model.total_rows / (double)pageSize);
 
             return model;
         }
