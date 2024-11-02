@@ -148,22 +148,31 @@ namespace BackendNet.Controllers
         /// <param name="courseId"></param>
         /// <returns></returns>
         [HttpGet("GetCourse/{courseId}")]
+        [AllowAnonymous]
         public async Task<ActionResult<CourseViewDto>> getCourse(string courseId)
         {
             try
             {
+                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+
                 var course = await _courseService.GetCourse(courseId);
                 if (course == null)
                     return NoContent();
-
                 var courseView = new CourseViewDto();
                 _mapper.Map(course, courseView);
                 courseView.Videos = new List<VideoViewDto>();
+
+                bool isStudent = course.Students.Where(x => x.user_id ==  userId).Any();
                 foreach(var video in course.Videos)
                 {
-                    string videoUrl = _configuration.GetValue<string>("CloudFrontEduVideo") ?? "";
-                    videoUrl += "/" + video.Id;
+                    string videoUrl = string.Empty;
+                    if (video.StatusNum == (int)VideoStatus.Public || isStudent)
+                    {
+                        videoUrl = _configuration.GetValue<string>("CloudFrontEduVideo") ?? "";
+                        videoUrl += "/" + video.Id;
+                    }
                     courseView.Videos.Add(new VideoViewDto(video, course.Cuser, videoUrl));
+
                 }
 
                 return Ok(courseView);
@@ -352,8 +361,15 @@ namespace BackendNet.Controllers
             try
             {
                 Videos video = _mapper.Map<CourseVideoCreateDto, Videos>(videoCreate);
+                
                 video.User_id = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
                 video.Id = videoCreate._id;
+                video.StatusNum = int.Parse(video.Status);
+                video.Time = DateTime.UtcNow;
+                video.View = 0;
+                video.Like = 0;
+
+
                 var res = await _courseService.AddVideoToCrs(courseId, video);
                 if(res.IsAcknowledged)
                     return NoContent();
