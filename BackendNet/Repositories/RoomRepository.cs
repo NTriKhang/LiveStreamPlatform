@@ -110,6 +110,11 @@ namespace BackendNet.Repositories
 
                     await session.CommitTransactionAsync();
 
+                    if(room.RoomType == (int)RoomType.LiveStream)
+                    {
+
+                    }
+
                     return res;
                 }
                 catch (Exception ex)

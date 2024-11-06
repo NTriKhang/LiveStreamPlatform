@@ -205,13 +205,19 @@ namespace BackendNet.Services
         {
             try
             {
+                if (response.Res)
+                {
+                    var room = await roomRepository.GetByFilter(Builders<Rooms>.Filter.Eq(x => x._id, response.RoomId));
+                    if (room != null)
+                        response.RoomType = room.RoomType;
+                }
+
                 await eduNimoHubContext.Clients.Group(response.StudentId).SendAsync(response.Cmd, response);
                 if(response.Res)
                     await roomHubContext.Clients.Group(response.RoomId).SendAsync(response.Cmd, response);
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
