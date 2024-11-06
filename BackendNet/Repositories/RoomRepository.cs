@@ -13,11 +13,15 @@ namespace BackendNet.Repositories
     public class RoomRepository : Repository<Rooms>, IRoomRepository
     {
         private IUserRepository _userRepository;
+        private IConfiguration configuration;
         public RoomRepository(IMongoContext context
             , IUserRepository userRepository
+            , IConfiguration configuration
+
             ) : base(context)
         {
             _userRepository = userRepository;
+            this.configuration = configuration;
         }
         public async Task<Rooms> AddRoom(Rooms room)
         {
@@ -112,7 +116,14 @@ namespace BackendNet.Repositories
 
                     if(room.RoomType == (int)RoomType.LiveStream)
                     {
-
+                        _ = Task.Run(async () =>
+                        {
+                            var user = await _userRepository.GetByFilter(filterOwnerDef);
+                            string filePathConfig = configuration.GetValue<string>("FilePath")!;
+                            var filePath = filePathConfig + user.StreamInfo.Stream_token;
+                            
+                            Directory.Delete(filePath, recursive: true);
+                        });
                     }
 
                     return res;
