@@ -1,4 +1,5 @@
 ﻿using BackendNet.Models;
+using BackendNet.Models.Submodel;
 using BackendNet.Setting;
 
 namespace BackendNet.Services.IService
@@ -7,6 +8,7 @@ namespace BackendNet.Services.IService
     {
         Task<Videos> AddVideoAsync(Videos video);
         Task<Videos> GetVideoAsync(string videoId);
+        Task<SubVideo> GetSubVideo(string videoId);
         Task<PaginationModel<Videos>> GetNewestVideo(int page, int pageSize);
         Task<PaginationModel<Videos>> GetRecommendVideo(int page, int pageSize, string userId);
         Task<PaginationModel<Videos>> GetUserVideos(int page, int pageSize, string userId);

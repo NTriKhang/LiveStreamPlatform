@@ -30,28 +30,26 @@ namespace BackendNet.Controllers
         private readonly IConfiguration _configuration;
         private readonly IAwsService _awsService;
         private readonly IUserService _userService;
-        private readonly IRecommendService _recommendService;
-        private readonly ITrendingService _trendingService;
         private readonly IFollowService _followService;
         private readonly ICommentService _commentService;
+        private readonly IHistoryService _historyService;
         public VideoController(IVideoService videoService
             , IAwsService awsService
             , IConfiguration configuration
             , IUserService userService
-            , IRecommendService recommendService
-            , ITrendingService trendingService
             , IFollowService followService
             , ICommentService commentService
+            , IHistoryService historyService
+
             )
         {
             _userService = userService;
             _videoService = videoService;
             _configuration = configuration;
             _awsService = awsService;
-            _recommendService = recommendService;
-            _trendingService = trendingService;
             _followService = followService;
             _commentService = commentService;
+            _historyService = historyService;
         }
         //[HttpGet("findVideos/{title}")]
         //public async Task<PaginationModel<VideoViewDto>> FindVideos(string title)
@@ -79,19 +77,23 @@ namespace BackendNet.Controllers
                 var subuser = await _userService.GetSubUser(video.User_id);
                 string videoUrl = _configuration.GetValue<string>("CloudFrontEduVideo") ?? "";
                 videoUrl += "/" + video.VideoUrl;
+
+                if(video.FileType != string.Empty && video.FileType == "hls")
+                {
+                    videoUrl += "/index.m3u8";
+                }
+
                 VideoViewDto videoViewDto = new VideoViewDto(video, subuser, videoUrl);
 
                 videoViewDto.Subscribe = await _followService.GetTotalFollow(video.User_id);
 
-                _ = Task.Run(async () =>
+                if(userId != string.Empty)
                 {
-                    await _videoService.UpdateVideoView(videoId);
-                    if (userId != string.Empty)
+                    _ = Task.Run(async () =>
                     {
-                        await _recommendService.UpdateRecommendInfo(userId, videoId);
-                    }
-                    await _trendingService.ProcessTrend(videoId, (int)videoViewDto.View + 1);
-                });
+                        await _historyService.PostHistory(userId, videoId);
+                    });
+                }
 
 
                 return StatusCode(StatusCodes.Status200OK, videoViewDto);
@@ -232,17 +234,7 @@ namespace BackendNet.Controllers
             var res = await _videoService.GetRecommendVideo(page, pageSize, userId);
             return StatusCode(StatusCodes.Status200OK, res);
         }
-        /// <summary>
-        /// spam api getVideo/{videoId} để tăng GrowthRate trong collection Trending để video đc xem là trend trước
-        /// </summary>
-        /// <param name="page"></param>
-        /// <param name="pageSize"></param>
-        /// <returns></returns>
-        [HttpGet("GetTrendingVideo")]
-        public async Task<ActionResult<PaginationModel<Videos>>> GetTrendingVideo([FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Video)
-        {
-            return await _trendingService.GetTrendingVideo(page, pageSize);
-        }
+
         [HttpDelete("DeleteS3Video/{videoId}")]
         public async Task<ActionResult> DeleteS3Video(string videoId)
         {

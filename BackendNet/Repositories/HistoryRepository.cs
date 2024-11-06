@@ -5,9 +5,9 @@ using BackendNet.Repository;
 
 namespace BackendNet.Repositories
 {
-    public class RecommendRepository : Repository<Recommend>, IRecommendRepository
+    public class HistoryRepository : Repository<History>, IHIstoryRepository
     {
-        public RecommendRepository(IMongoContext context) : base(context)
+        public HistoryRepository(IMongoContext context) : base(context)
         {
         }
     }

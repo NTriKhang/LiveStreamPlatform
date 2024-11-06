@@ -1,5 +1,6 @@
 ﻿using BackendNet.Dtos.Redis;
 using BackendNet.Models;
+using BackendNet.Models.Submodel;
 using BackendNet.Repositories;
 using BackendNet.Repositories.IRepositories;
 using BackendNet.Services.IService;
@@ -15,39 +16,26 @@ namespace BackendNet.Services
     {
         private readonly IVideoRepository _videoRepository;
         private readonly IConnectionMultiplexer _redisConnect;
-        private readonly ITrendingService _trendingService;
         public VideoService(
             IVideoRepository video
-            , ITrendingService trendingService
             , IConnectionMultiplexer redisConnect
 
         )
         {
             _videoRepository = video;
             _redisConnect = redisConnect;
-            _trendingService = trendingService;
-        }
-        public async Task<Videos> AddVideoAsync(Videos video)
-        {
-            try
-            {
-                return await _videoRepository.Add(video);
-
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-        }
-        public async Task<bool> RemoveVideo(string Id)
-        {
-            return await _videoRepository.RemoveByKey(nameof(Follow.Id), Id);
         }
         public Task<Videos> GetVideoAsync(string videoId)
         {
             var filDef = Builders<Videos>.Filter.Eq(x => x.Id, videoId);
             return _videoRepository.GetByFilter(filDef);
+        }
+        public async Task<SubVideo> GetSubVideo(string videoId)
+        {
+            var filter = Builders<Videos>.Filter.Eq(x => x.Id, videoId);
+
+            var video = await _videoRepository.GetByFilter(filter);
+            return new SubVideo(video.Id, video.Title, video.Thumbnail, video.Tags, video.Time ?? DateTime.Now);
         }
         public async Task<PaginationModel<Videos>> GetUserVideos(int page, int pageSize, string userId)
         {
@@ -56,27 +44,6 @@ namespace BackendNet.Services
                 Builders<Videos>.Filter.Eq(x => x.User_id, userId),
                 Builders<Videos>.Sort.Descending(x => x.Time)
             );
-        }
-        public async Task UpdateVideoStatus(int status, string id)
-        {
-            var filter = Builders<Videos>.Filter.Eq(x => x.Id, id);
-            var updateDefine = Builders<Videos>.Update.Set(x => x.StatusNum, status);
-            await _videoRepository.UpdateByFilter(filter, updateDefine);
-        }
-        public Task UpdateVideoView(string videoId)
-        {
-            try
-            {
-                var filter = Builders<Videos>.Filter.Eq(x => x.Id, videoId);
-                var updateDefine = Builders<Videos>.Update.Inc(x => x.View, 1);
-                _ = _videoRepository.UpdateByFilter(filter, updateDefine);
-                return Task.CompletedTask;
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
         }
         public async Task<PaginationModel<Videos>> GetNewestVideo(int page, int pageSize)
         {
@@ -112,7 +79,44 @@ namespace BackendNet.Services
         {
             return _videoRepository.GenerateKey();
         }
+        public async Task<Videos> AddVideoAsync(Videos video)
+        {
+            try
+            {
+                return await _videoRepository.Add(video);
 
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public async Task UpdateVideoStatus(int status, string id)
+        {
+            var filter = Builders<Videos>.Filter.Eq(x => x.Id, id);
+            var updateDefine = Builders<Videos>.Update.Set(x => x.StatusNum, status);
+            await _videoRepository.UpdateByFilter(filter, updateDefine);
+        }
+        public Task UpdateVideoView(string videoId)
+        {
+            try
+            {
+                var filter = Builders<Videos>.Filter.Eq(x => x.Id, videoId);
+                var updateDefine = Builders<Videos>.Update.Inc(x => x.View, 1);
+                _ = _videoRepository.UpdateByFilter(filter, updateDefine);
+                return Task.CompletedTask;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public async Task<bool> RemoveVideo(string Id)
+        {
+            return await _videoRepository.RemoveByKey(nameof(Follow.Id), Id);
+        }
 
     }
 }

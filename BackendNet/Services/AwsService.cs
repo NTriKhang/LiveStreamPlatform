@@ -11,6 +11,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.IO;
 using Amazon.S3.Model;
+using SharpCompress.Common;
 
 namespace BackendNet.Services
 {
@@ -130,8 +131,8 @@ namespace BackendNet.Services
         public async Task<HttpStatusCode> UploadStreamVideo(string streamkey, string folderContainName)
         {
             string filePathConfig = configuration.GetValue<string>("FilePath")!;
-            var filePaths = Directory.GetFiles(filePathConfig, streamkey + '*').ToList();
-            filePaths.AddRange(Directory.GetDirectories(filePathConfig, streamkey + '*'));
+            var filePath = filePathConfig + streamkey;
+
             string accesckey = configuration.GetSection("AwsCredentail").GetValue<string>("AccessKey");
             BasicAWSCredentials basicAWSCredentials =
                 new BasicAWSCredentials(
@@ -144,30 +145,17 @@ namespace BackendNet.Services
             AmazonS3Client s3Client = new AmazonS3Client(basicAWSCredentials, Amazon.RegionEndpoint.APSoutheast2);
             try
             {
-                string bucketName = "khang-hlsvideo";
+                string bucketName = "edunimovideo";
                 await CreateS3Folder(s3Client, bucketName, folderContainName);
 
                 TransferUtility transferUtility = new TransferUtility(s3Client);
-                filePaths.ForEach(async filePath =>
+                var request = new TransferUtilityUploadDirectoryRequest
                 {
-                    string fileName = filePath.Split("/")[filePath.Split("/").Length - 1];
-                    if (filePath.EndsWith(".m3u8"))
-                    {
-                        await transferUtility.UploadAsync(filePath, bucketName, folderContainName + "/index.m3u8");
-                    }
-                    else
-                    {
-                        //Directory.Move(filePath, destinationFolderName + filePath.Split("/")[filePath.Split("/").Length - 1]);
-                        //await CreateS3Folder(s3Client, bucketName, folderContainName + '/' + fileName.Replace(streamkey + "_", ""));
-                        var request = new TransferUtilityUploadDirectoryRequest
-                        {
-                            BucketName = bucketName,
-                            Directory = filePath,
-                            KeyPrefix = folderContainName + '/' + fileName,
-                        };
-                        await transferUtility.UploadDirectoryAsync(request);
-                    }
-                });
+                    BucketName = bucketName,
+                    Directory = filePath,
+                    KeyPrefix = folderContainName,
+                };
+                await transferUtility.UploadDirectoryAsync(request);
                 return HttpStatusCode.NoContent;
             }
             catch (Exception e)

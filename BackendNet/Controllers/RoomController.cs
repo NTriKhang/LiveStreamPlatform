@@ -3,11 +3,13 @@ using AutoMapper;
 using BackendNet.Dtos;
 using BackendNet.Dtos.HubDto.Room;
 using BackendNet.Dtos.Room;
+using BackendNet.Dtos.Video;
 using BackendNet.Hubs;
 using BackendNet.Models;
 using BackendNet.Models.Submodel;
 using BackendNet.Repositories;
 using BackendNet.Repositories.IRepositories;
+using BackendNet.Services;
 using BackendNet.Services.IService;
 using BackendNet.Setting;
 using Microsoft.AspNetCore.Authorization;
@@ -31,17 +33,23 @@ namespace BackendNet.Controllers
         private readonly IMapper mapper;
         private readonly IRoomService roomService;
         private readonly IUserService userService;
+        private readonly IVideoService videoService;
         private readonly IStatusService statusService;
+        private readonly IAwsService awsService;
         public RoomController(IRoomService roomService
             , IMapper mapper
             , IUserService userService
             , IStatusService statusService
+            , IVideoService videoService
+            , IAwsService awsService
             )
         {
             this.mapper = mapper;
             this.roomService = roomService;
             this.userService = userService; 
             this.statusService = statusService;
+            this.awsService = awsService;
+            this.videoService = videoService;
         }
         /// <summary>
         /// 
@@ -325,6 +333,50 @@ namespace BackendNet.Controllers
                     return new ReturnModel(200, string.Empty, removeFromRoomDto);
                 }
                 return new ReturnModel(500, "Internal server error", removeFromRoomDto);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        [HttpPut("UploadVideoStream")]
+        [Authorize]
+        public async Task<ActionResult<ReturnModel>> UploadVideoStream(VideoCreateDto uploadVideoDto)
+        {
+            try
+            {
+                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                string videoId = videoService.GetAvailableId();
+
+                var video = await videoService.AddVideoAsync(new Videos
+                {
+                    Id = videoId,
+                    Title = uploadVideoDto.title,
+                    User_id = userId,
+                    StatusNum = (int)VideoStatus.Upload,
+                    Description = uploadVideoDto.description ?? "",
+                    Like = 0,
+                    Time = DateTime.Now,
+                    View = 0,
+                    Thumbnail = uploadVideoDto.image_url ?? "https://t4.ftcdn.net/jpg/04/73/25/49/360_F_473254957_bxG9yf4ly7OBO5I0O5KABlN930GwaMQz.jpg",
+                    Tags = uploadVideoDto.tags,
+                    VideoSize = uploadVideoDto.video_size,
+                    FileType = uploadVideoDto.file_type,
+                    VideoUrl = videoId
+                });
+                if (video == null)
+                    return StatusCode(StatusCodes.Status500InternalServerError, "Lỗi không thể lưu thông tin video");
+
+                var user = await userService.GetUserById(userId);
+
+                var res = await awsService.UploadStreamVideo(user.StreamInfo.Stream_token, video.Id);
+
+                if (res.ToString().StartsWith('2'))
+                {
+                    return new ReturnModel(200, "Upload success", res);
+                }
+                return new ReturnModel(500, "Internal server error", res);
             }
             catch (Exception)
             {

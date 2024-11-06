@@ -232,7 +232,6 @@ namespace BackendNet.Services
                 else
                     res = await roomRepository.RemoveFromRoom(room._id, removeFromRoomDto.UserId);
                    
-
                 if (res)
                     await roomHubContext.Clients.Group(removeFromRoomDto.RoomId).SendAsync(removeFromRoomDto.Cmd, removeFromRoomDto);
 
