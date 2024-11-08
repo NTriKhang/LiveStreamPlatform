@@ -89,13 +89,15 @@ namespace BackendNet.Controllers
 
                 videoViewDto.Subscribe = await _followService.GetTotalFollow(video.User_id);
 
-                if(userId != string.Empty)
+                _ = Task.Run(async () =>
                 {
-                    _ = Task.Run(async () =>
+                    await _videoService.UpdateVideoView(videoId);
+                    if (userId != string.Empty)
                     {
                         await _historyService.PostHistory(userId, videoId);
-                    });
-                }
+                    }
+
+                });
 
 
                 return StatusCode(StatusCodes.Status200OK, videoViewDto);
