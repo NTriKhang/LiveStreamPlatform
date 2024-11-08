@@ -1,4 +1,5 @@
 ﻿using BackendNet.Models;
+using BackendNet.Repositories;
 using BackendNet.Repositories.IRepositories;
 using BackendNet.Services.IService;
 using BackendNet.Setting;
@@ -19,6 +20,10 @@ namespace BackendNet.Services
             _historyRepository = hIstoryRepository;
             _userService = userService;
             _videoService = videoService;
+        }
+        public async Task<PaginationModel<History>> GetHistoryByFilter(int page, int pageSize, FilterDefinition<History> filterDefinition, SortDefinition<History> sortDefinition)
+        {
+            return await _historyRepository.GetManyByFilter(page, pageSize, filterDefinition, sortDefinition);
         }
         public async Task<PaginationModel<History>> GetHistory(string userId, int page, int pageSize)
         {

@@ -19,7 +19,6 @@ namespace BackendNet.Services
         public VideoService(
             IVideoRepository video
             , IConnectionMultiplexer redisConnect
-
         )
         {
             _videoRepository = video;
@@ -51,27 +50,35 @@ namespace BackendNet.Services
 
             return await _videoRepository.GetMany(page, pageSize, null, sort);
         }
-        public async Task<PaginationModel<Videos>> GetRecommendVideo(int page, int pageSize, string userId)
+        public async Task<PaginationModel<Videos>> GetRecommendVideo(
+            int page
+            , int pageSize
+            , List<string> recentVideoIds)
         {
-            var db = _redisConnect.GetDatabase();
             try
             {
-                var redisVal = await db.StringGetAsync("svd_predictions");
+                var videoFilter = Builders<Videos>.Filter.In(x => x.Id, recentVideoIds);
 
-                var recModel = JsonConvert.DeserializeObject<List<RecommendModel>>(redisVal)
-                    .Where(x => x.user_id == userId)
-                    .OrderByDescending(x => x.predicted_rating)
-                    .Select(x => x.item_id)
-                    .Skip((pageSize - 1) * page)
-                    .Take(pageSize)
-                    .ToList();
+                var recentVideos = await _videoRepository.GetAll(videoFilter, null);
 
-                var filterDef = Builders<Videos>.Filter.In(x => x.Id, recModel);
-                return await _videoRepository.GetManyByFilter(page, pageSize, filterDef, null);
+                var preferredTags = recentVideos
+                   .SelectMany(video => video.Tags.Select(tag => tag.ToString()))
+                   .GroupBy(tag => tag)
+                   .OrderByDescending(group => group.Count())
+                   .Take(3)
+                   .Select(group => group.Key)
+                   .ToList();
+
+                var unseenVideoFilter = Builders<Videos>.Filter.And(
+                    Builders<Videos>.Filter.Nin(x => x.Id, recentVideoIds),
+                    Builders<Videos>.Filter.AnyIn(x => x.Tags, preferredTags)
+                );
+                var recommendations = await _videoRepository.GetManyByFilter(page, pageSize, unseenVideoFilter, null);
+
+                return recommendations;
             }
             catch (Exception)
             {
-                //await db.KeyDeleteAsync(user.Id);
                 throw;
             }
         }

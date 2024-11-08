@@ -16,7 +16,7 @@ namespace BackendNet.Models
         public bool Like { set; get; }
         public bool Dislike { set; get; }
         public int Comment { set; get; }
-
+        public int? calculated_rating { set; get; }
         public History()
         {
             Video = new SubVideo();

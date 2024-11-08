@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using MongoDB.Bson;
+using MongoDB.Driver;
 using Newtonsoft.Json;
 using System.Net;
 using System.Net.Http.Headers;
@@ -183,11 +185,32 @@ namespace BackendNet.Controllers
             return NoContent();
         }
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<List<Videos>>> GetVideos([FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Video)
         {
             try
             {
-                var listVideo = await _videoService.GetNewestVideo(page, pageSize);
+                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
+                PaginationModel<Videos> listVideo = null;
+
+                if(userId == string.Empty)
+                    listVideo = await _videoService.GetNewestVideo(page, pageSize);
+                else
+                {
+                    var historyFilter = Builders<History>.Filter.Eq(x => x.User.user_id, userId);
+                    var historySort = Builders<History>.Sort.Descending(x => x.Time);
+                    var recentHistoryData = await _historyService.GetHistoryByFilter(1, 100, historyFilter, historySort);
+
+                    if(recentHistoryData == null)
+                    {
+                        listVideo = await _videoService.GetNewestVideo(page, pageSize);
+                    }
+                    else
+                    {
+                        var recentVideoIds = recentHistoryData.data.Select(doc => doc.Video.video_id).ToList();
+                        listVideo = await _videoService.GetRecommendVideo(page, pageSize, recentVideoIds);
+                    }
+                }
 
                 if (listVideo == null)
                     return StatusCode(StatusCodes.Status204NoContent, listVideo);
@@ -217,22 +240,6 @@ namespace BackendNet.Controllers
             {
                 throw;
             }
-        }
-
-        /// <summary>
-        /// Đăng nhập trước khi sử dụng
-        /// </summary>
-        /// <param name="page"></param>
-        /// <param name="pageSize"></param>
-        /// <returns></returns>
-        [HttpGet("GetRecommendVideos")]
-        [Authorize]
-        public async Task<ActionResult<PaginationModel<Videos>>> GetRecommendVideos([FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Video)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
-
-            var res = await _videoService.GetRecommendVideo(page, pageSize, userId);
-            return StatusCode(StatusCodes.Status200OK, res);
         }
 
         [HttpDelete("DeleteS3Video/{videoId}")]
