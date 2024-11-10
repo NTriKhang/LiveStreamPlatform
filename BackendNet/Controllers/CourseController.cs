@@ -166,7 +166,9 @@ namespace BackendNet.Controllers
                 foreach(var video in course.Videos)
                 {
                     string videoUrl = string.Empty;
-                    if (video.StatusNum == (int)VideoStatus.Public || isStudent)
+                    if (video.StatusNum == (int)VideoStatus.Public
+                        || userId == course.Cuser.user_id
+                        || isStudent)
                     {
                         videoUrl = _configuration.GetValue<string>("CloudFrontEduVideo") ?? "";
                         videoUrl += "/" + video.Id;
