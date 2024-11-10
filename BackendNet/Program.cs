@@ -124,7 +124,7 @@ internal class Program
             };
             options.Cookie.SameSite = SameSiteMode.None;
             options.Cookie.HttpOnly = true;
-            options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.None;
         });
         //builder.Services.AddAuthentication(cfg =>
         //{
