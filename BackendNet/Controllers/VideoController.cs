@@ -201,7 +201,7 @@ namespace BackendNet.Controllers
                 {
                     var historyFilter = Builders<History>.Filter.Eq(x => x.User.user_id, userId);
                     var historySort = Builders<History>.Sort.Descending(x => x.Time);
-                    var recentHistoryData = await _historyService.GetHistoryByFilter(1, 100, historyFilter, historySort);
+                    var recentHistoryData = await _historyService.GetHistoryByFilter(1, 5, historyFilter, historySort);
 
                     if(recentHistoryData == null)
                     {
@@ -209,8 +209,16 @@ namespace BackendNet.Controllers
                     }
                     else
                     {
-                        var recentVideoIds = recentHistoryData.data.Select(doc => doc.Video.video_id).ToList();
-                        listVideo = await _videoService.GetRecommendVideo(page, pageSize, recentVideoIds);
+                        if(recentHistoryData.data != null)
+                        {
+                            var recentVideoIds = recentHistoryData.data.Select(doc => doc.Video.video_id).ToList();
+                            listVideo = await _videoService.GetRecommendVideo(page, pageSize, recentVideoIds);
+                        }
+                        else
+                        {
+
+                            listVideo = await _videoService.GetNewestVideo(page, pageSize);
+                        }
                     }
                 }
 
