@@ -1,8 +1,45 @@
-﻿using System.Security.Cryptography;
+﻿using StackExchange.Redis;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace BackendNet
 {
+    struct SessionInfo
+    {
+        public string UserId { set; get; }
+        public DateTime ExpiredTime { set;get; }
+    }
+    public static class AuthSession
+    {
+        private static List<SessionInfo> Sessions = new List<SessionInfo>();
+        public static bool IsExist(string UserId)
+        {
+            return Sessions.Any(x => x.UserId == UserId);   
+        }
+        public static void RemoveUserId(string UserId)
+        {
+            var removed = Sessions.Where(x => x.UserId == UserId);
+            if (removed.Any())
+            {
+                Sessions.Remove(removed.SingleOrDefault());
+            }
+        }
+        public static bool AddUserId(string UserId, DateTime ExpiredTime)
+        {
+            if (Sessions.Any(x => x.UserId == UserId) 
+                && Sessions.Where(x => x.UserId == UserId).Select(x => x.ExpiredTime).Single() > DateTime.UtcNow)
+                return false;
+
+            var removed = Sessions.Where(x => x.UserId == UserId);
+            if (removed.Any())
+            {
+                Sessions.Remove(removed.SingleOrDefault());
+            }
+
+            Sessions.Add(new SessionInfo {  UserId = UserId, ExpiredTime = ExpiredTime });
+            return true;
+        }
+    }
     public static class Utility
     {
         public const string ThumbnailImage = "Thumbnail";
