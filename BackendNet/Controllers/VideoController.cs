@@ -186,6 +186,48 @@ namespace BackendNet.Controllers
                 return BadRequest(videoId);
             return NoContent();
         }
+        [HttpPost("SearchVideo")]
+        public async Task<ActionResult<List<Videos>>> SearchVideo(
+            [FromBody] IEnumerable<string> Tags
+            , [FromQuery] int page = 1
+            , [FromQuery] int pageSize = (int)PaginationCount.Video
+            )
+        {
+            try
+            {
+                PaginationModel<Videos> listVideo = null;
+                listVideo = await _videoService.SearchVideo(page, pageSize, Tags);
+
+
+                if (listVideo == null)
+                    return StatusCode(StatusCodes.Status204NoContent, listVideo);
+
+                List<VideoViewDto> videoView = new List<VideoViewDto>();
+                foreach (var video in listVideo.data)
+                {
+                    string videoUrl = _configuration.GetValue<string>("CloudFrontEduVideo") ?? "";
+                    videoUrl += "/" + video.VideoUrl;
+                    var subUser = await _userService.GetSubUser(video.User_id);
+
+                    VideoViewDto videoViewDto = new VideoViewDto(video, subUser, videoUrl);
+                    videoView.Add(videoViewDto);
+                }
+                var paginationModel = new PaginationModel<VideoViewDto>()
+                {
+                    total_pages = listVideo.total_pages,
+                    total_rows = listVideo.total_rows,
+                    page = listVideo.page,
+                    pageSize = listVideo.pageSize,
+                    data = videoView
+                };
+
+                return StatusCode(StatusCodes.Status200OK, paginationModel);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         [HttpGet]
         [AllowAnonymous]
         public async Task<ActionResult<List<Videos>>> GetVideos([FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Video)

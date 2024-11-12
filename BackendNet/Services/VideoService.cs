@@ -5,6 +5,7 @@ using BackendNet.Repositories;
 using BackendNet.Repositories.IRepositories;
 using BackendNet.Services.IService;
 using BackendNet.Setting;
+using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Newtonsoft.Json;
@@ -23,6 +24,16 @@ namespace BackendNet.Services
         {
             _videoRepository = video;
             _redisConnect = redisConnect;
+        }
+
+        public async Task<PaginationModel<Videos>> SearchVideo(
+            int page
+            , int pageSize
+            , IEnumerable<string> Tags)
+        {
+            var filDef = Builders<Videos>.Filter.All(x => x.Tags, Tags);
+            return await _videoRepository.GetManyByFilter(page, pageSize, filDef, Builders<Videos>.Sort.Descending(x => x.Time));
+
         }
         public Task<Videos> GetVideoAsync(string videoId)
         {

@@ -1,11 +1,17 @@
 ﻿using BackendNet.Models;
 using BackendNet.Models.Submodel;
 using BackendNet.Setting;
+using Microsoft.AspNetCore.Mvc;
 
 namespace BackendNet.Services.IService
 {
     public interface IVideoService
     {
+        Task<PaginationModel<Videos>> SearchVideo(
+        int page
+        , int pageSize
+        , IEnumerable<string> Tags);
+
         Task<Videos> AddVideoAsync(Videos video);
         Task<Videos> GetVideoAsync(string videoId);
         Task<SubVideo> GetSubVideo(string videoId);
