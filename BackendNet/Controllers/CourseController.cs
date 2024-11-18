@@ -72,18 +72,25 @@ namespace BackendNet.Controllers
         public async Task<ActionResult> BuyCourse(string courseId)
         {
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+            var course = await _courseService.GetCourse(courseId);
+            if (course.Students.Any(x => x.user_id == userId) || course.Cuser.user_id == userId)
+                return StatusCode(StatusCodes.Status403Forbidden);
+
+            var user = await _userService.GetUserById(userId);
+            var resUrl = await _paymentService.CreatePaymentInfo(course, user);
+
+            return Ok(resUrl);
+
+        }
+        [HttpGet("ConfirmCheckout")]
+        public async Task<ActionResult> ConfirmCheckout([FromQuery] string userId, [FromQuery] string courseId)
+        {
             var user = await _userService.GetSubUser(userId);
             if (user == null)
                 return BadRequest();
-            //string sessionUrl = await _paymentService.CreatePaymentInfo(course, userId);
-            //Response.Headers["Location"] = sessionUrl;
-
-            //return StatusCode(StatusCodes.Status307TemporaryRedirect);
             var res = await _courseService.BuyCourse(courseId, new CourseStudent(userId, user.user_name, user.user_avatar));
             if (res.ModifiedCount == 0)
                 return StatusCode(StatusCodes.Status500InternalServerError);
-
-
 
             _ = Task.Run(async () =>
             {

@@ -7,7 +7,7 @@ namespace BackendNet.Services
 {
     public interface IStripeService
     {
-        Task<string> CreatePaymentInfo(Course course, string buyerId);
+        Task<string> CreatePaymentInfo(Course course, Users users);
         string CreateStripeAccount();
     }
     public class StripeService : IStripeService
@@ -18,6 +18,7 @@ namespace BackendNet.Services
             ,IHttpContextAccessor httpContextAccessor)
         {
             this.configuration = configuration;
+            this.httpContextAccessor = httpContextAccessor;
         }
         public string CreateStripeAccount()
         {
@@ -39,7 +40,7 @@ namespace BackendNet.Services
             service.Create(options);
             return service.BaseUrl;
         }
-        public async Task<string> CreatePaymentInfo(Course course, string buyerId)
+        public async Task<string> CreatePaymentInfo(Course course, Users users)
         {
 
             var userAgent = httpContextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString() ?? string.Empty;
@@ -52,7 +53,6 @@ namespace BackendNet.Services
                     returnUrl = "http://10.0.2.2/";
             }
 
-            
 
             StripeConfiguration.ApiKey = configuration.GetSection("Stripe").GetValue<string>("Secretkey");
             decimal price = course.Price;
@@ -80,10 +80,10 @@ namespace BackendNet.Services
                         Quantity = 1,
                     },
                 },
-                
+                CustomerEmail = users.Email,
                 Mode = "payment",
-                SuccessUrl = returnUrl + "/ConfirmCheckout/?userId=" + buyerId,
-                CancelUrl = returnUrl + "/Index"
+                SuccessUrl = returnUrl + "api/Course/ConfirmCheckout/?userId=" + users.Id + "&courseId=" + course._id,
+                CancelUrl = "http://localhost:4200/" + "CancelCheckout"
             };
             var service = new SessionService();
             Session session = await service.CreateAsync(options);
