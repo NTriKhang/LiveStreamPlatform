@@ -115,9 +115,14 @@ namespace BackendNet.Services
         {
             return BCrypt.Net.BCrypt.HashPassword(password);
         }
-        public async Task<IEnumerable<Users>> GetUsersAsync()
+        public async Task<PaginationModel<Users>> GetUsersAsync(int page, int pageSize, string? userName = null)
         {
-            return await _userRepository.GetAll(Builders<Users>.Filter.Empty, null);
+            FilterDefinition<Users> filter = null;
+            if (userName != null)
+                filter = Builders<Users>.Filter.Eq(x => x.UserName, userName);
+            else
+                filter = Builders<Users>.Filter.Empty;
+            return await _userRepository.GetManyByFilter(page, pageSize, filter, Builders<Users>.Sort.Descending(x => x.Id));
         }
         public async Task<Users> GetUserById(string id)
         {

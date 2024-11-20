@@ -3,8 +3,10 @@ using BackendNet.Dtos;
 using BackendNet.Dtos.User;
 using BackendNet.Hubs;
 using BackendNet.Models;
+using BackendNet.Repositories;
 using BackendNet.Services;
 using BackendNet.Services.IService;
+using BackendNet.Setting;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -42,13 +44,42 @@ namespace BackendNet.Controllers
             this.hubContext = hubContext;
             this.mapper = mapper;
         }
-        [HttpGet("GetStripeAccount")]
-        public ActionResult GetStripeAccount()
+        [Authorize(Roles = "Admin")]
+        [HttpGet("GetListUser")]
+        public async Task<ActionResult<PaginationModel<Users>>> GetListUser([FromQuery] int page = 1
+            , [FromQuery] int pageSize = (int)PaginationCount.Course
+            , [FromQuery] string? userName = null)
+        {
+            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await userService.GetUserById(userId);
+            if (user.Role != RoleKey.Admin.ToString())
+                return StatusCode(StatusCodes.Status401Unauthorized, user.Role);
+
+            var users = await userService.GetUsersAsync(page, pageSize, userName);
+            return Ok(users);
+        }
+        /// <summary>
+        /// Cấp lại stream key cho user
+        /// Đăng nhập trước khi sử dụng
+        /// </summary>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin")]
+        [HttpPut("UpdateStreamKey")]
+        public async Task<ActionResult> UpdateStreamKey(string userId)
         {
             try
             {
-                var url = stripeService.CreateStripeAccount();
-                return Ok(url);
+                var user = await userService.GetUserById(userId);
+                if (user == null)
+                    return NotFound("can't find user");
+
+                if (user.Role != "Teacher" && user.StreamInfo != null && user.StreamInfo.Status == StreamStatus.Streaming.ToString())
+                    return StatusCode(StatusCodes.Status405MethodNotAllowed);
+
+                var res = await userService.UpdateStreamKey(userId, user.StreamInfo);
+                if (res.ModifiedCount > 0)
+                    return NoContent();
+                return StatusCode(StatusCodes.Status304NotModified);
             }
             catch (Exception)
             {
@@ -89,19 +120,6 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
-        //[HttpGet("{token}")]
-        //public async Task<Users> getUser(string token)
-        //{
-        //    try
-        //    {
-        //        return await userService.GetUserByStreamKey(token);
-        //    }
-        //    catch (Exception)
-        //    {
-
-        //        throw;
-        //    }
-        //}
         [HttpPost]
         public async Task<ActionResult<Users>> signup(UserSignupDto user)
         {
@@ -202,6 +220,81 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
+        [HttpPost("authAdmin")]
+        public async Task<ActionResult> authAdmin(UserLoginDto user)
+        {
+            try
+            {
+
+                var userAuth = await userService.AuthUser(user.UserName, user.Password);
+                if (userAuth == null)
+                {
+                    return NotFound(user);
+                }
+                if (userAuth.code == 300)
+                {
+                    return StatusCode(StatusCodes.Status303SeeOther, user);
+                }
+                if (userAuth.code == 400)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, "Sai mật khẩu");
+                }
+                var userLogin = userAuth.entity as Users;
+
+                if(userLogin.Role != RoleKey.Admin.ToString())
+                {
+                    return StatusCode(StatusCodes.Status401Unauthorized, userLogin);
+                }
+
+                if (AuthSession.IsExist(userLogin.Id))
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, "Đã đăng nhập ở 1 thiết bị khác");
+                }
+                AuthSession.AddUserId(userLogin.Id, DateTime.UtcNow.AddMinutes(5));
+
+                var expired_time = DateTime.Now.AddDays(6);
+                var claims = new List<Claim>
+                {
+                    new Claim(type: ClaimTypes.NameIdentifier,value: (userAuth.entity as Users).Id!),
+                    new Claim(type: ClaimTypes.Role, value: (userAuth.entity as Users).Role!),
+                };
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(identity),
+                    new AuthenticationProperties
+                    {
+                        IsPersistent = true,
+                        AllowRefresh = true,
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(14),
+                    }
+                );
+                //            CookieOptions cookieOptions = new CookieOptions();
+                //              cookieOptions.HttpOnly = true;
+                //                cookieOptions.Expires = expired_time;
+
+                //var url = HttpContext.Request.Headers["Origin"].ToString();
+                //Console.WriteLine(url);
+                //Uri uri = new Uri(url);
+                //cookieOptions.Domain = "localhost";
+                // Console.WriteLine(cookieOptions.Domain);
+                //if (uri.Scheme.Equals("https"))
+                //{
+                //cookieOptions.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.None;
+                //cookieOptions.Secure = true;
+                //}
+
+                // var token = GenerateJWTToken((userAuth.entity as Users)!);
+                //Response.Cookies.Append("AuthToken", token, cookieOptions);
+
+                return Ok(userAuth.entity);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
         [NonAction]
         public string GenerateJWTToken(Users user)
         {
@@ -262,35 +355,6 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
-        /// <summary>
-        /// Cấp lại stream key cho user
-        /// Đăng nhập trước khi sử dụng
-        /// </summary>
-        /// <returns></returns>
-        [HttpPut("UpdateStreamKey")]
-        [Authorize(Roles = "Teacher")]
-        public async Task<ActionResult> UpdateStreamKey()
-        {
-            try
-            {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                var user = await userService.GetUserById(userId);
-                if (user == null)
-                    return NotFound("can't find user");
 
-                if(user.Role != "Teacher" && user.StreamInfo != null && user.StreamInfo.Status == StreamStatus.Streaming.ToString())
-                    return StatusCode(StatusCodes.Status405MethodNotAllowed);
-
-                var res = await userService.UpdateStreamKey(userId, user.StreamInfo);
-                if (res.ModifiedCount > 0)
-                    return NoContent();
-                return StatusCode(StatusCodes.Status304NotModified);
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-        }
     }
 }

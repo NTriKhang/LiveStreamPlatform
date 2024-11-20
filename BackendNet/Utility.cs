@@ -73,7 +73,8 @@ namespace BackendNet
     public enum RoleKey
     {
         Teacher,
-        Student
+        Student,
+        Admin
     }
     public enum PaginationCount
     {

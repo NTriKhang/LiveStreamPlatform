@@ -10,7 +10,7 @@ namespace BackendNet.Services.IService
         Task<SubUser> GetSubUser(string id);
         Task<Users> GetUserById(string id);
         Task<Users> GetUserByStreamKey(string streamKey);
-        Task<IEnumerable<Users>> GetUsersAsync();
+        Task<PaginationModel<Users>> GetUsersAsync(int page, int pageSize, string? userName = null);
 
         Task<Users> AddUserAsync(Users user);
 
