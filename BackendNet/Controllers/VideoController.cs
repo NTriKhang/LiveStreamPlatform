@@ -70,7 +70,7 @@ namespace BackendNet.Controllers
         //    }
         //}
         [HttpGet("getVideo/{videoId}")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<ActionResult<VideoViewDto>> GetVideo(string videoId)
         {
             try
@@ -200,15 +200,12 @@ namespace BackendNet.Controllers
                 string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 await _videoService.UpdateLike(videoId, isLike);
 
-                _ = Task.Run(async () =>
-                {
                     var history = await _historyService.GetHistory(userId, videoId);
                     if (history != null)
                     {
                         history.Like = isLike;
                     }
                     await _historyService.UpdateHistory(history);
-                });
 
                 return Ok();
             }
