@@ -13,6 +13,7 @@ namespace BackendNet.Services.IService
         Task<bool> RemoveFollow(string Id);
         Task<BsonArray> GetFollowerEmail(string followedId);
         Task<int> GetTotalFollow(string userId);
+        Task<bool> IsFollow(string followerId, string followedId);
 
     }
 }

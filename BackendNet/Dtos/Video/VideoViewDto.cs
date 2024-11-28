@@ -19,6 +19,9 @@ namespace BackendNet.Dtos.Video
         public string FileType { set; get; }
         public string VideoUrl { set; get; }
         public int Subscribe { set; get; }
+
+        public bool IsLike { set; get; }
+        public bool IsSub { set; get; } 
         public VideoViewDto()
         {
             

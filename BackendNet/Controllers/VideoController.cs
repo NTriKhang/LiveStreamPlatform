@@ -86,9 +86,13 @@ namespace BackendNet.Controllers
                 }
 
                 VideoViewDto videoViewDto = new VideoViewDto(video, subuser, videoUrl);
-
+                var history = await _historyService.GetHistory(userId, videoId);
+                if(history != null)
+                {
+                    videoViewDto.IsLike = history.Like;
+                }
+                videoViewDto.IsSub = await _followService.IsFollow(userId, video.User_id);  
                 videoViewDto.Subscribe = await _followService.GetTotalFollow(video.User_id);
-
                 _ = Task.Run(async () =>
                 {
                     await _videoService.UpdateVideoView(videoId);
@@ -167,6 +171,32 @@ namespace BackendNet.Controllers
                 //        ));
                 //    }
                 //}
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+        [HttpPut("updateVideoLike/{videoId}")]
+        [Authorize]
+        public async Task<ActionResult> updateVideoLike(string videoId, bool isLike)
+        {
+            try
+            {
+                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                await _videoService.UpdateLike(videoId, isLike);
+
+                _ = Task.Run(async () =>
+                {
+                    var history = await _historyService.GetHistory(userId, videoId);
+                    if (history != null)
+                    {
+                        history.Like = isLike;
+                    }
+                    await _historyService.UpdateHistory(history);
+                });
+
                 return Ok();
             }
             catch (Exception ex)

@@ -64,5 +64,20 @@ namespace BackendNet.Services
         {
             throw new NotImplementedException();
         }
+
+        public async Task<History> GetHistory(string userId, string videoId)
+        {
+            var filter = Builders<History>.Filter.And(
+                Builders<History>.Filter.Eq(x => x.Video.video_id, videoId),
+                Builders<History>.Filter.Eq(x => x.User.user_id, userId)
+            );
+            return await _historyRepository.GetByFilter(filter);
+        }
+
+        public async Task UpdateHistory(History history)
+        {
+            var filter = Builders<History>.Filter.Eq(x => x.Id, history.Id);
+            await _historyRepository.ReplaceAsync(filter, history);
+        }
     }
 }

@@ -125,5 +125,14 @@ namespace BackendNet.Services
         {
             return await followRepository.RemoveByKey(nameof(Follow.Id), Id);
         }
+
+        public async Task<bool> IsFollow(string followerId, string followedId)
+        {
+            var filter = Builders<Follow>.Filter.And(
+                Builders<Follow>.Filter.Eq(x => x.Followed.user_id, followedId),
+                Builders<Follow>.Filter.Eq(x => x.Follower.user_id, followerId)
+            );
+            return await followRepository.IsExist(filter);
+        }
     }
 }

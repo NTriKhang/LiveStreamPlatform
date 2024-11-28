@@ -104,7 +104,7 @@ namespace BackendNet.Services
             StreamVideoUrlDto videoUrlDto = new StreamVideoUrlDto();
 
             videoUrlDto.videoUrl = streamKey;
-            videoUrlDto.waitTime = 5;
+            videoUrlDto.waitTime = 7;
             Console.WriteLine("Log on publish: " + user.CurrentActivity.value);
             await _hubContext.Clients.Group(user.CurrentActivity.value).SendAsync(OnStreamingEvent, videoUrlDto);
 

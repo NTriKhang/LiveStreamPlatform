@@ -136,5 +136,20 @@ namespace BackendNet.Services
             return await _videoRepository.RemoveByKey(nameof(Follow.Id), Id);
         }
 
+        public async Task UpdateLike(string videoId, bool isLike)
+        {
+            var filter = Builders<Videos>.Filter.Eq(x => x.Id, videoId);
+            UpdateDefinition<Videos> updateDefine = null;
+            if (isLike)
+            {
+                updateDefine = Builders<Videos>.Update.Inc(x => x.Like, 1);
+
+            }
+            else {
+                updateDefine = Builders<Videos>.Update.Inc(x => x.Like, -1);
+
+            }
+            await _videoRepository.UpdateByFilter(filter, updateDefine);
+        }
     }
 }

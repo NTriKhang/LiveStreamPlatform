@@ -20,6 +20,7 @@ namespace BackendNet.Services.IService
         Task<PaginationModel<Videos>> GetUserVideos(int page, int pageSize, string userId);
         Task UpdateVideoStatus(int status, string id);
         Task UpdateVideoView(string videoId);
+        Task UpdateLike(string videoId, bool isLike);
         Task<bool> RemoveVideo(string Id);
         string GetAvailableId();
 
