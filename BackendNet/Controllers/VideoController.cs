@@ -35,6 +35,7 @@ namespace BackendNet.Controllers
         private readonly IFollowService _followService;
         private readonly ICommentService _commentService;
         private readonly IHistoryService _historyService;
+        private readonly IEmailService _emailService;
         public VideoController(IVideoService videoService
             , IAwsService awsService
             , IConfiguration configuration
@@ -42,6 +43,7 @@ namespace BackendNet.Controllers
             , IFollowService followService
             , ICommentService commentService
             , IHistoryService historyService
+            , IEmailService emailService
 
             )
         {
@@ -52,6 +54,7 @@ namespace BackendNet.Controllers
             _followService = followService;
             _commentService = commentService;
             _historyService = historyService;
+            _emailService = emailService;
         }
         //[HttpGet("findVideos/{title}")]
         //public async Task<PaginationModel<VideoViewDto>> FindVideos(string title)
@@ -152,25 +155,26 @@ namespace BackendNet.Controllers
             }
         }
         [HttpPut("updateVideoStatus/{videoId}")]
-        // [Authorize]
+        [Authorize]
         public async Task<ActionResult> UpdateVideoStatus(string videoId, int status)
         {
             try
             {
                 await _videoService.UpdateVideoStatus(status, videoId);
-                //string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
-                //if (status == (int)VideoStatus.Public)
-                //{
-                //    var emails = await _followService.GetFollowerEmail(userId); 
-                //    if(emails != null)
-                //    {
-                //        _ = _emailService.SendMultiEmail(new Dtos.Mail.MultiMailRequest(
-                //            $"Thông báo video mới",
-                //            $"Khang vừa đăng tải video mới tại ...",
-                //            emails.Select(x => x.AsString).ToList()
-                //        ));
-                //    }
-                //}
+                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+                var user = await _userService.GetUserById(userId);
+                if (status == (int)VideoStatus.Public)
+                {
+                    var emails = await _followService.GetFollowerEmail(userId);
+                    if (emails != null)
+                    {
+                        _ = _emailService.SendMultiEmail(new Dtos.Mail.MultiMailRequest(
+                            $"Thông báo video mới",
+                            $"{user.DislayName} vừa đăng tải video mới tại ...",
+                            emails.Select(x => x.AsString).ToList()
+                        ));
+                    }
+                }
                 return Ok();
             }
             catch (Exception ex)
@@ -218,7 +222,7 @@ namespace BackendNet.Controllers
         }
         [HttpPost("SearchVideo")]
         public async Task<ActionResult<List<Videos>>> SearchVideo(
-            [FromBody] IEnumerable<string> Tags
+            [FromBody] string title
             , [FromQuery] int page = 1
             , [FromQuery] int pageSize = (int)PaginationCount.Video
             )
@@ -226,7 +230,7 @@ namespace BackendNet.Controllers
             try
             {
                 PaginationModel<Videos> listVideo = null;
-                listVideo = await _videoService.SearchVideo(page, pageSize, Tags);
+                listVideo = await _videoService.SearchVideo(page, pageSize, title);
 
 
                 if (listVideo == null)

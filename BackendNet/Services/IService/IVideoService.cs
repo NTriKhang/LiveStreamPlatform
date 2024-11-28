@@ -10,7 +10,7 @@ namespace BackendNet.Services.IService
         Task<PaginationModel<Videos>> SearchVideo(
         int page
         , int pageSize
-        , IEnumerable<string> Tags);
+        , string title);
 
         Task<Videos> AddVideoAsync(Videos video);
         Task<Videos> GetVideoAsync(string videoId);

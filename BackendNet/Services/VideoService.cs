@@ -29,11 +29,10 @@ namespace BackendNet.Services
         public async Task<PaginationModel<Videos>> SearchVideo(
             int page
             , int pageSize
-            , IEnumerable<string> Tags)
+            , string title)
         {
-            var filDef = Builders<Videos>.Filter.All(x => x.Tags, Tags);
+            var filDef = Builders<Videos>.Filter.Eq(x => x.Title, title);
             return await _videoRepository.GetManyByFilter(page, pageSize, filDef, Builders<Videos>.Sort.Descending(x => x.Time));
-
         }
         public Task<Videos> GetVideoAsync(string videoId)
         {
