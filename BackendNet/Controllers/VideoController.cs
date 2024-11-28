@@ -222,7 +222,7 @@ namespace BackendNet.Controllers
         }
         [HttpPost("SearchVideo")]
         public async Task<ActionResult<List<Videos>>> SearchVideo(
-            [FromBody] string title
+            [FromQuery] string title
             , [FromQuery] int page = 1
             , [FromQuery] int pageSize = (int)PaginationCount.Video
             )
