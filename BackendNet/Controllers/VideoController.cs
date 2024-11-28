@@ -70,7 +70,6 @@ namespace BackendNet.Controllers
         //    }
         //}
         [HttpGet("getVideo/{videoId}")]
-        [Authorize]
         public async Task<ActionResult<VideoViewDto>> GetVideo(string videoId)
         {
             try
