@@ -70,6 +70,7 @@ namespace BackendNet.Controllers
         //    }
         //}
         [HttpGet("getVideo/{videoId}")]
+        [AllowAnonymous]
         public async Task<ActionResult<VideoViewDto>> GetVideo(string videoId)
         {
             try
@@ -89,13 +90,21 @@ namespace BackendNet.Controllers
                 }
 
                 VideoViewDto videoViewDto = new VideoViewDto(video, subuser, videoUrl);
-                var history = await _historyService.GetHistory(userId, videoId);
-                if(history != null)
+                if(userId != string.Empty)
                 {
-                    videoViewDto.IsLike = history.Like;
+                    var history = await _historyService.GetHistory(userId, videoId);
+                    if (history != null)
+                    {
+                        videoViewDto.IsLike = history.Like;
+                    }
+                    videoViewDto.IsSub = await _followService.IsFollow(userId, video.User_id);
+                    videoViewDto.Subscribe = await _followService.GetTotalFollow(video.User_id);
                 }
-                videoViewDto.IsSub = await _followService.IsFollow(userId, video.User_id);  
-                videoViewDto.Subscribe = await _followService.GetTotalFollow(video.User_id);
+                else
+                {
+                    videoViewDto.IsLike = false;
+                    videoViewDto.IsSub = false;
+                }
                 _ = Task.Run(async () =>
                 {
                     await _videoService.UpdateVideoView(videoId);
