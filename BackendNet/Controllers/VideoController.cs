@@ -229,7 +229,7 @@ namespace BackendNet.Controllers
                 return BadRequest(videoId);
             return NoContent();
         }
-        [HttpPost("SearchVideo")]
+        [HttpGet("SearchVideo")]
         public async Task<ActionResult<List<Videos>>> SearchVideo(
             [FromQuery] string title
             , [FromQuery] int page = 1
