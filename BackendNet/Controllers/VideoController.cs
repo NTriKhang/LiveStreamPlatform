@@ -233,7 +233,7 @@ namespace BackendNet.Controllers
                 listVideo = await _videoService.SearchVideo(page, pageSize, title);
 
 
-                if (listVideo == null)
+                if (listVideo.data == null)
                     return StatusCode(StatusCodes.Status204NoContent, listVideo);
 
                 List<VideoViewDto> videoView = new List<VideoViewDto>();
