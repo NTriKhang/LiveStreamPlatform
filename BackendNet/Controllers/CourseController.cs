@@ -178,7 +178,7 @@ namespace BackendNet.Controllers
                         || isStudent)
                     {
                         videoUrl = _configuration.GetValue<string>("CloudFrontEduVideo") ?? "";
-                        videoUrl += "/" + video.Id;
+                        videoUrl += "/" + video.VideoUrl;
                     }
                     courseView.Videos.Add(new VideoViewDto(video, course.Cuser, videoUrl));
 
@@ -373,6 +373,7 @@ namespace BackendNet.Controllers
                 
                 video.User_id = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
                 video.Id = videoCreate._id;
+                video.VideoUrl = videoCreate._id;
                 video.StatusNum = int.Parse(video.Status);
                 video.Time = DateTime.UtcNow;
                 video.View = 0;

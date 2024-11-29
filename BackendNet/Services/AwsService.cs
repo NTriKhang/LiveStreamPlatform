@@ -145,7 +145,7 @@ namespace BackendNet.Services
             AmazonS3Client s3Client = new AmazonS3Client(basicAWSCredentials, Amazon.RegionEndpoint.APSoutheast2);
             try
             {
-                string bucketName = "edunimovideo";
+                string bucketName = "edunimovideov2";
                 await CreateS3Folder(s3Client, bucketName, folderContainName);
 
                 TransferUtility transferUtility = new TransferUtility(s3Client);
