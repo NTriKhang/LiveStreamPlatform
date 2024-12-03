@@ -101,12 +101,14 @@ namespace BackendNet.Controllers
                     CourseTitle = crs.Title,
                     CourseImage = crs.CourseImage,
                     Price = crs.Price,
-                    DateIncome = DateTime.UtcNow
+                    DateIncome = DateTime.UtcNow,
+                    UserId = userId,
                 };
-                Task income = _userService.UpdateIncome(crs.Cuser.user_id, subIncome);
-                Task outcome = _userService.UpdateOutcome(userId, subIncome);
+                await _userService.UpdateIncome(crs.Cuser.user_id, subIncome);
 
-                await Task.WhenAll(income, outcome);
+                subIncome.UserId = crs.Cuser.user_id;
+                await _userService.UpdateOutcome(userId, subIncome);
+
             });
 
             return NoContent();

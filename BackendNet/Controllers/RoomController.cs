@@ -36,12 +36,14 @@ namespace BackendNet.Controllers
         private readonly IVideoService videoService;
         private readonly IStatusService statusService;
         private readonly IAwsService awsService;
+        private readonly IEmailService emailService;
         public RoomController(IRoomService roomService
             , IMapper mapper
             , IUserService userService
             , IStatusService statusService
             , IVideoService videoService
             , IAwsService awsService
+            , IEmailService emailService
             )
         {
             this.mapper = mapper;
@@ -50,6 +52,7 @@ namespace BackendNet.Controllers
             this.statusService = statusService;
             this.awsService = awsService;
             this.videoService = videoService;
+            this.emailService = emailService;
         }
         /// <summary>
         /// 
@@ -192,6 +195,36 @@ namespace BackendNet.Controllers
                     room.Owner = new Models.Submodel.SubUser(user.Id, user.DislayName, user.AvatarUrl);
                     room.RoomType = roomCreate.RoomType;
                     var res = await roomService.AddRoom(room);
+
+                    _ = Task.Run(async () =>
+                    {
+                        if (user?.Incomes != null)
+                        {
+                            var distinctUserIds = user.Incomes
+                                .Where(income => income != null && income.UserId != null) // Filter out null entries
+                                .Select(income => income.UserId)
+                                .Distinct()
+                                .ToList();
+                            if(distinctUserIds != null)
+                            {
+                                List<string> emails = new List<string>();
+                                foreach(var studentId in distinctUserIds)
+                                {
+                                    var student = await userService.GetUserById(studentId);
+                                    emails.Add(student.Email);
+                                } 
+                                if(emails.Count > 0)
+                                {
+                                     await emailService.SendMultiEmail(new Dtos.Mail.MultiMailRequest(
+                                         $"Thông báo phòng học mới",
+                                         $"{user.DislayName} vừa tạo môt phòng học mới tại với room key là {room.RoomKey}",
+                                         emails.ToList()
+                                     ));
+                                }
+                            }
+                        }
+                    });
+
                     return res;
                 }
                 else
