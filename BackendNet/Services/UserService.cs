@@ -16,15 +16,15 @@ namespace BackendNet.Services
     {
         private readonly IUserRepository _userRepository;
         //private readonly IConnectionMultiplexer _redisConnect;
-        private readonly IHttpContextAccessor _contextAccessor;
+        private readonly ISysRelationshipRepo _sysRelationshipRepo;
         public UserService(
             IUserRepository userRepository
-            , IHttpContextAccessor contextAccessor
         //, IConnectionMultiplexer redisConnect
+            , ISysRelationshipRepo sysRelationshipRepo
         )
         {
             _userRepository = userRepository;
-            _contextAccessor = contextAccessor;
+            _sysRelationshipRepo = sysRelationshipRepo;
             //_redisConnect = redisConnect;
 
         }
@@ -173,9 +173,15 @@ namespace BackendNet.Services
             {
                 var filter = Builders<Users>.Filter.Eq(x => x.Id, user.Id);
                 var res = await _userRepository.ReplaceAsync(filter, user);
-                if (res.ModifiedCount > 0)
-                    return true;
-                return false;
+                if (res.ModifiedCount == 0)
+                    return false;
+
+                _ = Task.Run(async () =>
+                {
+                    await _sysRelationshipRepo.UpdateUserMonitor(user);
+                });
+
+                return true;
             }
             catch (Exception)
             {

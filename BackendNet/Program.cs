@@ -100,6 +100,7 @@ internal class Program
         builder.Services.AddScoped<ITrendingRepository, TrendingRepository>();
         builder.Services.AddScoped<ICommentRepository, CommentRepository>();
         builder.Services.AddScoped<IHIstoryRepository, HistoryRepository>();
+        builder.Services.AddScoped<ISysRelationshipRepo, SysRelationshipRepo>();
 
         builder.Services.AddScoped<IUserService, UserService>();
         builder.Services.AddScoped<IVideoService, VideoService>();

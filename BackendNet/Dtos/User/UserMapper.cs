@@ -10,6 +10,9 @@ namespace BackendNet.Dtos.User
         {
             CreateMap<UserProfileDto, Users>();
             CreateMap<Users, UserProfileDto>();
+
+            CreateMap<UserUpdateDto, Users>();
+            CreateMap<Users, UserUpdateDto>();
         }
     }
 }

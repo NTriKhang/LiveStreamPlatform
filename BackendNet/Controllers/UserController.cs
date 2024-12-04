@@ -335,7 +335,7 @@ namespace BackendNet.Controllers
             }
         }
         [HttpPut("updateProfile")]
-        public async Task<ActionResult> UpdateProfile(UserProfileDto userProfileDto)
+        public async Task<ActionResult> UpdateProfile(UserUpdateDto userProfileDto)
         {
             try
             {
@@ -343,8 +343,11 @@ namespace BackendNet.Controllers
                 if (user == null)
                     return BadRequest();
                 
-                mapper.Map<UserProfileDto,Users>(userProfileDto, user);
+                mapper.Map<UserUpdateDto, Users>(userProfileDto, user);
                 var res = await userService.UpdateUser(user);
+
+
+
                 if (res)
                     return NoContent();
                 return BadRequest(userProfileDto);
