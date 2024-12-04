@@ -12,7 +12,7 @@ namespace BackendNet.Hubs
         public override Task OnConnectedAsync()
         {
             string userId = Context.GetHttpContext().Request.Query["userId"].ToString() ?? "";
-            Console.WriteLine("userId : " + userId);
+            Console.WriteLine("userId connect: " + userId);
             if(userId != "")
                 Groups.AddToGroupAsync(Context.ConnectionId, userId);
             return base.OnConnectedAsync();
