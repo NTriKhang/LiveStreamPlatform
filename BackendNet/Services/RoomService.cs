@@ -195,6 +195,8 @@ namespace BackendNet.Services
                     , subUser.user_name
                     , subUser.user_avatar
                     , rooms._id));
+
+                Console.WriteLine("Send request: " + rooms.Owner.user_id);
             }
             catch (Exception)
             {
@@ -211,7 +213,7 @@ namespace BackendNet.Services
                     if (room != null)
                         response.RoomType = room.RoomType;
                 }
-                Console.WriteLine(response.StudentId);
+                Console.WriteLine("Response request: " + response.StudentId);
                 await eduNimoHubContext.Clients.Group(response.StudentId).SendAsync(response.Cmd, response);
 
                 if(response.Res)
