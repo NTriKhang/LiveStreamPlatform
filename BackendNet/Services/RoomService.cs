@@ -211,8 +211,9 @@ namespace BackendNet.Services
                     if (room != null)
                         response.RoomType = room.RoomType;
                 }
-
+                Console.WriteLine(response.StudentId);
                 await eduNimoHubContext.Clients.Group(response.StudentId).SendAsync(response.Cmd, response);
+
                 if(response.Res)
                     await roomHubContext.Clients.Group(response.RoomId).SendAsync(response.Cmd, response);
             }

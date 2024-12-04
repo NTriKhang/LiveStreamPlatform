@@ -44,14 +44,14 @@ namespace BackendNet.Services
         {
 
             var userAgent = httpContextAccessor.HttpContext?.Request.Headers["User-Agent"].ToString() ?? string.Empty;
-            string returnUrl = string.Empty;
-            if (userAgent != string.Empty)
-            {
-                if (userAgent.Contains("Windows NT") || userAgent.Contains("Macintosh") || userAgent.Contains("Mac OS X"))
-                    returnUrl = "http://localhost:8000/";
-                else if (userAgent.Contains("Mobi") || userAgent.Contains("Android") || userAgent.Contains("iPhone") || userAgent.Contains("iPad"))
-                    returnUrl = "http://10.0.2.2/";
-            }
+            string returnUrl = "https://api.hightfive.click/";
+            //if (userAgent != string.Empty)
+            //{
+            //        returnUrl = "http://localhost:8000/";
+            //        returnUrl = "http://10.0.2.2/";
+
+
+            //}
 
 
             StripeConfiguration.ApiKey = configuration.GetSection("Stripe").GetValue<string>("Secretkey");
