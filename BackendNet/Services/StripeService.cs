@@ -74,7 +74,7 @@ namespace BackendNet.Services
                             {
                                 Name = $"Buy course {course.Title}",
                                 Description = $"Desc: {course.Desc}",
-                                Images = new List<string>{ course.CourseImage }
+                                Images = course.CourseImage != string.Empty ? new List<string>{course.CourseImage} : null
                             },
                         },
                         Quantity = 1,
