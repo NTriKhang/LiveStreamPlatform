@@ -73,7 +73,10 @@ namespace BackendNet.Controllers
         {
             string userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
             var course = await _courseService.GetCourse(courseId);
-            if (course.Students.Any(x => x.user_id == userId) || course.Cuser.user_id == userId)
+            if (course == null)
+                return BadRequest();
+
+            if (course.Students?.Count > 0 && course.Students.Any(x => x.user_id == userId) || course.Cuser.user_id == userId)
                 return StatusCode(StatusCodes.Status403Forbidden);
 
             var user = await _userService.GetUserById(userId);

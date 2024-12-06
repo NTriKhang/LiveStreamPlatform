@@ -21,9 +21,10 @@ FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./BackendNet.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 COPY ["BackendNet/wwwroot", "./wwwroot"]
+COPY ["BackendNet/Certificates", "./Certificates"]
+
 ENTRYPOINT ["dotnet", "BackendNet.dll"]
