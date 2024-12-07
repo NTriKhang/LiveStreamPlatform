@@ -8,12 +8,12 @@ services:
       dockerfile: ./BackendNet/Dockerfile
     ports:
       - 8000:80
-      - 8001:443
+      #- 8001:443
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
-      - ASPNETCORE_URLS=https://+:443;http://+:80
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=khang117203
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=Certificates/aspnetapp.pfx
+      # - ASPNETCORE_URLS=https://+:443;http://+:80
+      # - ASPNETCORE_Kestrel__Certificates__Default__Password=khang117203
+      # - ASPNETCORE_Kestrel__Certificates__Default__Path=Certificates/aspnetapp.pfx
     volumes:
       - ./Hls_video:/app/wwwroot
 
