@@ -14,7 +14,7 @@ namespace BackendNet
         private static List<SessionInfo> Sessions = new List<SessionInfo>();
         public static bool IsExist(string UserId)
         {
-            return Sessions.Any(x => x.UserId == UserId);   
+            return Sessions.Any(x => x.UserId == UserId && x.ExpiredTime >= DateTime.UtcNow);   
         }
         public static void RemoveUserId(string UserId)
         {
@@ -26,15 +26,9 @@ namespace BackendNet
         }
         public static bool AddUserId(string UserId, DateTime ExpiredTime)
         {
-            if (Sessions.Any(x => x.UserId == UserId) 
-                && Sessions.Where(x => x.UserId == UserId).Select(x => x.ExpiredTime).Single() > DateTime.UtcNow)
-                return false;
-
-            var removed = Sessions.Where(x => x.UserId == UserId);
-            if (removed.Any())
-            {
-                Sessions.Remove(removed.SingleOrDefault());
-            }
+            var session = Sessions.Where(x => x.UserId == UserId).FirstOrDefault();
+            if (Sessions.Any(x => x.UserId == UserId))
+                Sessions.Remove(session);
 
             Sessions.Add(new SessionInfo {  UserId = UserId, ExpiredTime = ExpiredTime });
             return true;
