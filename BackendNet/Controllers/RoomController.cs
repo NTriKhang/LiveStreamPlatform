@@ -225,7 +225,10 @@ namespace BackendNet.Controllers
                         }
                     });
 
-                    return res;
+                    if (res.code == (int)HttpStatusCode.MethodNotAllowed)
+                        return StatusCode(StatusCodes.Status401Unauthorized, res);
+
+                    return Ok(res);
                 }
                 else
                 {
