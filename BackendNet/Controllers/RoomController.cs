@@ -227,6 +227,8 @@ namespace BackendNet.Controllers
 
                     if (res.code == (int)HttpStatusCode.MethodNotAllowed)
                         return StatusCode(StatusCodes.Status401Unauthorized, res);
+                    else if (res.code == (int)HttpStatusCode.Conflict)
+                        return StatusCode(StatusCodes.Status409Conflict, res);
 
                     return Ok(res);
                 }

@@ -41,8 +41,9 @@ namespace BackendNet.Services
                 var returmModel = new ReturnModel();
                 var isRemain = IsUserRemainRoom(room.Owner.user_id);
                 var isStreamKeyInUse = userService.IsStreamKeyValid(room.Owner.user_id);
+                var isRoomKeyExist = roomRepository.IsExist(Builders<Rooms>.Filter.Eq(x => x.RoomKey, room.RoomKey));
 
-                await Task.WhenAll(isRemain, isStreamKeyInUse);
+                await Task.WhenAll(isRemain, isStreamKeyInUse, isRoomKeyExist);
                 if(await isRemain)
                 {
                     returmModel.code = (int)HttpStatusCode.MethodNotAllowed;
@@ -54,6 +55,13 @@ namespace BackendNet.Services
                 {
                     returmModel.code = (int)HttpStatusCode.MethodNotAllowed;
                     returmModel.message = "Stream key không tồn tại hoặc đang được sử dụng";
+                    returmModel.entity = room;
+                    return returmModel;
+                }
+                if(await isRoomKeyExist == true)
+                {
+                    returmModel.code = (int)HttpStatusCode.Conflict;
+                    returmModel.message = "Room key da ton tai";
                     returmModel.entity = room;
                     return returmModel;
                 }
