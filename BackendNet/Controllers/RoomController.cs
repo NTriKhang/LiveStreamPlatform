@@ -443,7 +443,7 @@ namespace BackendNet.Controllers
             if(userName == "")
                 return new ReturnModel(400, "Không tìm thấy phòng hoặc người dùng không có trong phòng", null);
             
-            string _appId = "2a1f82d264aa44cd915e30f6bfd0505a";
+            string _appId = "4f3398988a4f41d0b23b641d30a5bb92";
             //string _appCertificate = "4f3398988a4f41d0b23b641d30a5bb92";
             string userRole = "";
             if (room.Owner.user_id == userId)
