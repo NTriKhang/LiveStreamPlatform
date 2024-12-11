@@ -234,7 +234,7 @@ namespace BackendNet.Controllers
                 }
                 else
                 {
-                    return new ReturnModel((int)HttpStatusCode.TemporaryRedirect, "Cần cập nhật lại stream key của người dùng", roomCreate);
+                    return StatusCode(StatusCodes.Status403Forbidden, "Cần cập nhật lại stream key của người dùng");
                 }
             }
             catch (Exception e)
