@@ -119,9 +119,10 @@ namespace BackendNet.Services
         {
             FilterDefinition<Users> filter = null;
             if (userName != null)
-                filter = Builders<Users>.Filter.Eq(x => x.UserName, userName);
+                filter = Builders<Users>.Filter.Regex(x => x.UserName, new MongoDB.Bson.BsonRegularExpression(userName, "i"));
             else
                 filter = Builders<Users>.Filter.Empty;
+
             return await _userRepository.GetManyByFilter(page, pageSize, filter, Builders<Users>.Sort.Descending(x => x.Id));
         }
         public async Task<Users> GetUserById(string id)

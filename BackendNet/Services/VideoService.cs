@@ -31,8 +31,9 @@ namespace BackendNet.Services
             , int pageSize
             , string title)
         {
-            var filDef = Builders<Videos>.Filter.Eq(x => x.Title, title);
+            var filDef = Builders<Videos>.Filter.Regex(x => x.Title, new MongoDB.Bson.BsonRegularExpression(title, "i"));
             return await _videoRepository.GetManyByFilter(page, pageSize, filDef, Builders<Videos>.Sort.Descending(x => x.Time));
+
         }
         public Task<Videos> GetVideoAsync(string videoId)
         {

@@ -171,11 +171,6 @@ namespace BackendNet.Controllers
                     return StatusCode(StatusCodes.Status400BadRequest, "Sai mật khẩu");
                 }
                 var userLogin = userAuth.entity as Users;
-                if (AuthSession.IsExist(userLogin.Id))
-                {
-                    return StatusCode(StatusCodes.Status400BadRequest, "Đã đăng nhập ở 1 thiết bị khác");
-                }
-                AuthSession.AddUserId(userLogin.Id, DateTime.UtcNow.AddMinutes(5));
                
                 var expired_time = DateTime.Now.AddDays(6);
                 var claims = new List<Claim>
@@ -245,13 +240,6 @@ namespace BackendNet.Controllers
                 {
                     return StatusCode(StatusCodes.Status401Unauthorized, userLogin);
                 }
-
-                if (AuthSession.IsExist(userLogin.Id))
-                {
-                    return StatusCode(StatusCodes.Status400BadRequest, "Đã đăng nhập ở 1 thiết bị khác");
-                }
-                AuthSession.AddUserId(userLogin.Id, DateTime.UtcNow.AddMinutes(5));
-
                 var expired_time = DateTime.Now.AddDays(6);
                 var claims = new List<Claim>
                 {
@@ -326,7 +314,6 @@ namespace BackendNet.Controllers
                 {
                     Expires = DateTime.Now.AddDays(-1)
                 });
-                AuthSession.RemoveUserId(User.FindFirstValue(ClaimTypes.NameIdentifier));
                 return NoContent();
             }
             catch (Exception)

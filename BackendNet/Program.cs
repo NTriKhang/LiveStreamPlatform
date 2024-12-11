@@ -17,6 +17,7 @@ using System.Text;
 using Serilog;
 using Stripe;
 using MongoDB.Driver;
+using BackendNet.Middleware;
 
 internal class Program
 {
@@ -203,10 +204,11 @@ internal class Program
         app.UseCors("AllowFE");
         app.UseHttpsRedirection();
 
-       // app.UseMiddleware<JwtCookieMiddleware>();
-
         app.UseAuthentication();
         app.UseAuthorization();
+
+        //app.UseMiddleware<ManageSessionMiddleware>();
+
         app.UseStaticFiles();
         app.MapControllers();
 

@@ -4,36 +4,46 @@ using System.Text;
 
 namespace BackendNet
 {
-    struct SessionInfo
-    {
-        public string UserId { set; get; }
-        public DateTime ExpiredTime { set;get; }
-    }
-    public static class AuthSession
-    {
-        private static List<SessionInfo> Sessions = new List<SessionInfo>();
-        public static bool IsExist(string UserId)
-        {
-            return Sessions.Any(x => x.UserId == UserId && x.ExpiredTime >= DateTime.UtcNow);   
-        }
-        public static void RemoveUserId(string UserId)
-        {
-            var removed = Sessions.Where(x => x.UserId == UserId);
-            if (removed.Any())
-            {
-                Sessions.Remove(removed.SingleOrDefault());
-            }
-        }
-        public static bool AddUserId(string UserId, DateTime ExpiredTime)
-        {
-            var session = Sessions.Where(x => x.UserId == UserId).FirstOrDefault();
-            if (Sessions.Any(x => x.UserId == UserId))
-                Sessions.Remove(session);
+    //struct SessionInfo
+    //{
+    //    public string UserId { set; get; }
+    //    public DateTime ExpiredTime { set;get; }
+    //}
+    //public static class AuthSession
+    //{
+    //    private static List<SessionInfo> Sessions = new List<SessionInfo>();
+    //    public static bool IsExist(string UserId)
+    //    {
+    //        var res = Sessions.Where(x => x.UserId == UserId).FirstOrDefault();   
+    //        if(!res.Equals(default(SessionInfo)))
+    //        {
+    //            if (res.ExpiredTime <= DateTime.UtcNow)
+    //            {
+    //                Sessions.Remove(res);
+    //                return false;
+    //            }
+    //            return true;
+    //        }
+    //        return false;
+    //    }
+    //    public static void RemoveUserId(string UserId)
+    //    {
+    //        var removed = Sessions.Where(x => x.UserId == UserId);
+    //        if (removed.Any())
+    //        {
+    //            Sessions.Remove(removed.SingleOrDefault());
+    //        }
+    //    }
+    //    public static bool AddUserId(string UserId, DateTime ExpiredTime)
+    //    {
+    //        var session = Sessions.Where(x => x.UserId == UserId).FirstOrDefault();
+    //        if (Sessions.Any(x => x.UserId == UserId))
+    //            Sessions.Remove(session);
 
-            Sessions.Add(new SessionInfo {  UserId = UserId, ExpiredTime = ExpiredTime });
-            return true;
-        }
-    }
+    //        Sessions.Add(new SessionInfo {  UserId = UserId, ExpiredTime = ExpiredTime });
+    //        return true;
+    //    }
+    //}
     public static class Utility
     {
         public const string ThumbnailImage = "Thumbnail";
