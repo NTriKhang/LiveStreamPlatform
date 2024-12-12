@@ -63,7 +63,7 @@ namespace BackendNet.Services
 
                 Console.WriteLine("On publish done");
 
-                //var res = await _userService.UpdateStreamStatusAsync(user.Id, StreamStatus.Idle.ToString());
+                var res = await _userService.UpdateStreamStatusAsync(user.Id, StreamStatus.Idle.ToString());
                 //if (res.ModifiedCount == 0)
                 //{
                 //    var retunModel = new ReturnModel(400, "Lỗi hệ thống, file video sẽ bị mất hoặc bạn có thể tải file video record xuống", new { videoKey = streamKey });
@@ -122,6 +122,8 @@ namespace BackendNet.Services
             }
             room.VideoUrl = videoUrlDto.videoUrl;
             await _roomService.UpdateRoom(room);
+            await _userService.UpdateStreamStatusAsync(user.Id, StreamStatus.Streaming.ToString());
+
 
             return true;
         }
