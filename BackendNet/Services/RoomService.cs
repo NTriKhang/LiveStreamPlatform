@@ -249,7 +249,7 @@ namespace BackendNet.Services
                     res = await roomRepository.RemoveFromRoom(room._id, removeFromRoomDto.UserId);
                    
                 if (res)
-                    await eduNimoHubContext.Clients.Group(removeFromRoomDto.UserId).SendAsync(removeFromRoomDto.Cmd, removeFromRoomDto);
+                    await roomHubContext.Clients.Group(removeFromRoomDto.UserId).SendAsync(removeFromRoomDto.Cmd, removeFromRoomDto);
 
                 return res;
             }
