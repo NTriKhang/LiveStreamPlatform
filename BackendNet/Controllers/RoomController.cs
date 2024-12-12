@@ -78,7 +78,7 @@ namespace BackendNet.Controllers
                 else if (rooms.Status == (int)RoomStatus.Expired)
                     return new ReturnModel(400, "Phòng này đã hết hạn", roomId);
 
-                string streamUrl = "rtmp://192.168.18.219/live";
+                string streamUrl = "rtmp://localhost:1935/live";
 
                 var user = await userService.GetUserById(rooms.Owner.user_id);
                 if (user == null)
