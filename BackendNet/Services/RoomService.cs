@@ -20,12 +20,15 @@ namespace BackendNet.Services
         private readonly IHubContext<EduNimoHub> eduNimoHubContext;
         private readonly IHubContext<RoomHub> roomHubContext;
         private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly IChatliveService chatliveService;
         public RoomService(
             IRoomRepository roomRepository
             , IUserService userService
             , IHubContext<EduNimoHub> eduNimoHubContext
             , IHubContext<RoomHub> roomHubContext
             , IHttpContextAccessor httpContextAccessor
+            , IChatliveService chatliveService
+
         )
         {
             this.roomRepository = roomRepository;
@@ -33,6 +36,7 @@ namespace BackendNet.Services
             this.eduNimoHubContext = eduNimoHubContext;
             this.roomHubContext = roomHubContext;
             this.httpContextAccessor = httpContextAccessor;
+            this.chatliveService = chatliveService;
         }
         public async Task<ReturnModel> AddRoom(Rooms room)
         {
@@ -262,7 +266,18 @@ namespace BackendNet.Services
                 throw;
             }
         }
-
+        public async Task SendChat(ChatLive chatLive)
+        {
+            chatLive.createdAt = DateTime.Now;
+            var chat = await chatliveService.AddChat(chatLive);
+            await roomHubContext.Clients.Group(chatLive.room_id).SendAsync("onChatLive", chat);
+        }
+        public async Task<PaginationModel<ChatLive>> GetChatsPagination(string roomId, int page, int pageSize)
+        {
+            var filterDef = Builders<ChatLive>.Filter.Eq(x => x.room_id, roomId);
+            SortDefinition<ChatLive> sort = Builders<ChatLive>.Sort.Descending(x => x.createdAt);
+            return await chatliveService.GetChatsPagination(roomId, page, pageSize);
+        }
         public async Task<bool> IsRoomHasUserId(string roomKey, string userId)
         {
             var filter = Builders<Rooms>.Filter.And(

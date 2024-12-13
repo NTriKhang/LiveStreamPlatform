@@ -26,5 +26,8 @@ namespace BackendNet.Services.IService
         Task<bool> RemoveFromRoom(RemoveFromRoomDto removeFrom);
 
         Task<bool> IsRoomHasUserId(string roomKey, string userId);
+        Task SendChat(ChatLive chatLive);
+        Task<PaginationModel<ChatLive>> GetChatsPagination(string roomId, int page, int pageSize);
+
     }
 }

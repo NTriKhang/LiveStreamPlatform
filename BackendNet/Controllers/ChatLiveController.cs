@@ -11,9 +11,14 @@ namespace BackendNet.Controllers
     public class ChatLiveController : ControllerBase
     {
         private readonly IChatliveService _chatliveService;
-        public ChatLiveController(IChatliveService chatliveService)
+        private readonly IRoomService roomService;
+
+        public ChatLiveController(IChatliveService chatliveService,
+            IRoomService roomService)
         {
             _chatliveService = chatliveService;
+            this.roomService = roomService;
+
         }
 
         [HttpGet("{roomId}")]

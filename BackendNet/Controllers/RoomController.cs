@@ -422,6 +422,31 @@ namespace BackendNet.Controllers
                 throw;
             }
         }
+        [HttpGet("GetChat/{roomId}")]
+        public async Task<PaginationModel<ChatLive>> getChatLives(string roomId, [FromQuery] int page = 1, [FromQuery] int pageSize = (int)PaginationCount.Chat)
+        {
+            try
+            {
+                return await roomService.GetChatsPagination(roomId, page, pageSize);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        [Authorize]
+        [HttpPost("SendChat")]
+        public async Task sendChat(ChatLive chatLive)
+        {
+            try
+            {
+                await roomService.SendChat(chatLive);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         [HttpGet("GenerateMeetingToken")]
         [Authorize]
         public async Task<ReturnModel> GenerateRtcToken(string channelName)
