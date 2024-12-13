@@ -270,7 +270,7 @@ namespace BackendNet.Services
         {
             chatLive.createdAt = DateTime.Now;
             var chat = await chatliveService.AddChat(chatLive);
-            await roomHubContext.Clients.Group(chatLive.room_id).SendAsync("onChatLive", chat);
+            await eduNimoHubContext.Clients.All.SendAsync("onChatLive", chat);
         }
         public async Task<PaginationModel<ChatLive>> GetChatsPagination(string roomId, int page, int pageSize)
         {
