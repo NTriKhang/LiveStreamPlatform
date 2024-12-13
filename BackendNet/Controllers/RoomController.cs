@@ -436,11 +436,13 @@ namespace BackendNet.Controllers
         }
         [Authorize]
         [HttpPost("SendChat")]
-        public async Task sendChat(ChatLive chatLive)
+        public async Task sendChat(Dtos.ChatDto chatLive)
         {
             try
             {
-                await roomService.SendChat(chatLive);
+                ChatLive chat = new ChatLive();
+                mapper.Map(chatLive, chat);
+                await roomService.SendChat(chat);
             }
             catch (Exception)
             {
