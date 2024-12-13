@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: ./BackendNet/Dockerfile
     ports:
-      - 80:80
+      - 8000:80
       #- 8001:443
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
